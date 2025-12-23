@@ -133,7 +133,7 @@ async-scrum-hub/
 │ │
 │ └── package.json
 │
-├── backend/   (Architecture: ✨ Daniela / Features: 📦 Freddy, 🧩 Malu)
+├── backend/   (Architecture: ✨ Daniela / Features: 🚀 Freddy, 🌊 Malu)
 │ ├── src/
 │ │ ├── main.py # FastAPI entrypoint       ✨ Daniela
 │ │ │
@@ -167,52 +167,52 @@ async-scrum-hub/
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── organizations/                     📦 Freddy
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 📦 Freddy (implementation)
+│ │ ├── organizations/                     🚀 Freddy
+│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── projects/                          📦 Freddy
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 📦 Freddy (implementation)
+│ │ ├── projects/                          🚀 Freddy
+│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── sprints/                           📦 Freddy
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 📦 Freddy (implementation)
+│ │ ├── sprints/                           🚀 Freddy
+│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── tasks/                             📦 Freddy + 🧩 Malu 
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 📦 Freddy (implementation)
+│ │ ├── tasks/                             🚀 Freddy + 🌊 Malu 
+│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── standups/                          🧩 Malu 
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🧩 Malu (implementation)
+│ │ ├── standups/                          🌊 Malu 
+│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ └── blockers/                          🧩 Malu 
-│ │ ├── routes.py                          use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🧩 Malu (implementation)
+│ │ └── blockers/                          🌊 Malu 
+│ │ ├── routes.py                          use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
 │ │ ├── schemas.py
 │ │ └── service.py
 │ │
-│ ├── tests/                               ✨ Daniela (base) + 📦 Freddy / 🧩 Malu (feature tests)
+│ ├── tests/                               ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
 │ ├── requirements.txt                     ✨ Daniela
 │ ├── Dockerfile                           ✨ Daniela
 │ └── .env.example                         ✨ Daniela
 │
-├── realtime/                              🧩 Malu      
+├── realtime/                              🌊 Malu      
 │ ├── README.md # event documentation
 │ └── events.md
 │
 ├── docs/
 │ ├── ARCHITECTURE.md                      ✨ Daniela
 │ ├── API_CONTRACTS.md                     ✨ Daniela
-│ ├── USER_STORIES.md                      🧩 Malu + 📦 Freddy (features) / ✨ Daniela (validation)
+│ ├── USER_STORIES.md                      🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
 │ └── DEVELOPMENT_STANDARDS.md             ✨ Daniela (owner) + 🤜🤛 Team (input)
 │
-├── docker-compose.yml                     🧩 Malu
+├── docker-compose.yml                     🌊 Malu
 ├── .gitignore                             ✨ Daniela
 └── README.md                              ✨ Daniela (structure) + 🎨 Miguel (usage / screenshots)
 ```
