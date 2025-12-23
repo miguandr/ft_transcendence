@@ -1,0 +1,9 @@
+#ignore the .vscode folder in all repository
+.vscode/*
+
+
+# BUT keep these two files
+!.vscode/launch.json
+!.vscode/tasks.json
+
+a.out
