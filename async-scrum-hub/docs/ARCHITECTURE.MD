@@ -15,8 +15,6 @@
 13. [Conclusion](#13-conclusion)
 14. [Project Structure](#14-project-structure)
 
-
-
 ## 1. Overview
 
 This project is an asynchronous collaboration platform designed to help small teams coordinate their work without relying on constant synchronous meetings.
@@ -24,7 +22,6 @@ This project is an asynchronous collaboration platform designed to help small te
 The system focuses on structured communication patterns such as task management, daily standups, and blocker tracking. By moving these workflows into an asynchronous environment, the platform aims to reduce interruptions while maintaining visibility across the team.
 
 The application is built as a multi-layer system composed of a frontend client, a backend API, a real-time communication layer, and a persistent database. Each component has a clearly defined responsibility and communicates with the others through well-defined interfaces.
-
 
 ## 2. High-Level System Architecture
 
@@ -103,7 +100,6 @@ Frontend development focuses on user experience and client-side interaction, bac
 This architecture provides a clear separation of concerns while supporting collaborative development and incremental growth.
 
 By defining responsibilities explicitly and enforcing well-defined interfaces between components, the system remains maintainable, scalable, and easy to reason about throughout the development process.
-
 
 ## 14. Project Structure
 
