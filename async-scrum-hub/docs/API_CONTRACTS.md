@@ -13,7 +13,7 @@ This document is framework-agnostic and serves as a reference for frontend and b
 ```
 http://localhost:8000/api/v1
 ```
-
+---
 ## Authentication
 
 This API uses JWT-based authentication.
@@ -24,6 +24,58 @@ Authorization: Bearer <jwt_token>
 ```
 ---
 
+## Roles & Permissions
+
+This API uses a role-based access control (RBAC) model.
+Permissions are scoped to specific resources (organization, project, task, etc.).
+ 
+---
+
+### Roles
+
+### Organization Roles
+- admin
+	- Full control over the organization.
+	- Can manage members and their roles.
+	- Can create and manage projects within the organization.
+- member
+	- Can access organizations they belong to.
+	- Can participate in projects they are assigned to.
+
+### Project Roles
+- admin
+	- Full control over the project.
+	- Can manage project members and roles.
+	- Can manage sprints, tasks, standups, and blockers.
+- member
+	- Can participate in the project.
+	- Can create and update resources according to endpoint permissions.
+
+### Role Inheritance
+
+- Organization admins are implicitly project admins for all projects within their organization.
+- Project roles do not grant organization-level permissions.
+- Permissions are always evaluated at the most specific scope.
+
+### Ownership Rules
+
+- The creator of a resource (task, standup, blocker) becomes its owner.
+- Resource owners can update or delete their own resources, even if they are not project admins.
+- Project admins can manage all resources within their project.
+- The assigned user has full edit permissions over the resource (task or blocker), equivalent to the resource owner.
+- Assigned user permissions only apply when the resource has an assigned user.
+- If `assigned_to` is null, permissions related to the assigned user are ignored.
+
+### Membership Management Rules
+
+- Membership in organizations and projects is managed exclusively by organization or project admins.
+- Users cannot remove themselves from organizations or projects.
+- An organization must always have at least one organization admin.
+- A project must always have at least one project admin.
+- The last remaining admin of an organization or project cannot be removed or demoted.
+
+---
+
 ### Common HTTP Status Codes (Used in this API)
 
 - `200 OK` - Request successful
@@ -31,7 +83,7 @@ Authorization: Bearer <jwt_token>
 - `204 No Content` – Request successful, no response body 
 - `400 Bad Request` - Invalid request data
 - `401 Unauthorized` - Authentication required or invalid
-- `403 Forbidden` - Authenticated but not authorized | Insufficient permissions
+- `403 Forbidden` - Insufficient permissions
 - `404 Not Found` - Resource not found
 - `409 Conflict` - Resource conflict (e.g., duplicate)
 ---
@@ -95,6 +147,9 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Public
 
+**Permissions:** 
+- The authenticated user
+
 **Request Body:**
 ```json
 {
@@ -143,6 +198,9 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Required (JWT)
 
+**Permissions:** 
+- The authenticated user
+
 **Success Response:** `200 OK`
 ```json
 {
@@ -172,6 +230,9 @@ Authorization: Bearer <jwt_token>
 **Description:** Updates the profile information of the currently authenticated user.
 
 **Authentication:** Required (JWT)
+
+**Permissions:** 
+- The authenticated user
 
 **Request Body:**
 ```json
@@ -218,9 +279,12 @@ Authorization: Bearer <jwt_token>
 
 **Endpoint:** `POST /organizations`
 
-**Description:** Creates a new organization. The creator automatically becomes the admin.
+**Description:** Creates a new organization.
 
 **Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any authenticated user (creator becomes organization admin).
 
 **Request Body:**
 ```json
@@ -233,7 +297,8 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "id": "uuid",
-  "name": "string"
+  "name": "string",
+  "created_by": "uuid (owner)"
 }
 ```
 
@@ -268,12 +333,16 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Required (JWT)
 
+**Permissions:** 
+- Any organization member.
+
 **Success Response:** `200 OK`
 ```json
 [
 	{
 		"id": "uuid",
-		"name": "string"
+		"name": "string",
+		"created_by": "uuid (owner)"
 	}
 ]
 ```
@@ -295,9 +364,12 @@ Authorization: Bearer <jwt_token>
 
 **Endpoint:** `GET /organizations/{org_id}/members`
 
-**Description:** Returns the list of members of the specified organization. If admins, they can see the 'delete' option next each member name.
+**Description:** Returns the list of members of the specified organization. If admin, they can see the 'delete' option next each member name.
 
 **Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any organization member.
 
 **URL Parameters:**
 - `org_id` - UUID of the organization
@@ -325,12 +397,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this organization
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this organization"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -480,6 +552,81 @@ Authorization: Bearer <jwt_token>
 ```
 ---
 
+## 3.6 Update Organization Member Role ##
+
+**Endpoint:** `PATCH /organizations/{org_id}/members/{user_id}`
+
+**Description:** Updates the role of an existing organization member.
+
+**notes:** Reminder: an organization must always have at least one organization admin.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Organization admin
+
+**URL Parameters:**
+- `org_id` – UUID of the organization
+- `user_id` – UUID of the member
+
+**Request Body:**
+```json
+{
+  "role": "admin | member"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+  "user_id": "uuid",
+  "role": "admin | member"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid role
+```json
+{
+  "error": {
+	"code": "INVALID_ROLE",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Organization or user not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization or user not found"
+  }
+}
+```
+---
+
 ## 4. Projects
 
 ### 4.1 Create Project
@@ -489,6 +636,9 @@ Authorization: Bearer <jwt_token>
 **Description:** Creates a new Project. The creator automatically becomes the admin.
 
 **Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any organization member (creator becomes project admin).
 
 **URL Parameters:**
 - `org_id` - UUID of the organization
@@ -504,7 +654,8 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "id": "uuid",
-  "name": "string"
+  "name": "string",
+  "created_by": "uuid (owner)"  
 }
 ```
 
@@ -530,12 +681,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this organization
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this organization"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -559,6 +710,9 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Required (JWT)
 
+**Permissions:** 
+- Any organization member.
+
 **URL Parameters:**
 - `org_id` - UUID of the organization
 
@@ -567,7 +721,8 @@ Authorization: Bearer <jwt_token>
 [
 	{
 		"id": "uuid",
-		"name": "string"
+		"name": "string",
+		"created_by": "uuid (owner)"
 	}
 ]
 ```
@@ -584,12 +739,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this organization
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this organization"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -609,9 +764,12 @@ Authorization: Bearer <jwt_token>
 
 **Endpoint:** `GET /projects/{proj_id}/members`
 
-**Description:** Returns the list of members assigned to a specific project. If admins, they can see the 'delete' option next each member name.
+**Description:** Returns the list of members assigned to a specific project. If admin, they can see the 'delete' option next each member name.
 
 **Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any organization member.
 
 **URL Parameters:**
 - `proj_id` - UUID of the project
@@ -639,12 +797,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this project
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -793,6 +951,81 @@ Authorization: Bearer <jwt_token>
 ```
 ---
 
+## 4.6 Update Project Member Role ##
+
+**Endpoint:** `PATCH /projects/{proj_id}/members/{user_id}`
+
+**Description:** Updates the role of an existing project member.
+
+**notes:** Reminder: a project must always have at least one project admin.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Project admin
+
+**URL Parameters:**
+- `proj_id` – UUID of the project
+- `user_id` – UUID of the member
+
+**Request Body:**
+```json
+{
+  "role": "admin | member"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+  "user_id": "uuid",
+  "role": "admin | member"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid role
+```json
+{
+  "error": {
+	"code": "INVALID_ROLE",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project or user not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project or user not found"
+  }
+}
+```
+---
+
 ## 5. Sprints
 
 ### 5.1 Create Sprint
@@ -813,8 +1046,8 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "name": "string",
-  "start_date": "2025-01-01 (optional)",
-  "end_date": "2025-01-14 (optional)"
+  "start_date": "timestamp | null",
+  "end_date": "timestamp | null"
 }
 ```
 
@@ -824,8 +1057,9 @@ Authorization: Bearer <jwt_token>
   "id": "uuid",
   "name": "string",
   "status": "active",
-  "start_date": "2025-01-01 (optional)",
-  "end_date": "2025-01-14 (optional)"
+  "start_date": "timestamp | null",
+  "end_date": "timestamp | null",
+  "tasks": []
 }
 ```
 
@@ -880,6 +1114,9 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Required (JWT)
 
+**Permissions:** 
+- Any project member.
+
 **URL Parameters:**
 - `proj_id` - UUID of the project
 
@@ -890,8 +1127,11 @@ Authorization: Bearer <jwt_token>
 		"id": "uuid",
 		"name": "string",
 		"status": "active | completed",
-		"start_date": "2025-01-01 (optional)",
-		"end_date": "2025-01-14 (optional)"
+		"start_date": "timestamp | null",
+		"end_date": "timestamp | null",
+		"tasks": [
+    		{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
+  		]
 	}
 ]
 ```
@@ -908,12 +1148,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this project
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -937,130 +1177,11 @@ Authorization: Bearer <jwt_token>
 
 **Authentication:** Required (JWT)
 
-**URL Parameters:**
-- `sprint_id` - UUID of the sprint
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"name": "string",
-	"status": "active | completed",
-	"start_date": "2025-01-01 (optional)",
-	"end_date": "2025-01-14 (optional)"
-}
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - User not a member of this project
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
-  }
-}
-```
-
-`404 Not Found` - Task not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
-}
-```
----
-
-### 5.4 Get Sprint Tasks
-
-**Endpoint:** `GET /sprints/{sprint_id}/tasks`
-
-**Description:** Returns all tasks assigned to a specific sprint.
-
-**Authentication:** Required (JWT)
-
 **Permissions:** 
-- Project admin
-- Project member
+- Any project member.
 
 **URL Parameters:**
 - `sprint_id` - UUID of the sprint
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"title": "string",
-	"status": "todo | in_progress | done",
-}
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - User not a member of this project
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
-  }
-}
-```
-
-`404 Not Found` - Task not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
-}
-```
----
-
-### 5.5 Update Sprint
-
-**Endpoint:** `PATCH /sprints/{sprint_id}`
-
-**Description:** Updates sprint information (e.g. name, dates).
-
-**Authentication:** Required (JWT)
-
-**URL Parameters:**
-- `sprint_id` - UUID of the sprint
-
-**Request Body:**
-```json
-{
-  "name": "string (optional)",
-  "status": "active | completed (optional)",
-  "start_date": "2025-01-01 (optional)",
-  "end_date": "2025-01-14 (optional)"
-}
-```
 
 **Success Response:** `200 OK`
 ```json
@@ -1068,22 +1189,15 @@ Authorization: Bearer <jwt_token>
 	"id": "uuid",
 	"name": "string",
 	"status": "active | completed",
-	"start_date": "2025-01-01 (optional)",
-	"end_date": "2025-01-14 (optional)"
+	"start_date": "timestamp | null",
+	"end_date": "timestamp | null",
+	"tasks": [
+    	{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
+  	]
 }
 ```
 
 **Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
 
 `401 Unauthorized` - Authentication required
 ```json
@@ -1095,12 +1209,12 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`403 Forbidden` - User not a member of this project
+`403 Forbidden` - Insufficient permissions
 ```json
 {
   "error": {
 	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
+	"message": "You do not have permission to perform this action"
   }
 }
 ```
@@ -1116,219 +1230,27 @@ Authorization: Bearer <jwt_token>
 ```
 ---
 
-## 6. Tasks
+### 5.4 Update Sprint
 
-### 6.1 Create Task
+**Endpoint:** `PATCH /sprints/{sprint_id}`
 
-**Endpoint:** `POST /projects/{proj_id}/tasks`
-
-**Description:** Creates a new task within a project.
+**Description:** Updates sprint information (e.g. name, dates).
 
 **Authentication:** Required (JWT)
 
 **Permissions:** 
-- Project member (becomes the owner).
-
-**URL Parameters:**
-- `proj_id` - UUID of the project
-
-**Request Body:**
-```json
-{
-  "title": "string",
-  "description": "string (optional)"
-}
-```
-
-**Success Response:** `201 Created`
-```json
-{
-	"id": "uuid",
-	"title": "string",
-	"description": "string (optional)",
-	"status": "todo",
-  	"created_by": "uuid (owner)"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - User not a member of this project
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
-  }
-}
-```
-
-`404 Not Found` - Project not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project not found"
-  }
-}
-```
----
-
-### 6.2 List Project Tasks
-
-**Endpoint:** `GET /projects/{proj_id}/tasks`
-
-**Description:** Returns all tasks belonging to a specific project.
-
-**Authentication:** Required (JWT)
-
-**URL Parameters:**
-- `proj_id` - UUID of the project
-
-
-**Success Response:** `200 OK`
-```json
-[
-	{
-		"id": "uuid",
-		"title": "string",
-		"status": "todo | in_progress | done",
-	}
-]
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - User not a member of this project
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
-  }
-}
-```
-
-`404 Not Found` - Project not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project not found"
-  }
-}
-```
----
-
-### 6.3 Get Task Details
-
-**Endpoint:** `GET /tasks/{task_id}`
-
-**Description:** Returns detailed information about a specific task.
-
-**Authentication:** Required (JWT)
-
-**URL Parameters:**
-- `task_id` - UUID of the task
-
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"title": "string",
-	"description": "string (optional)",
-	"status": "todo | in_progress | done",
-  	"created_by": "uuid (owner)",
-	"assignee_id": "uuid (optional)",
-	"sprint_id": "uuid (optional)"
-}
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - User not a member of this project
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You are not a member of this project"
-  }
-}
-```
-
-`404 Not Found` - Task not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
-}
-```
----
-
-### 6.4 Update Task
-
-**Endpoint:** `PATCH /tasks/{task_id}`
-
-**Description:** Updates task information (title, description, status, assignee, sprint).
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
 - Project admin
-- Task owner (creator)
 
 **URL Parameters:**
-- `task_id` - UUID of the task
+- `sprint_id` - UUID of the sprint
 
 **Request Body:**
 ```json
 {
-	"title": "string (optional)",
-	"description": "string (optional)",
-	"status": "todo | in_progress | done (optional)"
+  "name": "string (optional)",
+  "status": "active | completed (optional)",
+  "start_date": "timestamp (optional)",
+  "end_date": "timestamp (optional)"
 }
 ```
 
@@ -1336,12 +1258,13 @@ Authorization: Bearer <jwt_token>
 ```json
 {
 	"id": "uuid",
-	"title": "string (optional)",
-	"description": "string (optional)",
-	"status": "todo | in_progress | done (optional)",
-	"created_by": "uuid (owner)",
-	"assignee_id": "uuid (optional)",
-	"sprint_id": "uuid (optional)"
+	"name": "string",
+	"status": "active | completed",
+	"start_date": "timestamp | null",
+	"end_date": "timestamp | null",
+	"tasks": [
+    	{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
+  	]
 }
 ```
 
@@ -1377,7 +1300,288 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-`404 Not Found` - Task, sprint or user not found
+`404 Not Found` - Sprint not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Sprint not found"
+  }
+}
+```
+---
+
+## 6. Tasks
+
+### 6.1 Create Task
+
+**Endpoint:** `POST /projects/{proj_id}/tasks`
+
+**Description:** Creates a new task within a project.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member (creator becomes the task owner).
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+**Request Body:**
+```json
+{
+  "title": "string",
+  "description": "string | null"
+}
+```
+
+**Success Response:** `201 Created`
+```json
+{
+	"id": "uuid",
+	"title": "string",
+	"description": "string | null",
+	"status": "todo",
+  	"created_by": "uuid (owner)",
+	"assignee_id": "uuid | null",
+	"sprint_id": "uuid | null"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+---
+
+### 6.2 List Project Tasks
+
+**Endpoint:** `GET /projects/{proj_id}/tasks`
+
+**Description:** Returns all tasks belonging to a specific project.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+
+**Success Response:** `200 OK`
+```json
+[
+	{
+		"id": "uuid",
+		"title": "string",
+		"status": "todo | in_progress | done",
+	}
+]
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+---
+
+### 6.3 Get Task Details
+
+**Endpoint:** `GET /tasks/{task_id}`
+
+**Description:** Returns detailed information about a specific task.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**URL Parameters:**
+- `task_id` - UUID of the task
+
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"title": "string",
+	"description": "string | null",
+	"status": "todo | in_progress | done",
+  	"created_by": "uuid (owner)",
+	"assignee_id": "uuid | null",
+	"sprint_id": "uuid | null"
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Task not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Task not found"
+  }
+}
+```
+---
+
+### 6.4 Update Task
+
+**Endpoint:** `PATCH /tasks/{task_id}`
+
+**Description:** Updates task information (title, description, status, assignee, sprint).
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Assigned user
+- Task owner (creator)
+
+**URL Parameters:**
+- `task_id` - UUID of the task
+
+**Request Body:**
+```json
+{
+	"title": "string (optional)",
+	"description": "string (optional)",
+	"status": "todo | in_progress | done (optional)"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"title": "string | null",
+	"description": "string | null",
+	"status": "todo | in_progress | done",
+	"created_by": "uuid (owner)",
+	"assignee_id": "uuid | null",
+	"sprint_id": "uuid | null"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Task not found
 ```json
 {
   "error": {
@@ -1448,6 +1652,7 @@ Authorization: Bearer <jwt_token>
 
 **Permissions:**
 - Project admin
+- Assigned user
 - Task owner (creator)
 
 **URL Parameters:**
@@ -1465,10 +1670,10 @@ Authorization: Bearer <jwt_token>
 {
 	"id": "uuid",
 	"title": "string",
-	"description": "string (optional)",
+	"description": "string | null",
 	"status": "todo | in_progress | done",
   	"created_by": "uuid (owner)",
-	"assignee_id": "uuid (optional)",
+	"assignee_id": "uuid | null",
 	"sprint_id": "uuid | null"
 }
 ```
@@ -1526,6 +1731,7 @@ Authorization: Bearer <jwt_token>
 
 **Permissions:**
 - Project admin
+- Assigned user
 - Task owner (creator)
 
 **URL Parameters:**
@@ -1534,7 +1740,7 @@ Authorization: Bearer <jwt_token>
 **Request Body:**
 ```json
 {
-  "assignee_id": "uuid (assigns assignee) | null (removes assignee)"
+  "assignee_id": "uuid (assigns user) | null (removes user)"
 }
 ```
 
@@ -1543,10 +1749,10 @@ Authorization: Bearer <jwt_token>
 {
 	"id": "uuid",
 	"title": "string",
-	"description": "string (optional)",
+	"description": "string | null",
 	"status": "todo | in_progress | done",
   	"created_by": "uuid (owner)",
-	"assignee_id": "uuid (optional)",
+	"assignee_id": "uuid | null",
 	"sprint_id": "uuid | null"
 }
 ```
@@ -1588,7 +1794,800 @@ Authorization: Bearer <jwt_token>
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Task or sprint not found"
+	"message": "Task or user not found"
+  }
+}
+```
+---
+
+## 7. Standups
+
+### 7.1 Create Standup
+
+**Endpoint:** `POST /projects/{proj_id}/standups`
+
+**Description:** Creates a new standup within a project.
+
+**Rules:**
+- A user can create only one standup per day per project.
+- If a standup already exists for today, creation is rejected.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member (creator becomes the standup owner).
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+**Request Body:**
+```json
+{
+	"today": "string", 
+	"yesterday": "string | null",
+	"blockers": "string | null"
+}
+```
+
+**Success Response:** `201 Created`
+```json
+{
+	"id": "uuid",
+	"created_at": "timestamp (today)",
+	"today": "string", 
+	"yesterday": "string | null",
+	"blockers": "string",
+	"created_by": "uuid (owner)"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+
+`409 Conflict` - Standup already exists for today
+```json
+{
+  "error": {
+    "code": "STANDUP_ALREADY_EXISTS",
+    "message": "You have already created a standup for today"
+  }
+}
+```
+---
+
+### 7.2 List Project Standups
+
+**Endpoint:** `GET /projects/{proj_id}/standups`
+
+**Description:** Returns standup entries for a project (usually filtered by date).
+
+**Notes:**
+- `preview` is a derived field generated from the first line of the standup today's input.
+- This field is not persisted and is only included in list responses.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**Notes:**
+- This endpoint returns all standups created within the project.
+- Standups are visible to all project members to provide team-wide visibility.
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+**Success Response:** `200 OK`
+```json
+[
+	{
+		"id": "uuid",
+		"created_at": "timestamp(today)",
+		"preview": "derived field (first line of today input)", 
+		"blockers": "string",
+		"created_by": "uuid (owner)"
+	}
+]
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+---
+### 7.3 Get Standup Details
+
+**Endpoint:** `GET /standups/{standup_id}`
+
+**Description:** Returns detailed information about a specific standup.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**URL Parameters:**
+- `standup_id` - UUID of the standup
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"created_at": "timestamp (today)",
+	"today": "string", 
+	"yesterday": "string | null",
+	"blockers": "string",
+  	"created_by": "uuid (owner)"
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Standup not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Standup not found"
+  }
+}
+```
+---
+
+### 7.4 Update Standup
+
+**Endpoint:** `PATCH /standups/{standup_id}`
+
+**Description:** Updates standups information (today, yesterday, blockers).
+
+**Rules:**
+- A standup can only be edited on the same day it was created.
+- Editing past standups is not allowed.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Standup owner (creator)
+
+**URL Parameters:**
+- `standup_id` - UUID of the Standup
+
+**Request Body:**
+```json
+{
+	"today": "string (optional)", 
+	"yesterday": "string  | null (optional)",
+	"blockers": "string | null (optional)"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"created_at": "timestamp (today)",
+	"today": "string", 
+	"yesterday": "string | null",
+	"blockers": "string",
+	"created_by": "uuid (owner)"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`409 Conflict` - Standup can no longer be edited
+```json
+{
+  "error": {
+    "code": "EDIT_WINDOW_EXPIRED",
+    "message": "Standups can only be edited on the day they are created"
+  }
+}
+
+
+`404 Not Found` - Standup not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Standup not found"
+  }
+}
+```
+---
+
+### 7.5 Delete Standup
+
+**Endpoint:** `DELETE /standups/{standup_id}`
+
+**Description:** Deletes a Standup.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Standup owner (creator)
+
+**URL Parameters:**
+- `standup_id` - UUID of the standup
+
+**Success Response:** `204 No Content`
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Standup not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Standup not found"
+  }
+}
+```
+---
+
+## 8. Blockers
+
+### 8.1 Create Blocker
+
+**Endpoint:** `POST /projects/{proj_id}/blockers`
+
+**Description:** Creates a new blocker within a project.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member (creator becomes the blocker owner).
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+**Request Body:**
+```json
+{
+	"description": "string",
+	"task_id": "uuid | null"
+}
+```
+
+**Success Response:** `201 Created`
+```json
+{
+	"id": "uuid",
+	"description": "string",
+	"status": "open",
+	"created_by": "uuid (owner)",
+	"assigned_to": "uuid | null",
+	"task_id": "uuid | null",
+	"created_at": "timestamp (today)",	
+	"resolved_at": "timestamp | null"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+---
+
+### 8.2 List Project Blockers
+
+**Endpoint:** `GET /projects/{proj_id}/blockers`
+
+**Description:** Returns all blockers for a project.
+
+**Notes:**
+- `preview` is a derived field generated from the first line of the blocker description.
+- This field is not persisted and is only included in list responses.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**URL Parameters:**
+- `proj_id` - UUID of the project
+
+**Success Response:** `200 OK`
+```json
+[
+	{
+		"id": "uuid",
+		"created_by": "uuid (owner)",
+		"preview": "derived field (first line of description input)", 
+		"status": "open | resolved",
+		"assigned_to": "uuid | null"
+	}
+]
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Project not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Project not found"
+  }
+}
+```
+---
+
+### 8.3 Get Blocker Details
+
+**Endpoint:** `GET /blockers/{blocker_id}`
+
+**Description:** Returns detailed information about a specific blocker.
+
+**Authentication:** Required (JWT)
+
+**Permissions:** 
+- Any project member.
+
+**URL Parameters:**
+- `blocker_id` - UUID of the blocker
+
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"description": "string",
+	"status": "open | resolved",
+	"created_by": "uuid (owner)",
+	"assigned_to": "uuid | null",
+	"task_id": "uuid | null",
+	"created_at": "timestamp (today)",	
+	"resolved_at": "timestamp | null"
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Blocker not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Blocker not found"
+  }
+}
+```
+---
+
+### 8.4 Update Blocker
+
+**Endpoint:** `PATCH /blockers/{blocker_id}`
+
+**Description:** Updates blocker information.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Blocker owner (creator)
+
+**URL Parameters:**
+- `blocker_id` - UUID of the Blocker
+
+**Request Body:**
+```json
+{
+	"description": "string (optional)",
+	"task_id": "uuid | null (optional)"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"description": "string",
+	"status": "open | resolved",
+	"created_by": "uuid (owner)",
+	"assigned_to": "uuid | null",
+	"task_id": "uuid | null",
+	"created_at": "timestamp (today)",	
+	"resolved_at": "timestamp | null"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Blocker not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Blocker not found"
+  }
+}
+```
+---
+
+### 8.5 Resolve Blocker
+
+**Endpoint:** `PATCH /blockers/{blocker_id}/resolve`
+
+**Description:** Marks a blocker as resolved.
+
+**Rules:**
+- Blockers cannot be deleted. They can only be resolved.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Assigned user
+- Blocker owner (creator)
+
+**URL Parameters:**
+- `blocker_id` - UUID of the Blocker
+
+**Success Response:** `204 No Content`
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Blocker not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Blocker not found"
+  }
+}
+```
+
+`409 Conflict` - Blocker already resolved
+```json
+{
+  "error": {
+    "code": "BLOCKER_ALREADY_RESOLVED",
+    "message": "Blocker already resolved"
+  }
+}
+```
+---
+
+### 8.6 Assign Blocker to User
+
+**Endpoint:** `PATCH /blockers/{blocker_id}/assignee`
+
+**Description:** Assigns a blocker to a user or removes the current assignee.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Project admin
+- Blocker owner (creator)
+
+**URL Parameters:**
+- `blocker_id` - UUID of the blocker
+
+**Request Body:**
+```json
+{
+  "assignee_id": "uuid (assigns user) | null (removes user)"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"description": "string",
+	"status": "open | resolved",
+	"created_by": "uuid (owner)",
+	"assigned_to": "uuid | null",
+	"task_id": "uuid | null",
+	"created_at": "timestamp (today)",	
+	"resolved_at": "timestamp | null"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Blocker or user not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Blocker or user not found"
   }
 }
 ```
