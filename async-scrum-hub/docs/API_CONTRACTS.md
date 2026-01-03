@@ -28,7 +28,7 @@ Authorization: Bearer <jwt_token>
 
 This API uses a role-based access control (RBAC) model.
 Permissions are scoped to specific resources (organization, project, task, etc.).
- 
+
 ---
 
 ### Roles
@@ -42,14 +42,16 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	- Can access organizations they belong to.
 	- Can participate in projects they are assigned to.
 
-### Project Roles
-- admin
-	- Full control over the project.
-	- Can manage project members and roles.
-	- Can manage sprints, tasks, standups, and blockers.
-- member
-	- Can participate in the project.
-	- Can create and update resources according to endpoint permissions.
+### Scrum Roles (Project-Level)
+- scrum_master
+	- Can create and manage sprints.
+	- Can manage project timeline and planning.
+- product_owner
+	- Manages product backlog and priorities.
+- developer
+	- Works on tasks and submits standups.
+
+**Note:** Scrum roles are assigned per-project and affect sprint management permissions.
 
 ### Role Inheritance
 
@@ -80,7 +82,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 - `200 OK` - Request successful
 - `201 Created` - Resource created successfully
-- `204 No Content` – Request successful, no response body 
+- `204 No Content` – Request successful, no response body
 - `400 Bad Request` - Invalid request data
 - `401 Unauthorized` - Authentication required or invalid
 - `403 Forbidden` - Insufficient permissions
@@ -147,7 +149,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Public
 
-**Permissions:** 
+**Permissions:**
 - The authenticated user
 
 **Request Body:**
@@ -198,7 +200,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - The authenticated user
 
 **Success Response:** `200 OK`
@@ -206,7 +208,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "id": "uuid",
   "email": "string",
-  "name": "string"
+  "name": "string",
+  "current_organization_id": "uuid | null",
+  "scrum_role": "scrum_master | product_owner | developer | null",
+  "org_role": "admin | member | null"
 }
 ```
 
@@ -231,7 +236,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - The authenticated user
 
 **Request Body:**
@@ -246,7 +251,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "id": "uuid",
   "email": "string",
-  "name": "string"
+  "name": "string",
+  "current_organization_id": "uuid | null",
+  "scrum_role": "scrum_master | product_owner | developer | null",
+  "org_role": "admin | member | null"
 }
 ```
 
@@ -283,7 +291,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any authenticated user (creator becomes organization admin).
 
 **Request Body:**
@@ -298,6 +306,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "id": "uuid",
   "name": "string",
+  "join_code": "SCR-493", // generated server-side when the organization is created.
   "created_by": "uuid (owner)"
 }
 ```
@@ -333,7 +342,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any organization member.
 
 **Success Response:** `200 OK`
@@ -364,11 +373,11 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Endpoint:** `GET /organizations/{org_id}/members`
 
-**Description:** Returns the list of members of the specified organization. If admin, they can see the 'delete' option next each member name.
+**Description:** Returns members of an organization. The client may allow admin-only actions based on the authenticated user’s org_role.
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any organization member.
 
 **URL Parameters:**
@@ -380,7 +389,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	{
 		"id": "uuid",
 		"name": "string",
-		"role": "admin | member"
+		"org_role": "admin | member",
 	}
 ]
 ```
@@ -426,7 +435,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Organization admin
 
 **URL Parameters:**
@@ -436,7 +445,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
   "email": "string",
-  "role": "admin | member"
+  "org_role": "admin | member"
 }
 ```
 
@@ -445,7 +454,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "id": "uuid",
   "email": "string",
-  "role": "admin | member"
+  "org_role": "admin | member"
 }
 ```
 
@@ -510,7 +519,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Organization admin
 
 **URL Parameters:**
@@ -562,7 +571,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Organization admin
 
 **URL Parameters:**
@@ -572,7 +581,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "role": "admin | member"
+  "org_role": "admin | member"
 }
 ```
 
@@ -580,7 +589,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
   "user_id": "uuid",
-  "role": "admin | member"
+  "org_role": "admin | member"
 }
 ```
 
@@ -627,6 +636,51 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
+### 3.7 Join Organization by Code
+
+**Endpoint:** `POST /organizations/join`
+
+**Authentication:** Required (JWT)
+
+**Request Body:**
+```json
+{
+  "join_code": "SCR-493"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+  "organization_id": "uuid",
+  "org_role": "member"
+}
+```
+
+**Error Responses:**
+
+`404 Not Found` - Organization or user not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization or user not found"
+  }
+}
+```
+
+`409 Conflict` - User already a member
+```json
+{
+  "error": {
+	"code": "ALREADY_MEMBER",
+	"message": "User is already a member of this organization"
+  }
+}
+```
+---
+
+
 ## 4. Projects
 
 ### 4.1 Create Project
@@ -637,8 +691,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
-- Any organization member (creator becomes project admin).
+**Permissions:**
+- Organization admin.
 
 **URL Parameters:**
 - `org_id` - UUID of the organization
@@ -655,7 +709,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "id": "uuid",
   "name": "string",
-  "created_by": "uuid (owner)"  
+  "created_by": "uuid (owner)"
 }
 ```
 
@@ -710,7 +764,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any organization member.
 
 **URL Parameters:**
@@ -768,7 +822,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any organization member.
 
 **URL Parameters:**
@@ -780,7 +834,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	{
 		"id": "uuid",
 		"name": "string",
-		"role": "admin | member"
+		"org_role": "admin | member",
+		"scrum_role": "scrum_master | product_owner | developer"
 	}
 ]
 ```
@@ -825,8 +880,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
-- Project admin
+**Permissions:**
+- Organization admin
 
 **URL Parameters:**
 - `proj_id` - UUID of the project
@@ -834,8 +889,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "email": "string",
-  "role": "admin | member"
+  "email": "string"
 }
 ```
 
@@ -843,8 +897,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
   "id": "uuid",
-  "email": "string",
-  "role": "admin | member"
+  "email": "string"
 }
 ```
 
@@ -909,8 +962,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
-- Project admin
+**Permissions:**
+- Organization admin
 
 **URL Parameters:**
 - `proj_id` - UUID of the project
@@ -919,81 +972,6 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Success Response:** `204 No Content`
 
 **Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Project or user not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project or user not found"
-  }
-}
-```
----
-
-## 4.6 Update Project Member Role ##
-
-**Endpoint:** `PATCH /projects/{proj_id}/members/{user_id}`
-
-**Description:** Updates the role of an existing project member.
-
-**notes:** Reminder: a project must always have at least one project admin.
-
-**Authentication:** Required (JWT)
-
-**Permissions:** 
-- Project admin
-
-**URL Parameters:**
-- `proj_id` – UUID of the project
-- `user_id` – UUID of the member
-
-**Request Body:**
-```json
-{
-  "role": "admin | member"
-}
-```
-
-**Success Response:** `200 OK`
-```json
-{
-  "user_id": "uuid",
-  "role": "admin | member"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid role
-```json
-{
-  "error": {
-	"code": "INVALID_ROLE",
-	"message": "validation error message"
-  }
-}
-```
 
 `401 Unauthorized` - Authentication required
 ```json
@@ -1036,8 +1014,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
-- Project admin
+**Permissions:**
+- Scrum Master
 
 **URL Parameters:**
 - `proj_id` - UUID of the project
@@ -1114,7 +1092,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -1177,7 +1155,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -1238,8 +1216,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
-- Project admin
+**Permissions:**
+- Scrum Master
 
 **URL Parameters:**
 - `sprint_id` - UUID of the sprint
@@ -1321,7 +1299,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member (creator becomes the task owner).
 
 **URL Parameters:**
@@ -1399,7 +1377,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -1458,7 +1436,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -1520,7 +1498,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Assigned user
 - Task owner (creator)
 
@@ -1651,7 +1629,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Assigned user
 - Task owner (creator)
 
@@ -1730,7 +1708,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Assigned user
 - Task owner (creator)
 
@@ -1814,7 +1792,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member (creator becomes the standup owner).
 
 **URL Parameters:**
@@ -1823,7 +1801,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-	"today": "string", 
+	"today": "string",
 	"yesterday": "string | null",
 	"blockers": "string | null"
 }
@@ -1834,7 +1812,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
 	"id": "uuid",
 	"created_at": "timestamp (today)",
-	"today": "string", 
+	"today": "string",
 	"yesterday": "string | null",
 	"blockers": "string",
 	"created_by": "uuid (owner)"
@@ -1906,7 +1884,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **Notes:**
@@ -1922,7 +1900,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	{
 		"id": "uuid",
 		"created_at": "timestamp(today)",
-		"preview": "derived field (first line of today input)", 
+		"preview": "derived field (first line of today input)",
 		"blockers": "string",
 		"created_by": "uuid (owner)"
 	}
@@ -1969,7 +1947,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -1980,7 +1958,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
 	"id": "uuid",
 	"created_at": "timestamp (today)",
-	"today": "string", 
+	"today": "string",
 	"yesterday": "string | null",
 	"blockers": "string",
   	"created_by": "uuid (owner)"
@@ -2033,7 +2011,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Standup owner (creator)
 
 **URL Parameters:**
@@ -2042,7 +2020,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-	"today": "string (optional)", 
+	"today": "string (optional)",
 	"yesterday": "string  | null (optional)",
 	"blockers": "string | null (optional)"
 }
@@ -2053,7 +2031,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
 	"id": "uuid",
 	"created_at": "timestamp (today)",
-	"today": "string", 
+	"today": "string",
 	"yesterday": "string | null",
 	"blockers": "string",
 	"created_by": "uuid (owner)"
@@ -2100,7 +2078,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
     "message": "Standups can only be edited on the day they are created"
   }
 }
-
+```
 
 `404 Not Found` - Standup not found
 ```json
@@ -2122,7 +2100,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Standup owner (creator)
 
 **URL Parameters:**
@@ -2173,7 +2151,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member (creator becomes the blocker owner).
 
 **URL Parameters:**
@@ -2196,7 +2174,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"created_by": "uuid (owner)",
 	"assigned_to": "uuid | null",
 	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",	
+	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
 ```
@@ -2256,7 +2234,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -2268,7 +2246,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	{
 		"id": "uuid",
 		"created_by": "uuid (owner)",
-		"preview": "derived field (first line of description input)", 
+		"preview": "derived field (first line of description input)",
 		"status": "open | resolved",
 		"assigned_to": "uuid | null"
 	}
@@ -2316,7 +2294,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Authentication:** Required (JWT)
 
-**Permissions:** 
+**Permissions:**
 - Any project member.
 
 **URL Parameters:**
@@ -2332,7 +2310,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"created_by": "uuid (owner)",
 	"assigned_to": "uuid | null",
 	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",	
+	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
 ```
@@ -2379,7 +2357,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Blocker owner (creator)
 
 **URL Parameters:**
@@ -2402,7 +2380,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"created_by": "uuid (owner)",
 	"assigned_to": "uuid | null",
 	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",	
+	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
 ```
@@ -2462,7 +2440,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Assigned user
 - Blocker owner (creator)
 
@@ -2523,7 +2501,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Blocker owner (creator)
 
 **URL Parameters:**
@@ -2545,7 +2523,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"created_by": "uuid (owner)",
 	"assigned_to": "uuid | null",
 	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",	
+	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
 ```
