@@ -168,12 +168,12 @@ async-scrum-hub/
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── projects/                          🚀 Freddy
+│ │ ├── projects/                          🚀 Freddy (dont do it now. we are thinking about have one project by default)
 │ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
 │ │ │
-│ │ ├── sprints/                           🚀 Freddy
+│ │ ├── tickets/                           🚀 Freddy
 │ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
