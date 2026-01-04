@@ -22,6 +22,7 @@ function AppLayout()
 	const preAuthPaths = ["/welcome", "/login", "/signup", "/role-selection", "/team-creation", "/team-join"];
 	const isPreAuth = preAuthPaths.includes(location.pathname);
 
+	// User is on /login
 	if (isPreAuth)
 	{
 		return (
@@ -36,6 +37,7 @@ function AppLayout()
 		);
 	}
 
+	// User is on /dashboard
 	return (
 		<div className="flex h-screen bg-gray-50">
 		<Sidebar />
