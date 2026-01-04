@@ -44,14 +44,14 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 ### Scrum Roles (Project-Level)
 - scrum_master
-	- Can create and manage sprints.
+	- Can create and manage tickets.
 	- Can manage project timeline and planning.
 - product_owner
 	- Manages product backlog and priorities.
 - developer
 	- Works on tasks and submits standups.
 
-**Note:** Scrum roles are assigned per-project and affect sprint management permissions.
+**Note:** Scrum roles are assigned per-project and affect ticket management permissions.
 
 ### Role Inheritance
 
@@ -66,7 +66,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - Project admins can manage all resources within their project.
 - The assigned user has full edit permissions over the resource (task or blocker), equivalent to the resource owner.
 - Assigned user permissions only apply when the resource has an assigned user.
-- If `assigned_to` is null, permissions related to the assigned user are ignored.
+- If `assignee_id` is null, permissions related to the assigned user are ignored.
 
 ### Membership Management Rules
 
@@ -148,9 +148,6 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Description:** Authenticates a user and returns JWT tokens.
 
 **Authentication:** Public
-
-**Permissions:**
-- The authenticated user
 
 **Request Body:**
 ```json
@@ -640,6 +637,9 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Endpoint:** `POST /organizations/join`
 
+**Permissions:**
+- The authenticated user
+
 **Authentication:** Required (JWT)
 
 **Request Body:**
@@ -1004,18 +1004,19 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-## 5. Sprints
+## 5. Tickets
 
-### 5.1 Create Sprint
+### 5.1 Create Tickets
 
-**Endpoint:** `POST /projects/{proj_id}/sprints`
+**Endpoint:** `POST /projects/{proj_id}/tickets`
 
-**Description:** Creates a new sprint within a project.
+**Description:** Creates a new ticket within a project.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
 - Scrum Master
+- Product Owner
 
 **URL Parameters:**
 - `proj_id` - UUID of the project
@@ -1023,9 +1024,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "name": "string",
-  "start_date": "timestamp | null",
-  "end_date": "timestamp | null"
+  "title": "string",
+  "description": "string | null",
+  "priority": "low | medium | high",
+  "assignee_id": "uuid | null"
 }
 ```
 
@@ -1033,11 +1035,15 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
   "id": "uuid",
-  "name": "string",
-  "status": "active",
-  "start_date": "timestamp | null",
-  "end_date": "timestamp | null",
-  "tasks": []
+  "title": "string",
+  "description": "string | null",
+  "status": "todo | in_progress | done",
+  "priority": "low | medium | high",
+  "created_by": "uuid",
+  "assignee_id": "uuid | null",
+  "project_id": "uuid",
+  "created_at": "iso",
+  "updated_at": "iso"
 }
 ```
 
@@ -1084,11 +1090,12 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-### 5.2 List Project Sprints
+### 5.2 List Tickets (Board)
 
-**Endpoint:** `GET /projects/{proj_id}/sprints`
+**Endpoint:** `GET /projects/{proj_id}/tickets?status=todo|in_progress|done`
 
-**Description:** Returns all sprints belonging to a specific project.
+**Description:** Returns tickets for a project, optionally filtered by status.
+Used to render the project board.
 
 **Authentication:** Required (JWT)
 
@@ -1098,18 +1105,20 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **URL Parameters:**
 - `proj_id` - UUID of the project
 
+**Query Parameters:**
+- status – todo | in_progress | done
+
 **Success Response:** `200 OK`
 ```json
 [
 	{
 		"id": "uuid",
-		"name": "string",
-		"status": "active | completed",
-		"start_date": "timestamp | null",
-		"end_date": "timestamp | null",
-		"tasks": [
-    		{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
-  		]
+		"title": "string",
+		"status": "todo | in_progress | done",
+		"priority": "low | medium | high",
+		"assignee_id": "uuid | null",
+		"created_at": "iso",
+		"updated_at": "iso"
 	}
 ]
 ```
@@ -1136,22 +1145,22 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Ticket not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Ticket not found"
   }
 }
 ```
 ---
 
-### 5.3 Get Sprint Details
+### 5.3 Get Ticket Details
 
-**Endpoint:** `GET /sprints/{sprint_id}`
+**Endpoint:** `GET /tickets/{ticket_id}`
 
-**Description:** Returns detailed information about a specific sprint.
+**Description:** Returns detailed information about a specific ticket.
 
 **Authentication:** Required (JWT)
 
@@ -1159,19 +1168,21 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - Any project member.
 
 **URL Parameters:**
-- `sprint_id` - UUID of the sprint
+- `ticket_id` - UUID of the ticket
 
 **Success Response:** `200 OK`
 ```json
 {
 	"id": "uuid",
-	"name": "string",
-	"status": "active | completed",
-	"start_date": "timestamp | null",
-	"end_date": "timestamp | null",
-	"tasks": [
-    	{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
-  	]
+	"title": "string",
+	"description": "string | null",
+	"status": "todo | in_progress | done",
+	"priority": "low | medium | high",
+	"created_by": "uuid",
+	"assignee_id": "uuid | null",
+	"project_id": "uuid",
+	"created_at": "iso",
+	"updated_at": "iso"
 }
 ```
 
@@ -1197,38 +1208,41 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Sprint not found
+`404 Not Found` - Ticket not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Sprint not found"
+	"message": "Ticket not found"
   }
 }
 ```
 ---
 
-### 5.4 Update Sprint
+### 5.4 Update Ticket
 
-**Endpoint:** `PATCH /sprints/{sprint_id}`
+**Endpoint:** `PATCH /tickets/{ticket_id}`
 
-**Description:** Updates sprint information (e.g. name, dates).
+**Description:** Updates ticket fields such as title, description, priority, assignee, or status.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
+- Organization admin
+- Ticket owner (creator)
+- Assigned user
 
 **URL Parameters:**
-- `sprint_id` - UUID of the sprint
+- `ticket_id` - UUID of the ticket
 
 **Request Body:**
 ```json
 {
-  "name": "string (optional)",
-  "status": "active | completed (optional)",
-  "start_date": "timestamp (optional)",
-  "end_date": "timestamp (optional)"
+	"title": "string (optional)",
+	"description": "string | null (optional)",
+	"priority": "low | medium | high (optional)",
+	"status": "todo | in_progress | done (optional)",
+	"assignee_id": "uuid | null (optional)"
 }
 ```
 
@@ -1236,13 +1250,15 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
 	"id": "uuid",
-	"name": "string",
-	"status": "active | completed",
-	"start_date": "timestamp | null",
-	"end_date": "timestamp | null",
-	"tasks": [
-    	{ "id": "uuid", "title": "string", "status": "todo | in_progress | done" }
-  	]
+	"title": "string",
+	"description": "string | null",
+	"status": "todo | in_progress | done",
+	"priority": "low | medium | high",
+	"created_by": "uuid",
+	"assignee_id": "uuid | null",
+	"project_id": "uuid",
+	"created_at": "iso",
+	"updated_at": "iso"
 }
 ```
 
@@ -1278,12 +1294,137 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Sprint not found
+`404 Not Found` - Ticket not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Sprint not found"
+	"message": "Ticket not found"
+  }
+}
+```
+---
+
+### 5.5 Move Ticket (Drag & Drop)
+
+**Endpoint:** `PATCH /tickets/{ticket_id}/move`
+
+**Description:** Moves a ticket between board columns by updating its status.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Organization admin
+- Ticket owner (creator)
+- Assigned user
+
+**URL Parameters:**
+- `ticket_id` - UUID of the ticket
+
+**Request Body:**
+```json
+{
+	"status": "todo | in_progress | done"
+}
+```
+
+**Success Response:** `200 OK`
+```json
+{
+	"id": "uuid",
+	"status": "todo | in_progress | done",
+	"updated_at": "iso"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid input
+```json
+{
+  "error": {
+	"code": "INVALID_INPUT",
+	"message": "validation error message"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Ticket not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Ticket not found"
+  }
+}
+```
+---
+
+### 5.6 Delete Ticket
+
+**Endpoint:** `DELETE /tickets/{ticket_id}`
+
+**Description:** Deletes a ticket and all its associated tasks and blockers.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Organization admin
+- Ticket owner (creator)
+
+**URL Parameters:**
+- `ticket_id` - UUID of the ticket
+
+**Success Response:** `204 No Content`
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Ticket not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Ticket not found"
   }
 }
 ```
@@ -1293,9 +1434,9 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 ### 6.1 Create Task
 
-**Endpoint:** `POST /projects/{proj_id}/tasks`
+**Endpoint:** `POST /tickets/{ticket_id}/tasks`
 
-**Description:** Creates a new task within a project.
+**Description:** Creates a new task within a ticket.
 
 **Authentication:** Required (JWT)
 
@@ -1303,13 +1444,14 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - Any project member (creator becomes the task owner).
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `ticket_id` - UUID of the ticket
 
 **Request Body:**
 ```json
 {
   "title": "string",
-  "description": "string | null"
+  "description": "string | null",
+  "assignee_id": "uuid | null"
 }
 ```
 
@@ -1319,10 +1461,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "todo",
+	"status": "in_process",
   	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"sprint_id": "uuid | null"
+	"ticket_id": "uuid"
 }
 ```
 
@@ -1358,22 +1500,22 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Ticket not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Ticket not found"
   }
 }
 ```
 ---
 
-### 6.2 List Project Tasks
+### 6.2 List Tasks
 
-**Endpoint:** `GET /projects/{proj_id}/tasks`
+**Endpoint:** `GET /tickets/{ticket_id}/tasks`
 
-**Description:** Returns all tasks belonging to a specific project.
+**Description:** Returns all tasks belonging to a specific ticket.
 
 **Authentication:** Required (JWT)
 
@@ -1381,8 +1523,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - Any project member.
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `ticket_id` - UUID of the ticket
 
+**Query Parameters:**
+- status – in_process | completed
 
 **Success Response:** `200 OK`
 ```json
@@ -1390,7 +1534,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	{
 		"id": "uuid",
 		"title": "string",
-		"status": "todo | in_progress | done",
+		"status": "in_process | completed",
 	}
 ]
 ```
@@ -1417,12 +1561,12 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Ticket not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Ticket not found"
   }
 }
 ```
@@ -1449,10 +1593,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "todo | in_progress | done",
+	"status": "in_process | completed",
   	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"sprint_id": "uuid | null"
+	"ticket_id": "uuid"
 }
 ```
 
@@ -1493,7 +1637,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 
 **Endpoint:** `PATCH /tasks/{task_id}`
 
-**Description:** Updates task information (title, description, status, assignee, sprint).
+**Description:** Updates task information.
 
 **Authentication:** Required (JWT)
 
@@ -1510,7 +1654,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
 	"title": "string (optional)",
 	"description": "string (optional)",
-	"status": "todo | in_progress | done (optional)"
+	"status": "in_process | completed (optional)",
+	"assignee_id": "uuid | null (optional)"
 }
 ```
 
@@ -1520,10 +1665,10 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"id": "uuid",
 	"title": "string | null",
 	"description": "string | null",
-	"status": "todo | in_progress | done",
+	"status": "in_process | completed",
 	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"sprint_id": "uuid | null"
+	"ticket_id": "uuid"
 }
 ```
 
@@ -1564,7 +1709,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Task, sprint or user not found"
+	"message": "Task not found"
   }
 }
 ```
@@ -1579,7 +1724,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Project admin
+- Organization admin
 - Task owner (creator)
 
 **URL Parameters:**
@@ -1615,164 +1760,6 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
   "error": {
 	"code": "NOT_FOUND",
 	"message": "Task not found"
-  }
-}
-```
----
-
-### 6.6 Assign Task to Sprint
-
-**Endpoint:** `PATCH /tasks/{task_id}/sprint`
-
-**Description:** Assigns a task to a sprint or removes it from its current sprint.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-- Assigned user
-- Task owner (creator)
-
-**URL Parameters:**
-- `task_id` - UUID of the task
-
-**Request Body:**
-```json
-{
-  "sprint_id": "uuid (assigns task) | null (removes task)"
-}
-```
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | done",
-  	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
-	"sprint_id": "uuid | null"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Task or sprint not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task or sprint not found"
-  }
-}
-```
----
-
-### 6.7 Assign Task to User
-
-**Endpoint:** `PATCH /tasks/{task_id}/assignee`
-
-**Description:** Assigns a task to a user or removes the current assignee.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-- Assigned user
-- Task owner (creator)
-
-**URL Parameters:**
-- `task_id` - UUID of the task
-
-**Request Body:**
-```json
-{
-  "assignee_id": "uuid (assigns user) | null (removes user)"
-}
-```
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | done",
-  	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
-	"sprint_id": "uuid | null"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Task or user not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task or user not found"
   }
 }
 ```
@@ -2161,7 +2148,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
 	"description": "string",
-	"task_id": "uuid | null"
+	"task_id": "uuid | null",
+	"assignee_id": "uuid | null"
 }
 ```
 
@@ -2172,7 +2160,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"description": "string",
 	"status": "open",
 	"created_by": "uuid (owner)",
-	"assigned_to": "uuid | null",
+	"assignee_id": "uuid | null",
 	"task_id": "uuid | null",
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
@@ -2248,7 +2236,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 		"created_by": "uuid (owner)",
 		"preview": "derived field (first line of description input)",
 		"status": "open | resolved",
-		"assigned_to": "uuid | null"
+		"assignee_id": "uuid | null"
 	}
 ]
 ```
@@ -2308,7 +2296,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"description": "string",
 	"status": "open | resolved",
 	"created_by": "uuid (owner)",
-	"assigned_to": "uuid | null",
+	"assignee_id": "uuid | null",
 	"task_id": "uuid | null",
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
@@ -2367,7 +2355,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
 	"description": "string (optional)",
-	"task_id": "uuid | null (optional)"
+	"task_id": "uuid | null (optional)",
+	"assignee_id": "uuid | null (optional)"
 }
 ```
 
@@ -2378,7 +2367,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 	"description": "string",
 	"status": "open | resolved",
 	"created_by": "uuid (owner)",
-	"assigned_to": "uuid | null",
+	"assignee_id": "uuid | null",
 	"task_id": "uuid | null",
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
@@ -2487,85 +2476,6 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
   "error": {
     "code": "BLOCKER_ALREADY_RESOLVED",
     "message": "Blocker already resolved"
-  }
-}
-```
----
-
-### 8.6 Assign Blocker to User
-
-**Endpoint:** `PATCH /blockers/{blocker_id}/assignee`
-
-**Description:** Assigns a blocker to a user or removes the current assignee.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-- Blocker owner (creator)
-
-**URL Parameters:**
-- `blocker_id` - UUID of the blocker
-
-**Request Body:**
-```json
-{
-  "assignee_id": "uuid (assigns user) | null (removes user)"
-}
-```
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"description": "string",
-	"status": "open | resolved",
-	"created_by": "uuid (owner)",
-	"assigned_to": "uuid | null",
-	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",
-	"resolved_at": "timestamp | null"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Blocker or user not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Blocker or user not found"
   }
 }
 ```
