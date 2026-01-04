@@ -2,7 +2,7 @@ Organizations:
 	DELETE /organizations/{org_id}
   - Delete organization (only if last admin)
 
-Projects:
+Projects (Tickets):
 	DELETE /projects/{proj_id}
   - Delete project
 
