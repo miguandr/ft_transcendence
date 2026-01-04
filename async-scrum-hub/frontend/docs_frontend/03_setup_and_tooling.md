@@ -1,7 +1,5 @@
 # Setup and tooling
 
-## What I did today (January 2, 2026)
-
 ### Initial scaffold
 - Created Vite React + TypeScript project
   ```bash
