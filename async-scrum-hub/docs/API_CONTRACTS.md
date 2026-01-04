@@ -294,7 +294,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "name": "string"
+  "name": "string",
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -645,7 +646,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "join_code": "SCR-493"
+  "join_code": "SCR-493",
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 

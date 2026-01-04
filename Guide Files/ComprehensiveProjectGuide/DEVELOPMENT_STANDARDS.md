@@ -1,4 +1,5 @@
 # Development Standards & Best Practices
+
 ## Async Scrum Hub - Team Guidelines
 
 **These are MANDATORY practices for successful remote collaboration.**
@@ -16,11 +17,13 @@ If something here is unclear, we discuss it before coding.
 ## 1. Branching & Git Rules
 
 ### Branches
+
 - `main` → protected, demo-ready only
 - `dev` → integration branch
 - `feat/<short-name>` → feature work (e.g. `feat/standups-ui`)
 
 ### Rules
+
 - No direct commits to `main`
 - All work goes through a Pull Request (PR) into `dev`
 - `dev` → `main` merges only at milestone checkpoints
@@ -30,6 +33,7 @@ If something here is unclear, we discuss it before coding.
 ## 2. Pull Requests (PRs)
 
 ### What is a PR?
+
 A Pull Request is a request to merge your feature branch into `dev`.
 All PRs must be reviewed by at least one teammate.
 
@@ -65,7 +69,9 @@ If one item is missing → PR stays open.
 - Both frontend and backend import from this folder
 
 ### API Contract Change Rule (MANDATORY)
+
 If an API or shared type changes:
+
 1. Update `/shared/types`
 2. Update backend implementation
 3. Notify the team in the communication channel
@@ -86,9 +92,37 @@ This is a security decision and should not be changed mid-project.
 
 ---
 
-## 7. Real-Time Scope (STRICT)
+## 7. Authorization & Permissions
+
+### Role-Based Access Control (RBAC)
+
+The application uses three scrum roles with different permission levels:
+
+| Action           | Product Owner (PO) | Scrum Master (SM) | Developer (DEV) |
+| ---------------- | :----------------: | :---------------: | :-------------: |
+| Create ticket    |         ✅         |        ✅         |       ❌        |
+| Edit ticket      |         ✅         |        ✅         |       ❌        |
+| Set priority     |         ✅         |        ❌         |       ❌        |
+| Move ticket      |         ✅         |        ✅         |       ❌        |
+| Create task      |         ❌         |        ❌         |       ✅        |
+| Resolve blocker  |         ❌         |        ✅         |       ❌        |
+| Raise blocker    |         ✅         |        ✅         |       ✅        |
+| View team health |         ❌         |        ✅         |       ❌        |
+
+### Implementation Rules
+
+- **Backend validation is MANDATORY** - Never trust frontend checks alone
+- Check user's `scrum_role` on every protected endpoint
+- Return `403 Forbidden` for unauthorized actions
+- Frontend should hide/disable UI for unauthorized actions (UX improvement)
+- If in doubt about a permission, discuss with the team before implementing
+
+---
+
+## 8. Real-Time Scope (STRICT)
 
 Real-time features are limited to:
+
 - Task status changes
 - Standup posts appearing
 - Blockers raised or resolved
@@ -99,7 +133,7 @@ No new WebSocket features are added without team agreement.
 
 ---
 
-## 8. Code Style & Formatting
+## 9. Code Style & Formatting
 
 - TypeScript is used everywhere
 - Prettier config is shared
@@ -108,7 +142,7 @@ No new WebSocket features are added without team agreement.
 
 ---
 
-## 9. Component-Driven Frontend Development
+## 10. Component-Driven Frontend Development
 
 - UI components are built in isolation first
 - Components live in the design system
@@ -116,7 +150,7 @@ No new WebSocket features are added without team agreement.
 
 ---
 
-## 10. Data & Demo Discipline
+## 11. Data & Demo Discipline
 
 - Seed data must look realistic
 - No placeholder text like "test test test"
@@ -126,11 +160,12 @@ Seed data is part of the product.
 
 ---
 
-## 11. When in Doubt
+## 12. When in Doubt
 
 - Ask before implementing
 - Prefer simpler solutions
 - Protect the demo at all times
+
 ---
 
 ## 🎯 Core Principles
@@ -148,6 +183,7 @@ Seed data is part of the product.
 ### ✅ Always Use Strict Mode
 
 `tsconfig.json`:
+
 ```json
 {
   "compilerOptions": {
@@ -163,9 +199,10 @@ Seed data is part of the product.
 ### ✅ Import Shared Types
 
 **GOOD:**
+
 ```typescript
 // Frontend
-import type { User, LoginRequest, AuthResponse } from '@shared/types';
+import type { User, LoginRequest, AuthResponse } from "@shared/types";
 
 function LoginForm() {
   const handleSubmit = async (data: LoginRequest): Promise<void> => {
@@ -176,11 +213,13 @@ function LoginForm() {
 ```
 
 **BAD:**
+
 ```typescript
 // ❌ Don't do this
 function LoginForm() {
-  const handleSubmit = async (data: any) => {  // ❌ "any" is forbidden
-    const response = await api.auth.login(data);  // ❌ No type safety
+  const handleSubmit = async (data: any) => {
+    // ❌ "any" is forbidden
+    const response = await api.auth.login(data); // ❌ No type safety
   };
 }
 ```
@@ -191,6 +230,7 @@ When you need a new type that both frontend and backend will use:
 
 1. Create file: `shared/types/notification.types.ts`
 2. Define types:
+
 ```typescript
 export interface Notification {
   id: string;
@@ -204,10 +244,10 @@ export interface Notification {
 }
 
 export enum NotificationType {
-  TASK_ASSIGNED = 'task_assigned',
-  BLOCKER_RAISED = 'blocker_raised',
-  COMMENT_ADDED = 'comment_added',
-  SPRINT_STARTED = 'sprint_started',
+  TASK_ASSIGNED = "task_assigned",
+  BLOCKER_RAISED = "blocker_raised",
+  COMMENT_ADDED = "comment_added",
+  SPRINT_STARTED = "sprint_started",
 }
 
 export interface CreateNotificationRequest {
@@ -218,16 +258,20 @@ export interface CreateNotificationRequest {
   link?: string;
 }
 ```
+
 3. Export in `shared/types/index.ts`:
+
 ```typescript
-export * from './notification.types';
+export * from "./notification.types";
 ```
+
 4. Commit: `git commit -m "feat(shared): add notification types"`
 5. Notify team in Discord: "🎯 Added notification types in /shared/types"
 
 ### ✅ Type API Responses
 
 **GOOD:**
+
 ```typescript
 // shared/types/api.types.ts
 export interface ApiResponse<T> {
@@ -294,16 +338,17 @@ git push origin feat/auth-login
 
 ### Branch Naming Convention
 
-| Type | Example | Description |
-|------|---------|-------------|
-| `feat/` | `feat/auth-login` | New feature |
-| `fix/` | `fix/login-validation` | Bug fix |
-| `docs/` | `docs/api-contracts` | Documentation |
+| Type        | Example                 | Description      |
+| ----------- | ----------------------- | ---------------- |
+| `feat/`     | `feat/auth-login`       | New feature      |
+| `fix/`      | `fix/login-validation`  | Bug fix          |
+| `docs/`     | `docs/api-contracts`    | Documentation    |
 | `refactor/` | `refactor/auth-service` | Code refactoring |
-| `test/` | `test/auth-endpoints` | Tests |
-| `chore/` | `chore/update-deps` | Maintenance |
+| `test/`     | `test/auth-endpoints`   | Tests            |
+| `chore/`    | `chore/update-deps`     | Maintenance      |
 
 **Rules:**
+
 - Lowercase only
 - Use hyphens (not underscores or spaces)
 - Be descriptive
@@ -316,6 +361,7 @@ git push origin feat/auth-login
 ### Format: `<type>(<scope>): <description>`
 
 **Types:**
+
 - `feat` - New feature
 - `fix` - Bug fix
 - `docs` - Documentation
@@ -325,10 +371,12 @@ git push origin feat/auth-login
 - `chore` - Maintenance
 
 **Scope:**
+
 - Component/module name
 - Examples: `auth`, `button`, `api`, `database`
 
 **Description:**
+
 - Imperative mood (not past tense)
 - Lowercase
 - No period at end
@@ -360,12 +408,14 @@ git commit -m "feat: everything"         # ❌ Too broad
 ### Atomic Commits
 
 **Each commit should be:**
+
 - One logical change
 - Independently testable
 - Easily revertable
 - Descriptive enough to understand without reading code
 
 **Example of breaking work into atomic commits:**
+
 ```bash
 # ❌ BAD: One huge commit
 git commit -m "feat(auth): complete auth system"
@@ -381,6 +431,7 @@ git commit -m "test(auth): add unit tests for auth service"
 ```
 
 **Benefits:**
+
 - Easy to review (small PRs)
 - Easy to debug (bisect to find breaking commit)
 - Easy to rollback (revert specific change)
@@ -393,6 +444,7 @@ git commit -m "test(auth): add unit tests for auth service"
 ### Prettier (Auto-Format)
 
 `.prettierrc.json`:
+
 ```json
 {
   "semi": true,
@@ -406,6 +458,7 @@ git commit -m "test(auth): add unit tests for auth service"
 ```
 
 **VSCode settings** (`.vscode/settings.json`):
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -417,6 +470,7 @@ git commit -m "test(auth): add unit tests for auth service"
 ```
 
 **Command line:**
+
 ```bash
 # Format all files
 npm run format
@@ -426,6 +480,7 @@ npm run format:check
 ```
 
 **What Prettier handles:**
+
 - Semicolons
 - Quotes (single vs double)
 - Line length
@@ -433,6 +488,7 @@ npm run format:check
 - Trailing commas
 
 **What you still control:**
+
 - Naming
 - Logic
 - Architecture
@@ -442,68 +498,75 @@ npm run format:check
 ### Component Template
 
 `src/components/ui/Button/Button.tsx`:
+
 ```typescript
-import React from 'react';
-import type { ButtonProps } from './Button.types';
+import React from "react";
+import type { ButtonProps } from "./Button.types";
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   isLoading = false,
   disabled = false,
   onClick,
   ...props
 }) => {
-  const baseStyles = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2';
+  const baseStyles =
+    "font-medium rounded-lg transition-colors focus:outline-none focus:ring-2";
 
   const variantStyles = {
-    primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-300',
-    secondary: 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300 focus:ring-neutral-400',
-    danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-300',
+    primary:
+      "bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-300",
+    secondary:
+      "bg-neutral-200 text-neutral-900 hover:bg-neutral-300 focus:ring-neutral-400",
+    danger: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-300",
   };
 
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
   };
 
   return (
     <button
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
-        disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''
+        disabled || isLoading ? "opacity-50 cursor-not-allowed" : ""
       }`}
       disabled={disabled || isLoading}
       onClick={onClick}
       {...props}
     >
-      {isLoading ? 'Loading...' : children}
+      {isLoading ? "Loading..." : children}
     </button>
   );
 };
 ```
 
 `src/components/ui/Button/Button.types.ts`:
+
 ```typescript
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "danger";
+  size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
 ```
 
 `src/components/ui/Button/index.ts`:
+
 ```typescript
-export { Button } from './Button';
-export type { ButtonProps } from './Button.types';
+export { Button } from "./Button";
+export type { ButtonProps } from "./Button.types";
 ```
 
 ### Component Usage
 
 ```typescript
 // ✅ GOOD
-import { Button } from '@/components/ui/Button';
+import { Button } from "@/components/ui/Button";
 
 function LoginForm() {
   return (
@@ -515,11 +578,7 @@ function LoginForm() {
 
 // ❌ BAD - Don't create buttons inline everywhere
 function LoginForm() {
-  return (
-    <button className="bg-blue-500 text-white px-4 py-2">
-      Log In
-    </button>
-  );
+  return <button className="bg-blue-500 text-white px-4 py-2">Log In</button>;
 }
 ```
 
@@ -537,6 +596,7 @@ function LoginForm() {
 ### The Problem
 
 **Traditional flow (slower):**
+
 1. Backend implements endpoint
 2. Frontend waits...
 3. Backend finishes
@@ -544,6 +604,7 @@ function LoginForm() {
 5. Find bugs, iterate
 
 **Our flow (faster):**
+
 1. Daniela defines API contract (types + docs)
 2. Frontend uses mock data (parallel work)
 3. Backend implements real endpoint (parallel work)
@@ -554,10 +615,12 @@ function LoginForm() {
 #### 1. Daniela Defines API Contract (Monday Week 1)
 
 `docs/API_CONTRACTS.md`:
-```markdown
+
+````markdown
 ### POST /api/auth/register
 
 **Request:**
+
 ```json
 {
   "email": "alice@42.fr",
@@ -565,8 +628,10 @@ function LoginForm() {
   "name": "Alice Chen"
 }
 ```
+````
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -585,9 +650,11 @@ function LoginForm() {
 ```
 
 **Errors:**
+
 - `400` - Email already exists
 - `422` - Validation failed (password too weak, invalid email format)
-```
+
+````
 
 #### 2. Daniel Creates TypeScript Types
 
@@ -612,23 +679,24 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
-```
+````
 
 #### 3. Frontend Creates Mock API (Tuesday)
 
 `frontend/src/lib/mockApi.ts`:
-```typescript
-import type { RegisterRequest, AuthResponse } from '@shared/types';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+```typescript
+import type { RegisterRequest, AuthResponse } from "@shared/types";
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const mockAuthApi = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    await delay(1000);  // Simulate network delay
+    await delay(1000); // Simulate network delay
 
     // Simulate validation error
     if (data.password.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+      throw new Error("Password must be at least 8 characters");
     }
 
     // Return mock success
@@ -640,7 +708,7 @@ export const mockAuthApi = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      token: 'mock-jwt-token-' + Date.now(),
+      token: "mock-jwt-token-" + Date.now(),
     };
   },
 };
@@ -649,17 +717,17 @@ export const mockAuthApi = {
 #### 4. Frontend Uses Mock (Can Start Immediately)
 
 ```typescript
-import { mockAuthApi } from '@/lib/mockApi';
+import { mockAuthApi } from "@/lib/mockApi";
 
 function SignupForm() {
   const handleSubmit = async (data: RegisterRequest) => {
     try {
       const response = await mockAuthApi.register(data);
       // This works NOW, even though backend isn't ready
-      console.log('User:', response.user);
-      console.log('Token:', response.token);
+      console.log("User:", response.user);
+      console.log("Token:", response.token);
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
     }
   };
 
@@ -695,11 +763,11 @@ async register(@Body() dto: RegisterRequest): Promise<ApiResponse<AuthResponse>>
 
 ```typescript
 // Before (using mock)
-import { mockAuthApi } from '@/lib/mockApi';
+import { mockAuthApi } from "@/lib/mockApi";
 const response = await mockAuthApi.register(data);
 
 // After (using real backend) - SAME TYPES!
-import { authApi } from '@/lib/api';
+import { authApi } from "@/lib/api";
 const response = await authApi.register(data);
 ```
 
@@ -720,16 +788,15 @@ const response = await authApi.register(data);
 ```typescript
 // Don't do this
 const users = [
-  { email: 'test@test.com', name: 'Test User' },
-  { email: 'test2@test.com', name: 'Test Test' },
+  { email: "test@test.com", name: "Test User" },
+  { email: "test2@test.com", name: "Test Test" },
 ];
 
-const tasks = [
-  { title: 'test', description: 'test test test' },
-];
+const tasks = [{ title: "test", description: "test test test" }];
 ```
 
 **Problems:**
+
 - Hard to demo
 - Doesn't reveal UX issues
 - Evaluators see lazy work
@@ -740,73 +807,74 @@ const tasks = [
 // backend/prisma/seed.ts
 const users = [
   {
-    email: 'alice@42lisboa.com',
-    name: 'Alice Chen',
-    passwordHash: await bcrypt.hash('SecurePass123!', 10),
+    email: "alice@42lisboa.com",
+    name: "Alice Chen",
+    passwordHash: await bcrypt.hash("SecurePass123!", 10),
   },
   {
-    email: 'bob.smith@42lisboa.com',
-    name: 'Bob Smith',
-    passwordHash: await bcrypt.hash('DevPassword456!', 10),
+    email: "bob.smith@42lisboa.com",
+    name: "Bob Smith",
+    passwordHash: await bcrypt.hash("DevPassword456!", 10),
   },
   {
-    email: 'carol.davis@42lisboa.com',
-    name: 'Carol Davis',
-    passwordHash: await bcrypt.hash('CodeMaster789!', 10),
+    email: "carol.davis@42lisboa.com",
+    name: "Carol Davis",
+    passwordHash: await bcrypt.hash("CodeMaster789!", 10),
   },
 ];
 
 const organizations = [
   {
-    name: '42 Lisboa - Transcendence Team',
+    name: "42 Lisboa - Transcendence Team",
     owner: alice,
   },
   {
-    name: 'Remote Scrum Innovators',
+    name: "Remote Scrum Innovators",
     owner: bob,
   },
 ];
 
 const projects = [
   {
-    name: 'ft_transcendence MVP',
-    description: 'Building Async Scrum Hub for remote teams',
+    name: "ft_transcendence MVP",
+    description: "Building Async Scrum Hub for remote teams",
     organization: org1,
   },
   {
-    name: 'Design System Library',
-    description: 'Reusable React components with Tailwind',
+    name: "Design System Library",
+    description: "Reusable React components with Tailwind",
     organization: org1,
   },
 ];
 
 const tasks = [
   {
-    title: 'Setup Docker Compose with PostgreSQL',
-    description: 'Configure multi-container environment for local development',
-    status: 'done',
-    priority: 'high',
+    title: "Setup Docker Compose with PostgreSQL",
+    description: "Configure multi-container environment for local development",
+    status: "done",
+    priority: "high",
     assignee: bob,
   },
   {
-    title: 'Implement JWT authentication endpoints',
-    description: 'POST /auth/register and POST /auth/login with bcrypt password hashing',
-    status: 'doing',
-    priority: 'high',
+    title: "Implement JWT authentication endpoints",
+    description:
+      "POST /auth/register and POST /auth/login with bcrypt password hashing",
+    status: "doing",
+    priority: "high",
     assignee: alice,
   },
   {
-    title: 'Design sprint board Kanban layout',
-    description: 'Three columns (Todo/Doing/Done) with drag-and-drop support',
-    status: 'todo',
-    priority: 'medium',
+    title: "Design sprint board Kanban layout",
+    description: "Three columns (Todo/Doing/Done) with drag-and-drop support",
+    status: "todo",
+    priority: "medium",
     assignee: carol,
   },
   {
-    title: 'Research WebSocket libraries for real-time updates',
-    description: 'Compare Socket.io vs native WebSockets, document pros/cons',
-    status: 'todo',
-    priority: 'medium',
+    title: "Research WebSocket libraries for real-time updates",
+    description: "Compare Socket.io vs native WebSockets, document pros/cons",
+    status: "todo",
+    priority: "medium",
   },
 ];
 
@@ -814,27 +882,31 @@ const standups = [
   {
     user: alice,
     date: today,
-    yesterday: 'Setup Prisma schema, created initial migrations, added seed data',
-    today: 'Implement auth endpoints, write unit tests, integrate with frontend',
+    yesterday:
+      "Setup Prisma schema, created initial migrations, added seed data",
+    today:
+      "Implement auth endpoints, write unit tests, integrate with frontend",
     blockers: null,
   },
   {
     user: bob,
     date: today,
-    yesterday: 'Configured Docker Compose, added PostgreSQL service with health checks',
-    today: 'Setup Nginx reverse proxy for HTTPS, test SSL certificates',
-    blockers: 'Need clarification on password reset flow - does it require email verification?',
+    yesterday:
+      "Configured Docker Compose, added PostgreSQL service with health checks",
+    today: "Setup Nginx reverse proxy for HTTPS, test SSL certificates",
+    blockers:
+      "Need clarification on password reset flow - does it require email verification?",
   },
 ];
 
 const blockers = [
   {
-    title: 'HTTPS not working in Docker container',
+    title: "HTTPS not working in Docker container",
     description: `Getting "ERR_SSL_PROTOCOL_ERROR" when accessing https://localhost:3001.
     Self-signed certificate might not be trusted by browser. Need to investigate mkcert setup.`,
     raisedBy: bob,
     assignedTo: alice,
-    status: 'open',
+    status: "open",
   },
 ];
 ```
@@ -863,25 +935,31 @@ const blockers = [
 ### How to Request Review
 
 1. **Open PR with clear description:**
+
 ```markdown
 ## What
+
 Implement POST /api/auth/register endpoint
 
 ## Why
+
 Users need to create accounts
 
 ## How
+
 - Added User model to Prisma schema
 - Created AuthService with bcrypt password hashing
 - Implemented validation using class-validator
 - Added unit tests (80% coverage)
 
 ## Testing
+
 - [x] Unit tests pass
 - [x] Manual testing with Postman
 - [x] Tested validation errors
 
 ## Screenshots
+
 (If UI changes, add screenshots)
 ```
 
@@ -906,19 +984,23 @@ Users need to create accounts
 #### Feedback Style:
 
 ✅ **GOOD (Constructive):**
-```markdown
+
+````markdown
 Consider using `useMemo` here to avoid recalculating on every render:
+
 ```typescript
 const filteredTasks = useMemo(
-  () => tasks.filter(t => t.status === 'done'),
+  () => tasks.filter((t) => t.status === "done"),
   [tasks]
 );
 ```
+````
 
 Why did you choose bcrypt over argon2? Just curious about the tradeoff.
 
 Looks good overall! Just two minor suggestions above.
-```
+
+````
 
 ❌ **BAD (Not constructive):**
 ```markdown
@@ -927,7 +1009,7 @@ This is wrong.
 You should know this already.
 
 Did you even test this?
-```
+````
 
 #### Response Times:
 
@@ -985,6 +1067,7 @@ docker-compose logs postgres
 ### Daily Async Standups (Discord)
 
 Post by 12 AM your timezone:
+
 ```
 📅 Jan 15, 2024 - Miguel
 
@@ -1022,13 +1105,13 @@ Mood: 🚀 (excited to see login working!)
 
 ### Response Time Expectations
 
-| Type | Response Time | Example |
-|------|---------------|---------|
-| Urgent (production down) | 1 hour | "Database not connecting" |
-| Blocker (can't work) | 3 hours | "Need API contract to continue" |
-| Question (not blocking) | 24 hours | "How should we handle errors?" |
-| PR review | 24 hours | "Please review my login PR" |
-| General discussion | 48 hours | "Should we use Redux or Context?" |
+| Type                     | Response Time | Example                           |
+| ------------------------ | ------------- | --------------------------------- |
+| Urgent (production down) | 1 hour        | "Database not connecting"         |
+| Blocker (can't work)     | 3 hours       | "Need API contract to continue"   |
+| Question (not blocking)  | 24 hours      | "How should we handle errors?"    |
+| PR review                | 24 hours      | "Please review my login PR"       |
+| General discussion       | 48 hours      | "Should we use Redux or Context?" |
 
 ---
 
@@ -1037,6 +1120,7 @@ Mood: 🚀 (excited to see login working!)
 Before considering ANY task "done":
 
 ### Code Quality:
+
 - [ ] TypeScript types are correct (no `any`)
 - [ ] Code is formatted (Prettier auto-format)
 - [ ] ESLint shows no errors
@@ -1046,6 +1130,7 @@ Before considering ANY task "done":
 - [ ] Edge cases considered
 
 ### Testing:
+
 - [ ] Works in development environment
 - [ ] Works in Docker environment
 - [ ] Manual testing performed
@@ -1053,6 +1138,7 @@ Before considering ANY task "done":
 - [ ] Integration tested with other features
 
 ### Documentation:
+
 - [ ] Code is self-documenting (clear variable names)
 - [ ] Complex logic has comments
 - [ ] API changes documented
@@ -1060,6 +1146,7 @@ Before considering ANY task "done":
 - [ ] Types added to /shared if needed
 
 ### Git:
+
 - [ ] Atomic commits (one logical change per commit)
 - [ ] Clear commit messages (feat/fix/docs format)
 - [ ] Pushed to correct branch
@@ -1067,6 +1154,7 @@ Before considering ANY task "done":
 - [ ] Assigned correct reviewer
 
 ### User Experience:
+
 - [ ] Loading states shown
 - [ ] Error messages are helpful
 - [ ] Success feedback provided
