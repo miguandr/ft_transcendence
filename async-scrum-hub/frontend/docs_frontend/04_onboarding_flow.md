@@ -294,14 +294,14 @@ When implementing guards:
 ```typescript
 function ProtectedRoute({ children }) {
   const { isAuthenticated, scrum_role, organization_id } = useAuth();
-  
+
   if (!isAuthenticated) return <Navigate to="/login" />;
   if (!scrum_role) return <Navigate to="/role-selection" />;
   if (!organization_id) {
     if (scrum_role === "developer") return <Navigate to="/team-join" />;
     return <Navigate to="/team-creation" />;
   }
-  
+
   return children;
 }
 ```
@@ -316,3 +316,5 @@ function ProtectedRoute({ children }) {
 4. **Guards run in order**: Auth → Role → Team
 5. **Current app uses path-based layout**, not state-based guards (temporary)
 6. **Next step**: Add auth state management and implement guards
+
+
