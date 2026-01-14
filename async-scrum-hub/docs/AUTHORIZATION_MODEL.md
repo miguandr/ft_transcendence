@@ -1,0 +1,180 @@
+# Authorization Model – Async Scrum Hub
+
+## Purpose
+
+This document defines **how authorization is evaluated and enforced**
+in the Async Scrum Hub backend.
+
+It does **not** redefine roles, permissions, or endpoints.
+Those are defined in:
+
+- API_CONTRACTS.md
+- PERMISSIONS_MATRIX.md
+
+This document focuses exclusively on:
+- authorization flow
+- contextual resolution
+- invariant rules
+- backend enforcement guidelines
+
+---
+
+## 1. Authorization Scope
+
+Authorization is always evaluated within a **specific context**:
+
+- Organization
+- Resource belonging to an organization
+
+There is **no global authorization scope**.
+All permissions are organization-scoped.
+
+---
+
+## 2. Authorization Prerequisites
+
+Authorization is evaluated **only after**:
+
+1. The request is authenticated (valid JWT)
+2. The target resource exists
+3. The organization context is resolved
+
+Failure at any step aborts authorization.
+
+---
+
+## 3. Context Resolution
+
+For every protected request, the backend must resolve:
+
+- `user_id` from JWT
+- `organization_id` from:
+  - request path
+  - resource ownership
+- user membership in that organization
+
+If the user is not a member of the organization,
+authorization immediately fails.
+
+---
+
+## 4. Role Resolution
+
+Each user has **two independent roles** within an organization:
+
+- **Organization role** (admin | member)
+- **Scrum role** (scrum_master | product_owner | developer)
+
+Roles are **never inferred**.
+They must be explicitly retrieved from persistence.
+
+---
+
+## 5. Organization Admin Override
+
+An organization admin:
+
+- bypasses ownership and assignment checks
+- can perform any action within the organization scope
+
+This override applies **only for authorization**  
+and does not imply scrum role semantics.
+
+---
+
+## 6. Ownership Rule
+
+For resources that define ownership:
+
+- The creator becomes the **owner**
+- Ownership is immutable
+- Ownership grants full modification rights
+
+Ownership is identified via the `created_by` field.
+
+---
+
+## 7. Assignment Rule
+
+Some resources support assignment:
+
+- Assignment is optional
+- Only valid assignees are allowed (validated at API level)
+- When present, the assignee has modification rights equivalent to the owner
+
+Assignment is identified via the `assignee_id` field.
+
+---
+
+## 8. Authorization Decision Order
+
+Authorization checks must be evaluated in the following order:
+
+1. Organization admin override
+2. Role-based permission
+3. Ownership permission
+4. Assignment permission
+
+The first successful check grants access.
+
+If no rule grants access, authorization fails.
+
+---
+
+## 9. Immutable Authorization Invariants
+
+The following rules must **never** be violated:
+
+- An organization must always have at least one admin
+- Users cannot remove themselves from an organization
+- Blockers cannot be deleted, only resolved
+- Standups are limited to one per user per day
+- Past standups cannot be edited
+
+These rules are enforced independently of roles.
+
+---
+
+## 10. Authorization Failure Semantics
+
+- Missing authentication → `401 Unauthorized`
+- Failed authorization → `403 Forbidden`
+- Invalid state transitions → `400 Bad Request`
+
+Authorization failures must never leak resource existence
+or internal role information.
+
+---
+
+## 11. Backend Enforcement Guidelines
+
+Authorization must be enforced:
+
+- exclusively in the backend
+- before any state mutation
+- consistently across all routes
+
+Frontend authorization checks are considered advisory only
+and must never be trusted.
+
+---
+
+## 12. Testing Expectations
+
+Every authorization rule must be covered by tests:
+
+- role-based access
+- ownership checks
+- assignment checks
+- admin overrides
+- invariant violations
+
+Authorization tests are mandatory for every new endpoint.
+
+---
+
+## Related Documents
+
+- API_CONTRACTS.md – endpoint definitions
+- PERMISSIONS_MATRIX.md – permission tables
+- ARCHITECTURE.md – system architecture
