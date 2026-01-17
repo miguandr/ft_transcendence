@@ -149,7 +149,9 @@ async-scrum-hub/
 │ │ │
 │ │ ├── api/                               ✨ Daniela
 │ │ │ ├── router.py # include all routers
-│ │ │ └── deps.py # auth / permissions
+│ │ │ └── deps.py
+│ │ │ └── permissions.py                   (IN PROGRESS)
+│ │ │ └── authorize.py                     (IN PROGRESS)
 │ │ │
 │ │ ├── auth/                              ✨ Daniela
 │ │ │ ├── routes.py                        use *FastAPI*
@@ -196,8 +198,10 @@ async-scrum-hub/
 │ └── events.md
 │
 ├── docs/
-│ ├── ARCHITECTURE.md                      ✨ Daniela
-│ ├── API_CONTRACTS.md                     ✨ Daniela
+│ ├── ARCHITECTURE.md                      ✨ Daniela (done)
+│ ├── API_CONTRACTS.md                     ✨ Daniela (done)
+│ ├── AUTHORIZATION_MODEL.md               ✨ Daniela (done)
+│ ├── PERMISSIONS_MATRIX.md                ✨ Daniela (done)
 │ ├── USER_STORIES.md                      🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
 │ └── DEVELOPMENT_STANDARDS.md             ✨ Daniela (owner) + 🤜🤛 Team (input)
 │
