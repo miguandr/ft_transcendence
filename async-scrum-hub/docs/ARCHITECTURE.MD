@@ -149,9 +149,9 @@ async-scrum-hub/
 │ │ │
 │ │ ├── api/                               ✨ Daniela
 │ │ │ ├── router.py # include all routers
-│ │ │ └── deps.py
-│ │ │ └── permissions.py                   (IN PROGRESS)
-│ │ │ └── authorize.py                     (IN PROGRESS)
+│ │ │ └── deps.py                          (IN PROGRESS)
+│ │ │ └── permissions.py                   (done)
+│ │ │ └── authorize.py                     (done)
 │ │ │
 │ │ ├── auth/                              ✨ Daniela
 │ │ │ ├── routes.py                        use *FastAPI*

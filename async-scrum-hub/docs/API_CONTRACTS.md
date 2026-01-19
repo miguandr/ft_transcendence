@@ -305,7 +305,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "name": "string",
-  "scrum_role": "Scrum_Master | Product_owner"
+  "scrum_role": "scrum_master | product_owner"
 }
 ```
 
@@ -544,7 +544,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "join_code": "SCR-493",
-  "scrum_role": "Scrum_Master | Product_owner | Developer"
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -553,7 +553,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 {
   "organization_id": "uuid",
   "org_role": "member | admin", //first one is admin. then all other member that joins are just members
-  "scrum_role": "Scrum_Master | Product_owner | Developer"
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
