@@ -58,7 +58,26 @@ authorization immediately fails.
 
 ---
 
-## 4. Role Resolution
+### 4. Organization Identifier Resolution
+
+The backend uses two different identifiers for the same concept,
+depending on context:
+
+- **`org_id`** is used in request paths as a route parameter  
+  (e.g. `/organizations/{org_id}/members`)
+- **`organization_id`** is used inside resource payloads and models  
+  (e.g. tickets, tasks, blockers)
+
+Authorization logic must follow this rule:
+
+- If `org_id` is present in the request path, it defines the organization context.
+- Otherwise, the organization context must be resolved from `resource.organization_id`.
+
+This distinction is intentional and must be handled consistently.
+
+---
+
+## 5. Role Resolution
 
 Each user has **two independent roles** within an organization:
 
@@ -70,7 +89,7 @@ They must be explicitly retrieved from persistence.
 
 ---
 
-## 5. Organization Admin Override
+## 6. Organization Admin Override
 
 An organization admin:
 
@@ -82,7 +101,7 @@ and does not imply scrum role semantics.
 
 ---
 
-## 6. Ownership Rule
+## 7. Ownership Rule
 
 For resources that define ownership:
 
@@ -94,7 +113,7 @@ Ownership is identified via the `created_by` field.
 
 ---
 
-## 7. Assignment Rule
+## 8. Assignment Rule
 
 Some resources support assignment:
 
@@ -110,7 +129,7 @@ Assignment is identified via the `assignee_id` field.
 
 ---
 
-## 8. Authorization Decision Order
+## 9. Authorization Decision Order
 
 Authorization checks must be evaluated in the following order:
 
@@ -124,7 +143,7 @@ If no rule grants access, authorization fails.
 
 ---
 
-## 9. Immutable Authorization Invariants
+## 10. Immutable Authorization Invariants
 
 The following rules must **never** be violated:
 
@@ -138,7 +157,7 @@ These rules are enforced independently of roles.
 
 ---
 
-## 10. Authorization Failure Semantics
+## 11. Authorization Failure Semantics
 
 - Missing authentication → `401 Unauthorized`
 - Failed authorization → `403 Forbidden`
@@ -149,7 +168,7 @@ or internal role information.
 
 ---
 
-## 11. Backend Enforcement Guidelines
+## 12. Backend Enforcement Guidelines
 
 Authorization must be enforced:
 
@@ -162,7 +181,7 @@ and must never be trusted.
 
 ---
 
-## 12. Testing Expectations
+## 13. Testing Expectations
 
 Every authorization rule must be covered by tests:
 
