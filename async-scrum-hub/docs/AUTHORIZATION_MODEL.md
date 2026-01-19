@@ -100,7 +100,11 @@ Some resources support assignment:
 
 - Assignment is optional
 - Only valid assignees are allowed (validated at API level)
-- When present, the assignee has modification rights equivalent to the owner
+- When present, the assignee may gain additional permissions depending on the **resource type** and **action**.
+- Assignee permissions are **not automatically equivalent** to owner permissions.
+- The exact assignee capabilities are defined in PERMISSIONS_MATRIX.md (per resource/action).
+
+> Example: For Blockers, assignees may resolve but may not update the blocker content unless explicitly allowed.
 
 Assignment is identified via the `assignee_id` field.
 
@@ -111,12 +115,11 @@ Assignment is identified via the `assignee_id` field.
 Authorization checks must be evaluated in the following order:
 
 1. Organization admin override
-2. Role-based permission
-3. Ownership permission
-4. Assignment permission
+2. Role-based permission (if applicable to the action)
+3. Ownership permission (if the action supports owner privileges)
+4. Assignment permission (if the action supports assignee privileges)
 
-The first successful check grants access.
-
+The first rule that grants the action authorizes the request.
 If no rule grants access, authorization fails.
 
 ---

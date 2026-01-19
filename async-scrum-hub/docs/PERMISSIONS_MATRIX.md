@@ -71,7 +71,7 @@
 | **Create task**      | ✅                 | ✅            | ✅             | ✅                     
 | **List tasks**       | ✅                 | ✅            | ✅             | ✅                     
 | **Get task details** | ✅                 | ✅            | ✅             | ✅                     
-| **Get task details** | ✅                 | ✅            | ✅             | ✅ (owner or assignee)  
+| **Update task**      | ✅                 | ✅            | ✅             | ✅ (owner or assignee)  
 | **Delete task**      | ✅                 | ✅            | ✅             | ✅ (owner only)        
 
 **Endpoints:**
@@ -170,7 +170,7 @@
 ### 👤 Assignee
 - The `assignee_id` field can only be assigned to users with the **Developer** role.
 - Assignees have **edit permissions equivalent to owners**
-- Applies to:: **Tickets, Tasks, Blockers**
+- Applies to:: **Tasks, Blockers**
 
 ---
 
