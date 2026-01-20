@@ -24,7 +24,7 @@ Raises:
 """
 
 from typing import Optional
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from .permissions import PERMISSIONS
 import logging
 logger = logging.getLogger("authz")
