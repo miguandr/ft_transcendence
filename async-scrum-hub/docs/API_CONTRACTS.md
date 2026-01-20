@@ -27,7 +27,7 @@ Authorization: Bearer <jwt_token>
 ## Roles & Permissions
 
 This API uses a role-based access control (RBAC) model.
-Permissions are scoped to specific resources (organization, project, task, etc.).
+Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 ---
 
@@ -37,44 +37,43 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - admin
 	- Full control over the organization.
 	- Can manage members and their roles.
-	- Can create and manage projects within the organization.
+	- Can create and manage tickets within the organization.
 - member
 	- Can access organizations they belong to.
-	- Can participate in projects they are assigned to.
+	- Can participate in tickets and tasks within the organization.
 
-### Scrum Roles (Project-Level)
+### Scrum Roles (Organization-Level)
 - scrum_master
 	- Can create and manage tickets.
-	- Can manage project timeline and planning.
+	- Can manage organization timeline and planning.
 - product_owner
 	- Manages product backlog and priorities.
 - developer
 	- Works on tasks and submits standups.
 
-**Note:** Scrum roles are assigned per-project and affect ticket management permissions.
+**Note:** Scrum roles are assigned per-organization and affect ticket management permissions.
 
 ### Role Inheritance
 
-- Organization admins are implicitly project admins for all projects within their organization.
-- Project roles do not grant organization-level permissions.
-- Permissions are always evaluated at the most specific scope.
+- Organization admins have full control over all resources within their organization.
+- Scrum roles (Scrum Master, Product Owner, Developer) are assigned at the organization level.
+- Permissions are always evaluated at the organization scope.
 
 ### Ownership Rules
 
 - The creator of a resource (task, standup, blocker) becomes its owner.
-- Resource owners can update or delete their own resources, even if they are not project admins.
-- Project admins can manage all resources within their project.
+- Resource owners can update or delete their own resources.
+- Organization admins can manage all resources within their organization.
 - The assigned user has full edit permissions over the resource (task or blocker), equivalent to the resource owner.
 - Assigned user permissions only apply when the resource has an assigned user.
 - If `assignee_id` is null, permissions related to the assigned user are ignored.
 
 ### Membership Management Rules
 
-- Membership in organizations and projects is managed exclusively by organization or project admins.
-- Users cannot remove themselves from organizations or projects.
+- Membership in organizations is managed exclusively by organization admins.
+- Users cannot remove themselves from organizations.
 - An organization must always have at least one organization admin.
-- A project must always have at least one project admin.
-- The last remaining admin of an organization or project cannot be removed or demoted.
+- The last remaining admin of an organization cannot be removed or demoted.
 
 ---
 
@@ -103,9 +102,9 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "email": "string (valid email)",
-  "password": "string (min 8 chars)",
-  "name": "string (display name)"
+	"name": "string (display name)",
+	"email": "string (valid email)",
+	"password": "string (min 8 chars)"
 }
 ```
 
@@ -289,13 +288,24 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any authenticated user (creator becomes organization admin).
+- The authenticated user
+
+**Rules:**
+- The user creating the organization becomes the organization admin.
+- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
+- Only one `scrum_master` and one `product_owner` can exist per organization.
+- Scrum roles are assigned only during organization creation and when joining an organization.
+- Once both scrum roles are assigned, new members can only join as `developer`.
+
+- The `join_code` is generated server-side when the organization is created.
+- The join code does not expire.
+- The join code consists of 3 letters followed by 3 numbers.
 
 **Request Body:**
 ```json
 {
   "name": "string",
-  "scrum_role": "scrum_master | product_owner | developer"
+  "scrum_role": "scrum_master | product_owner"
 }
 ```
 
@@ -332,42 +342,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-### 3.2 Get User’s Organizations
-
-**Endpoint:** `GET /organizations`
-
-**Description:** Returns all organizations the authenticated user belongs to.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Any organization member.
-
-**Success Response:** `200 OK`
-```json
-[
-	{
-		"id": "uuid",
-		"name": "string",
-		"created_by": "uuid (owner)"
-	}
-]
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
----
-
-### 3.3 Get Organization Members
+### 3.2 Get Organization Members
 
 **Endpoint:** `GET /organizations/{org_id}/members`
 
@@ -425,11 +400,11 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-### 3.4 Add Member to Organization
+### 3.3 Invite Member to Organization
 
 **Endpoint:** `POST /organizations/{org_id}/members`
 
-**Description:** Adds a user to the organization.
+**Description:** Send an email to a user with the join_code to join the organization.
 
 **Authentication:** Required (JWT)
 
@@ -442,17 +417,14 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 **Request Body:**
 ```json
 {
-  "email": "string",
-  "org_role": "admin | member"
+  "email": "string"
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "id": "uuid",
-  "email": "string",
-  "org_role": "admin | member"
+  "email": "string"
 }
 ```
 
@@ -509,7 +481,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-### 3.5 Remove Member from Organization
+### 3.4 Remove Member from Organization
 
 **Endpoint:** `DELETE /organizations/{org_id}/members/{user_id}`
 
@@ -559,82 +531,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
-## 3.6 Update Organization Member Role ##
-
-**Endpoint:** `PATCH /organizations/{org_id}/members/{user_id}`
-
-**Description:** Updates the role of an existing organization member.
-
-**notes:** Reminder: an organization must always have at least one organization admin.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-
-**URL Parameters:**
-- `org_id` – UUID of the organization
-- `user_id` – UUID of the member
-
-**Request Body:**
-```json
-{
-  "org_role": "admin | member"
-}
-```
-
-**Success Response:** `200 OK`
-```json
-{
-  "user_id": "uuid",
-  "org_role": "admin | member"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid role
-```json
-{
-  "error": {
-	"code": "INVALID_ROLE",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Organization or user not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization or user not found"
-  }
-}
-```
----
-
-### 3.7 Join Organization by Code
+### 3.5 Join Organization by Code
 
 **Endpoint:** `POST /organizations/join`
 
@@ -655,7 +552,8 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```json
 {
   "organization_id": "uuid",
-  "org_role": "member"
+  "org_role": "member | admin", //first one is admin. then all other member that joins are just members
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -682,337 +580,18 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 ```
 ---
 
+## 4. Tickets
 
-## 4. Projects
+### 4.1 Create Tickets
 
-### 4.1 Create Project
+**Endpoint:** `POST /organizations/{org_id}/tickets`
 
-**Endpoint:** `POST /organizations/{org_id}/projects`
+**Description:** Creates a new ticket within an organization.
 
-**Description:** Creates a new Project. The creator automatically becomes the admin.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin.
-
-**URL Parameters:**
-- `org_id` - UUID of the organization
-
-**Request Body:**
-```json
-{
-  "name": "string"
-}
-```
-
-**Success Response:** `201 Created`
-```json
-{
-  "id": "uuid",
-  "name": "string",
-  "created_by": "uuid (owner)"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Organization not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
-}
-```
----
-
-### 4.2 Get Organization's Projects
-
-**Endpoint:** `GET /organizations/{org_id}/projects`
-
-**Description:** Returns all projects to a specific organization the authenticated user belongs to.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Any organization member.
-
-**URL Parameters:**
-- `org_id` - UUID of the organization
-
-**Success Response:** `200 OK`
-```json
-[
-	{
-		"id": "uuid",
-		"name": "string",
-		"created_by": "uuid (owner)"
-	}
-]
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Organization not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
-}
-```
----
-
-### 4.3 Get Project Members
-
-**Endpoint:** `GET /projects/{proj_id}/members`
-
-**Description:** Returns the list of members assigned to a specific project. If admin, they can see the 'delete' option next each member name.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Any organization member.
-
-**URL Parameters:**
-- `proj_id` - UUID of the project
-
-**Success Response:** `200 OK`
-```json
-[
-	{
-		"id": "uuid",
-		"name": "string",
-		"org_role": "admin | member",
-		"scrum_role": "scrum_master | product_owner | developer"
-	}
-]
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Project not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project not found"
-  }
-}
-```
----
-### 4.4 Add Member to Project
-
-**Endpoint:** `POST /projects/{proj_id}/members`
-
-**Description:** Adds a user to the project.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-
-**URL Parameters:**
-- `proj_id` - UUID of the project
-
-**Request Body:**
-```json
-{
-  "email": "string"
-}
-```
-
-**Success Response:** `201 Created`
-```json
-{
-  "id": "uuid",
-  "email": "string"
-}
-```
-
-**Error Responses:**
-
-`400 Bad Request` - Invalid input
-```json
-{
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
-}
-```
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Project not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project not found"
-  }
-}
-```
-
-`409 Conflict` - User already a member
-```json
-{
-  "error": {
-	"code": "ALREADY_MEMBER",
-	"message": "User is already a member of this project"
-  }
-}
-```
----
-
-### 4.5 Remove Member from Project
-
-**Endpoint:** `DELETE /projects/{proj_id}/members/{user_id}`
-
-**Description:** Removes a user from the project.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Organization admin
-
-**URL Parameters:**
-- `proj_id` - UUID of the project
-- `user_id` - UUID of the user to remove
-
-**Success Response:** `204 No Content`
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Project or user not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Project or user not found"
-  }
-}
-```
----
-
-## 5. Tickets
-
-### 5.1 Create Tickets
-
-**Endpoint:** `POST /projects/{proj_id}/tickets`
-
-**Description:** Creates a new ticket within a project.
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to tickets.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
 
 **Authentication:** Required (JWT)
 
@@ -1021,7 +600,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 - Product Owner
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
 
 **Request Body:**
 ```json
@@ -1029,7 +608,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
   "title": "string",
   "description": "string | null",
   "priority": "low | medium | high",
-  "assignee_id": "uuid | null"
+  "assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
 
@@ -1043,7 +622,7 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
   "priority": "low | medium | high",
   "created_by": "uuid",
   "assignee_id": "uuid | null",
-  "project_id": "uuid",
+  "organization_id": "uuid",
   "created_at": "iso",
   "updated_at": "iso"
 }
@@ -1061,6 +640,16 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to tickets"
+  }
+}
+```
+
 `401 Unauthorized` - Authentication required
 ```json
 {
@@ -1081,34 +670,44 @@ Permissions are scoped to specific resources (organization, project, task, etc.)
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Organization not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Organization not found"
   }
 }
 ```
 ---
 
-### 5.2 List Tickets (Board)
+### 4.2 List Tickets (Board)
 
-**Endpoint:** `GET /projects/{proj_id}/tickets?status=todo|in_progress|done`
+**Endpoint:** `GET /organizations/{org_id}/tickets`
 
-**Description:** Returns tickets for a project, optionally filtered by status.
-Used to render the project board.
+**Description:** Returns tickets for an organization, optionally filtered by status.
+Used to render the organization board.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
 
 **Query Parameters:**
 - status – todo | in_progress | done
+- priority - low | medium | high
+
+**Examples:**
+- `GET /organizations/{org_id}/tickets`
+- `GET /organizations/{org_id}/tickets?status=todo`
+- `GET /organizations/{org_id}/tickets?status=in_progress`
+- `GET /organizations/{org_id}/tickets?status=done`
+- `GET /organizations/{org_id}/tickets?priority=low`
+- `GET /organizations/{org_id}/tickets?priority=medium`
+- `GET /organizations/{org_id}/tickets?priority=high`
 
 **Success Response:** `200 OK`
 ```json
@@ -1158,7 +757,7 @@ Used to render the project board.
 ```
 ---
 
-### 5.3 Get Ticket Details
+### 4.3 Get Ticket Details
 
 **Endpoint:** `GET /tickets/{ticket_id}`
 
@@ -1167,7 +766,7 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
@@ -1182,7 +781,7 @@ Used to render the project board.
 	"priority": "low | medium | high",
 	"created_by": "uuid",
 	"assignee_id": "uuid | null",
-	"project_id": "uuid",
+	"organization_id": "uuid",
 	"created_at": "iso",
 	"updated_at": "iso"
 }
@@ -1221,18 +820,22 @@ Used to render the project board.
 ```
 ---
 
-### 5.4 Update Ticket
+### 4.4 Update Ticket
 
 **Endpoint:** `PATCH /tickets/{ticket_id}`
 
 **Description:** Updates ticket fields such as title, description, priority, assignee, or status.
 
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to tickets.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
+
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Ticket owner (creator)
-- Assigned user
+- Scrum Master
+- Product Owner
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
@@ -1244,7 +847,7 @@ Used to render the project board.
 	"description": "string | null (optional)",
 	"priority": "low | medium | high (optional)",
 	"status": "todo | in_progress | done (optional)",
-	"assignee_id": "uuid | null (optional)"
+	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
 
@@ -1258,7 +861,7 @@ Used to render the project board.
 	"priority": "low | medium | high",
 	"created_by": "uuid",
 	"assignee_id": "uuid | null",
-	"project_id": "uuid",
+	"organization_id": "uuid",
 	"created_at": "iso",
 	"updated_at": "iso"
 }
@@ -1276,6 +879,16 @@ Used to render the project board.
 }
 ```
 
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to tickets"
+  }
+}
+```
+
 `401 Unauthorized` - Authentication required
 ```json
 {
@@ -1307,7 +920,7 @@ Used to render the project board.
 ```
 ---
 
-### 5.5 Move Ticket (Drag & Drop)
+### 4.5 Move Ticket (Drag & Drop)
 
 **Endpoint:** `PATCH /tickets/{ticket_id}/move`
 
@@ -1316,9 +929,8 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Ticket owner (creator)
-- Assigned user
+- Scrum Master
+- Product Owner
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
@@ -1382,7 +994,7 @@ Used to render the project board.
 ```
 ---
 
-### 5.6 Delete Ticket
+### 4.6 Delete Ticket
 
 **Endpoint:** `DELETE /tickets/{ticket_id}`
 
@@ -1391,8 +1003,8 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Ticket owner (creator)
+- Scrum Master
+- Product Owner
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
@@ -1432,18 +1044,23 @@ Used to render the project board.
 ```
 ---
 
-## 6. Tasks
+## 5. Tasks
 
-### 6.1 Create Task
+### 5.1 Create Task
 
 **Endpoint:** `POST /tickets/{ticket_id}/tasks`
 
 **Description:** Creates a new task within a ticket.
 
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to tasks.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
+
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member (creator becomes the task owner).
+- Any organization member (creator becomes the task owner).
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
@@ -1453,7 +1070,7 @@ Used to render the project board.
 {
   "title": "string",
   "description": "string | null",
-  "assignee_id": "uuid | null"
+  "assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
 
@@ -1478,6 +1095,16 @@ Used to render the project board.
   "error": {
 	"code": "INVALID_INPUT",
 	"message": "validation error message"
+  }
+}
+```
+
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to tasks"
   }
 }
 ```
@@ -1513,22 +1140,27 @@ Used to render the project board.
 ```
 ---
 
-### 6.2 List Tasks
+### 5.2 List Tasks
 
-**Endpoint:** `GET /tickets/{ticket_id}/tasks`
+**Endpoint:** `GET /tickets/{ticket_id}/tasks"`
 
 **Description:** Returns all tasks belonging to a specific ticket.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
 - `ticket_id` - UUID of the ticket
 
 **Query Parameters:**
 - status – in_process | completed
+
+**Examples:**
+- `GET /tickets/{ticket_id}/tasks`
+- `GET /tickets/{ticket_id}/tasks?status=in_process`
+- `GET /tickets/{ticket_id}/tasks?status=completed`
 
 **Success Response:** `200 OK`
 ```json
@@ -1574,7 +1206,7 @@ Used to render the project board.
 ```
 ---
 
-### 6.3 Get Task Details
+### 5.3 Get Task Details
 
 **Endpoint:** `GET /tasks/{task_id}`
 
@@ -1583,7 +1215,7 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
 - `task_id` - UUID of the task
@@ -1635,18 +1267,23 @@ Used to render the project board.
 ```
 ---
 
-### 6.4 Update Task
+### 5.4 Update Task
 
 **Endpoint:** `PATCH /tasks/{task_id}`
 
 **Description:** Updates task information.
 
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to tasks.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
+
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Assigned user
-- Task owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Task owner/assignee)
 
 **URL Parameters:**
 - `task_id` - UUID of the task
@@ -1657,7 +1294,7 @@ Used to render the project board.
 	"title": "string (optional)",
 	"description": "string (optional)",
 	"status": "in_process | completed (optional)",
-	"assignee_id": "uuid | null (optional)"
+	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
 
@@ -1682,6 +1319,16 @@ Used to render the project board.
   "error": {
 	"code": "INVALID_INPUT",
 	"message": "validation error message"
+  }
+}
+```
+
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to tasks"
   }
 }
 ```
@@ -1717,7 +1364,7 @@ Used to render the project board.
 ```
 ---
 
-### 6.5 Delete Task
+### 5.5 Delete Task
 
 **Endpoint:** `DELETE /tasks/{task_id}`
 
@@ -1726,8 +1373,9 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Task owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Task owner)
 
 **URL Parameters:**
 - `task_id` - UUID of the task
@@ -1767,32 +1415,35 @@ Used to render the project board.
 ```
 ---
 
-## 7. Standups
+## 6. Standups
 
-### 7.1 Create Standup
+### 6.1 Create Standup
 
-**Endpoint:** `POST /projects/{proj_id}/standups`
+**Endpoint:** `POST /organizations/{org_id}/standups`
 
-**Description:** Creates a new standup within a project.
+**Description:** Creates a new standup within an organization.
 
 **Rules:**
-- A user can create only one standup per day per project.
+- A user can create only one standup per day per organization.
 - If a standup already exists for today, creation is rejected.
+
+**Automatic Fields:**
+- **`yesterday`**: Automatically populated by the backend by retrieving the `today` content from the user's previous standup (created the day before). If no standup exists from the previous day, `yesterday` will be `null`.
+- **`blocker_ids`**: Automatically populated with an array of active (status: `open`) blockers associated with the organization. This allows the standup overview to display current blockers without manual input.
+- Users only need to provide the `today` field in the request body.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member (creator becomes the standup owner).
+- Any organization member (creator becomes the standup owner).
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
 
 **Request Body:**
 ```json
 {
-	"today": "string",
-	"yesterday": "string | null",
-	"blockers": "string | null"
+	"today": "string"
 }
 ```
 
@@ -1803,7 +1454,7 @@ Used to render the project board.
 	"created_at": "timestamp (today)",
 	"today": "string",
 	"yesterday": "string | null",
-	"blockers": "string",
+	"blocker_ids": ["uuid"],
 	"created_by": "uuid (owner)"
 }
 ```
@@ -1840,12 +1491,12 @@ Used to render the project board.
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Organization not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Organization not found"
   }
 }
 ```
@@ -1861,27 +1512,23 @@ Used to render the project board.
 ```
 ---
 
-### 7.2 List Project Standups
+### 6.2 List Organization Standups
 
-**Endpoint:** `GET /projects/{proj_id}/standups`
+**Endpoint:** `GET /organizations/{org_id}/standups`
 
-**Description:** Returns standup entries for a project (usually filtered by date).
-
-**Notes:**
-- `preview` is a derived field generated from the first line of the standup today's input.
-- This field is not persisted and is only included in list responses.
+**Description:** Returns standup entries for an organization (usually filtered by date).
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **Notes:**
-- This endpoint returns all standups created within the project.
-- Standups are visible to all project members to provide team-wide visibility.
+- This endpoint returns all standups created within the organization.
+- Standups are visible to all organization members to provide team-wide visibility.
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
 
 **Success Response:** `200 OK`
 ```json
@@ -1889,8 +1536,9 @@ Used to render the project board.
 	{
 		"id": "uuid",
 		"created_at": "timestamp(today)",
-		"preview": "derived field (first line of today input)",
-		"blockers": "string",
+		"today": "string",
+		"yesterday": "string | null",
+		"blocker_ids": ["uuid"],
 		"created_by": "uuid (owner)"
 	}
 ]
@@ -1918,17 +1566,17 @@ Used to render the project board.
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Organization not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Organization not found"
   }
 }
 ```
 ---
-### 7.3 Get Standup Details
+### 6.3 Get Standup Details
 
 **Endpoint:** `GET /standups/{standup_id}`
 
@@ -1937,7 +1585,7 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
 - `standup_id` - UUID of the standup
@@ -1949,8 +1597,8 @@ Used to render the project board.
 	"created_at": "timestamp (today)",
 	"today": "string",
 	"yesterday": "string | null",
-	"blockers": "string",
-  	"created_by": "uuid (owner)"
+	"blocker_ids": ["uuid"],
+	"created_by": "uuid (owner)"
 }
 ```
 
@@ -1987,21 +1635,26 @@ Used to render the project board.
 ```
 ---
 
-### 7.4 Update Standup
+### 6.4 Update Standup
 
 **Endpoint:** `PATCH /standups/{standup_id}`
 
-**Description:** Updates standups information (today, yesterday, blockers).
+**Description:** Updates standup information. Only the `today` field can be updated by the user.
 
 **Rules:**
 - A standup can only be edited on the same day it was created.
 - Editing past standups is not allowed.
 
+**Notes:**
+- The `yesterday` and `blocker_ids` fields are automatically managed by the backend and cannot be manually updated.
+- Users can only update the `today` field.
+
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Standup owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Standup owner)
 
 **URL Parameters:**
 - `standup_id` - UUID of the Standup
@@ -2009,9 +1662,7 @@ Used to render the project board.
 **Request Body:**
 ```json
 {
-	"today": "string (optional)",
-	"yesterday": "string  | null (optional)",
-	"blockers": "string | null (optional)"
+	"today": "string (optional)"
 }
 ```
 
@@ -2080,7 +1731,7 @@ Used to render the project board.
 ```
 ---
 
-### 7.5 Delete Standup
+### 6.5 Delete Standup
 
 **Endpoint:** `DELETE /standups/{standup_id}`
 
@@ -2089,8 +1740,9 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Standup owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Standup owner)
 
 **URL Parameters:**
 - `standup_id` - UUID of the standup
@@ -2130,28 +1782,33 @@ Used to render the project board.
 ```
 ---
 
-## 8. Blockers
+## 7. Blockers
 
-### 8.1 Create Blocker
+### 7.1 Create Blocker
 
-**Endpoint:** `POST /projects/{proj_id}/blockers`
+**Endpoint:** `POST /organizations/{org_id}/blockers`
 
-**Description:** Creates a new blocker within a project.
+**Description:** Creates a new blocker within an organization.
+
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to blockers.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member (creator becomes the blocker owner).
+- Any organization member (creator becomes the blocker owner).
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
 
 **Request Body:**
 ```json
 {
 	"description": "string",
 	"task_id": "uuid | null",
-	"assignee_id": "uuid | null"
+	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
 
@@ -2181,6 +1838,16 @@ Used to render the project board.
 }
 ```
 
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to blockers"
+  }
+}
+```
+
 `401 Unauthorized` - Authentication required
 ```json
 {
@@ -2201,34 +1868,38 @@ Used to render the project board.
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Organization not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Organization not found"
   }
 }
 ```
 ---
 
-### 8.2 List Project Blockers
+### 7.2 List Organization Blockers
 
-**Endpoint:** `GET /projects/{proj_id}/blockers`
+**Endpoint:** `GET /organizations/{org_id}/blockers`
 
-**Description:** Returns all blockers for a project.
-
-**Notes:**
-- `preview` is a derived field generated from the first line of the blocker description.
-- This field is not persisted and is only included in list responses.
+**Description:** Returns all blockers for an organization.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
-- `proj_id` - UUID of the project
+- `org_id` - UUID of the organization
+
+**Query Parameters:**
+- status – `open | resolved`
+
+**Examples:**
+- `GET /organizations/{org_id}/blockers`
+- `GET /organizations/{org_id}/blockers?status=open`
+- `GET /organizations/{org_id}/blockers?status=resolved`
 
 **Success Response:** `200 OK`
 ```json
@@ -2236,7 +1907,7 @@ Used to render the project board.
 	{
 		"id": "uuid",
 		"created_by": "uuid (owner)",
-		"preview": "derived field (first line of description input)",
+		"description": "string",
 		"status": "open | resolved",
 		"assignee_id": "uuid | null"
 	}
@@ -2265,18 +1936,18 @@ Used to render the project board.
 }
 ```
 
-`404 Not Found` - Project not found
+`404 Not Found` - Organization not found
 ```json
 {
   "error": {
 	"code": "NOT_FOUND",
-	"message": "Project not found"
+	"message": "Organization not found"
   }
 }
 ```
 ---
 
-### 8.3 Get Blocker Details
+### 7.3 Get Blocker Details
 
 **Endpoint:** `GET /blockers/{blocker_id}`
 
@@ -2285,7 +1956,7 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Any project member.
+- Any organization member.
 
 **URL Parameters:**
 - `blocker_id` - UUID of the blocker
@@ -2338,17 +2009,23 @@ Used to render the project board.
 ```
 ---
 
-### 8.4 Update Blocker
+### 7.4 Update Blocker
 
 **Endpoint:** `PATCH /blockers/{blocker_id}`
 
 **Description:** Updates blocker information.
 
+**Assignment Rules:**
+- The `assignee_id` field can only be assigned to users with the **Developer** role.
+- Scrum Masters and Product Owners cannot be assigned to blockers.
+- If `assignee_id` is provided, the backend must validate that the user has the Developer role.
+
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Blocker owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Task owner)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker
@@ -2358,7 +2035,7 @@ Used to render the project board.
 {
 	"description": "string (optional)",
 	"task_id": "uuid | null (optional)",
-	"assignee_id": "uuid | null (optional)"
+	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
 
@@ -2384,6 +2061,16 @@ Used to render the project board.
   "error": {
 	"code": "INVALID_INPUT",
 	"message": "validation error message"
+  }
+}
+```
+
+`400 Bad Request` - Invalid assignee role
+```json
+{
+  "error": {
+	"code": "INVALID_ASSIGNEE",
+	"message": "Only users with Developer role can be assigned to blockers"
   }
 }
 ```
@@ -2419,7 +2106,7 @@ Used to render the project board.
 ```
 ---
 
-### 8.5 Resolve Blocker
+### 7.5 Resolve Blocker
 
 **Endpoint:** `PATCH /blockers/{blocker_id}/resolve`
 
@@ -2431,9 +2118,9 @@ Used to render the project board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Organization admin
-- Assigned user
-- Blocker owner (creator)
+- Scrum Master
+- Product Owner
+- Developer (Task owner/assignee)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker
@@ -2482,3 +2169,5 @@ Used to render the project board.
 }
 ```
 ---
+
+**End of Document**

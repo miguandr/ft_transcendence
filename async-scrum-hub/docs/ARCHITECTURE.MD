@@ -75,7 +75,7 @@ Real-time functionality is intentionally limited to events that require immediat
 
 The application uses a relational database to model its domain entities and relationships.
 
-Core entities such as users, organizations, projects, sprints, and tasks are represented using normalized tables to ensure data consistency and integrity. The relational model allows the system to enforce constraints and represent complex relationships clearly.
+Core entities such as users, organizations, tickets, and tasks are represented using normalized tables to ensure data consistency and integrity. The relational model allows the system to enforce constraints and represent complex relationships clearly.
 
 ## 10. Configuration and Environments
 
@@ -112,8 +112,7 @@ async-scrum-hub/
 │ │ ├── features/
 │ │ │ ├── auth/
 │ │ │ ├── organizations/
-│ │ │ ├── projects/
-│ │ │ ├── sprints/
+│ │ │ ├── tickets/
 │ │ │ ├── tasks/
 │ │ │ ├── standups/
 │ │ │ └── blockers/
@@ -143,15 +142,16 @@ async-scrum-hub/
 │ │ │ ├── user.py
 │ │ │ ├── organization.py
 │ │ │ ├── membership.py
-│ │ │ ├── project.py
-│ │ │ ├── sprint.py
+│ │ │ ├── ticket.py
 │ │ │ ├── task.py
 │ │ │ ├── standup.py
 │ │ │ └── blocker.py
 │ │ │
 │ │ ├── api/                               ✨ Daniela
 │ │ │ ├── router.py # include all routers
-│ │ │ └── deps.py # auth / permissions
+│ │ │ └── deps.py                          (IN PROGRESS)
+│ │ │ └── permissions.py                   (done)
+│ │ │ └── authorize.py                     (done)
 │ │ │
 │ │ ├── auth/                              ✨ Daniela
 │ │ │ ├── routes.py                        use *FastAPI*
@@ -164,11 +164,6 @@ async-scrum-hub/
 │ │ │ └── service.py
 │ │ │
 │ │ ├── organizations/                     🚀 Freddy
-│ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
-│ │ │ ├── schemas.py
-│ │ │ └── service.py
-│ │ │
-│ │ ├── projects/                          🚀 Freddy (dont do it now. we are thinking about have one project by default)
 │ │ │ ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │ │ │ ├── schemas.py
 │ │ │ └── service.py
@@ -203,8 +198,10 @@ async-scrum-hub/
 │ └── events.md
 │
 ├── docs/
-│ ├── ARCHITECTURE.md                      ✨ Daniela
-│ ├── API_CONTRACTS.md                     ✨ Daniela
+│ ├── ARCHITECTURE.md                      ✨ Daniela (done)
+│ ├── API_CONTRACTS.md                     ✨ Daniela (done)
+│ ├── AUTHORIZATION_MODEL.md               ✨ Daniela (done)
+│ ├── PERMISSIONS_MATRIX.md                ✨ Daniela (done)
 │ ├── USER_STORIES.md                      🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
 │ └── DEVELOPMENT_STANDARDS.md             ✨ Daniela (owner) + 🤜🤛 Team (input)
 │
