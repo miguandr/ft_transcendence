@@ -147,7 +147,7 @@ async-scrum-hub/
 │ │ │ ├── standup.py
 │ │ │ └── blocker.py
 │ │ │
-│ │ ├── api/                               ✨ Daniela
+│ │ ├── api/                               ✨ Daniela 
 │ │ │ ├── router.py # include all routers
 │ │ │ └── deps.py                          (IN PROGRESS)
 │ │ │ └── permissions.py                   (done)
