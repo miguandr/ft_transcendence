@@ -37,6 +37,7 @@ const mockOrganizations = [
 	}
 ];
 
+
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
 	email: string;
@@ -89,6 +90,20 @@ interface JoinOrgRequest {
 interface JoinOrgResponse {
 	organization_id: string;
 	org_role: "admin" | "member";
+}
+
+interface OrganizationInfo {
+	id: string;
+	name: string;
+	join_code: string;
+	members_count: number;
+}
+
+interface OrganizationMember {
+	id: string;
+	name: string;
+	org_role: "admin" | "member";
+	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 }
 
 
@@ -149,6 +164,7 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 }
 
 
+
 export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse>
 {
 	await delay(500);
@@ -171,6 +187,41 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 		organization_id: matchingOrg.id,
 		org_role: "member"
 	}
+}
+
+export async function checkJoinCode(join_code: string): Promise<OrganizationInfo>
+{
+	await delay(300);
+
+	if (!join_code.trim()) {
+		createApiError("INVALID_CODE", "Team code is required");
+	}
+
+	const org = mockOrganizations.find(o => o.join_code === join_code);
+	if (!org) {
+		createApiError("CODE_NOT_FOUND", "Team code not found");
+	}
+
+	return {
+		id: org.id,
+		name: org.name,
+		join_code: org.join_code,
+		members_count: 1 // mock value for now
+	};
+}
+
+export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]>
+{
+	await delay(300);
+
+	return [
+		{
+			id: "user_0",
+			name: "creator",
+			org_role: "admin",
+			scrum_role: "scrum_master"  // ← SM is taken!
+		}
+	];
 }
 
 // Replace mock login with real fetch when backend ready!!!:

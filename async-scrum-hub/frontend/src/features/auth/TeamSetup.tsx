@@ -1,63 +1,79 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
-import { createOrganization } from "../../services/api";
-import { joinOrganization } from "../../services/api";
+import { createOrganization, joinOrganization, checkJoinCode, getOrganizationMembers } from "../../services/api";
 import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
 type TeamMode = "join" | "create";
-type Role = "scrum-master" | "product-owner" | "developer" | null;
+type Role = "scrum_master" | "product_owner" | "developer" | null;
 
 export function TeamSetup() {
 	const navigate = useNavigate();
 
-	// Team state
+	// ===== STATE DECLARATIONS =====
 	const [teamMode, setTeamMode] = useState<TeamMode>("join");
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
+	const [orgId, setOrgId] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
-
-	// Role state
+	const [takenRoles, setTakenRoles] = useState<(string[])>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
 
-	// Mock data for taken roles (in real app, this would come from API)
-	const takenRoles = ; // i need to fetch the team and check the roles in it
 
+	// ===== FUNCTION DEFINITIONS =====
+	//When user enters a team code and clicks "Check code"
 	const handleCheckCode = async (e: React.FormEvent) => {
-		e.preventDefault();
+		e.preventDefault(); // Prevents page refresh when form submits
 
-		// Mock validation - in real app, this would call an API
-		if (teamCode.trim()) {
-		setConfirmedTeam({
-			name: "Product Development Team",
-			members: 5,
-		});
-		setTeamConfirmed(true);
+		//Validation: checks if team-code is empty
+		if (!teamCode.trim()) {
+			setErrors({ team: "Team code is required "});
+			return;
 		}
 
-		// Start loading
-		setIsLoading(true);
-		// Clear previous errors
-		setErrors({});
+		//Call API
+		setIsLoading(true); // Show loading spinner
+		setErrors({}); // Clear previous errors
 
 		try {
-			//Call API
-			const response = await joinOrganization({ teamCode, selectedRole });
+			// Step 1: Validate code and get org info
+			const response = await checkJoinCode(teamCode);
 
-			console.log("Team joinned successfuly!", response);
+			//Step 2: Get members to see what roles are free/taken
+			const members = await getOrganizationMembers(response.id);
+
+			//Step 3: Extract taken roles
+			const taken = members
+				.filter(m => m.scrum_role  === "scrum_master" || m.scrum_role === "product_owner") // m(each member of the array) =>(return). Keep members with roles assigned
+				.map(m => m.scrum_role) as string[]; //tells TypeScript "trust me, these arent null".
+
+			//Step 4: Update state
+			setOrgId(response.id); // Save org ID for later (when joining)
+			setTakenRoles(taken);
+			setConfirmedTeam({
+				name: response.name,
+				members: response.members_count
+			});
 			setTeamConfirmed(true);
-			navigate("/");
+
 		} catch (error: any) {
 			// Handle API errors
-			console.error("Team not joinned", error);
+			if (error?.error?.code === "CODE_NOT_FOUND") {
+				setErrors({ team: "Invalid team code" });
+			} else if (error?.error?.message) {
+				setErrors({ team: error.error.message });
+			} else {
+				setErrors({ team: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
 		}
-
-
 	};
 
+	//TODO
 	const handleCreateTeam = () => {
 		// Mock team creation - in real app, this would call an API
 		if (teamName.trim()) {
@@ -71,6 +87,7 @@ export function TeamSetup() {
 		}
 	};
 
+	//TODO
 	const handleCopyCode = () => {
 		if (confirmedTeam?.code) {
 		navigator.clipboard.writeText(confirmedTeam.code);
@@ -79,21 +96,24 @@ export function TeamSetup() {
 		}
 	};
 
+	//TODO
 	const handleContinue = () => {
 		if (teamConfirmed && selectedRole) {
 		navigate("/");
 		}
 	};
 
+
+	// ===== DATA DEFINITIONS =====
 	const roles = [
 		{
-		id: "scrum-master",
+		id: "scrum_master",
 		title: "Scrum Master",
 		icon: Target,
 		description: "Facilitate tickets and remove blockers",
 		},
 		{
-		id: "product-owner",
+		id: "product_owner",
 		title: "Product Owner",
 		icon: Users,
 		description: "Prioritize backlog and define vision",
@@ -106,6 +126,7 @@ export function TeamSetup() {
 		},
 	];
 
+	// ===== RETURN = THE UI =====
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center p-8">
 		<div className="max-w-2xl w-full">
@@ -275,7 +296,7 @@ export function TeamSetup() {
 				) : (
 				<div className="grid grid-cols-3 gap-4">
 					{roles.map((role) => {
-					const isTaken = takenRoles.includes(role.id) && role.id !== "developer";
+					const isTaken = takenRoles.includes(role.id);
 					const isSelected = selectedRole === role.id;
 					const Icon = role.icon;
 
