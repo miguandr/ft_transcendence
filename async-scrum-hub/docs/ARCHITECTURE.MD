@@ -136,19 +136,19 @@ async-scrum-hub/
 │   │   │   ├── settings.py
 │   │   │   └── security.py # JWT, hashing
 │   │   │
-│   │   ├── database/                          ✨ Daniela use *FastAPI* and *SQLAlchemy*
-│   │   │   ├── __init__.py
-│   │   │   ├── session.py                      (IN PROGRESS)
-│   │   │   ├── base.py                         (IN PROGRESS)
+│   │   ├── database/                          *FastAPI* and *SQLAlchemy*
+│   │   │   ├── __init__.py                     ✨ Daniela
+│   │   │   ├── session.py                      ✨ Daniela (done ✅)
+│   │   │   ├── base.py                         ✨ Daniela (done ✅)
 │   │   │   └── models/
-│   │   │       ├── __init__.py                 (IN PROGRESS)
-│   │   │       ├── user.py                     (IN PROGRESS)
-│   │   │       ├── organization.py
-│   │   │       ├── membership.py
-│   │   │       ├── ticket.py
-│   │   │       ├── task.py
-│   │   │       ├── standup.py
-│   │   │       └── blocker.py
+│   │   │       ├── __init__.py                 ✨ Daniela (IN PROGRESS)
+│   │   │       ├── user.py                     ✨ Daniela (done ✅)
+│   │   │       ├── organization.py             ✨ Daniela (done ✅)
+│   │   │       ├── membership.py               ✨ Daniela (IN PROGRESS)
+│   │   │       ├── ticket.py                   🚀 Freddy
+│   │   │       ├── task.py                     🚀 Freddy
+│   │   │       ├── standup.py                  🌊 Malu 
+│   │   │       └── blocker.py                  🌊 Malu 
 │   │   │
 │   │   ├── alembic.ini                         ✨ Daniela (created automaticaly by Alembic)
 │   │   │
@@ -160,8 +160,8 @@ async-scrum-hub/
 │   │   ├── api/                               ✨ Daniela
 │   │   │   ├── router.py # include all routers
 │   │   │   ├── deps.py                          (IN PROGRESS)
-│   │   │   ├── permissions.py                   (done)
-│   │   │   └── authorize.py                     (done)
+│   │   │   ├── permissions.py                   (done ✅)
+│   │   │   └── authorize.py                     (done ✅)
 │   │   │
 │   │   ├── auth/                              ✨ Daniela
 │   │   │   ├── routes.py                        use *FastAPI*
@@ -208,14 +208,16 @@ async-scrum-hub/
 │   └── events.md
 │
 ├── docs/
-│   ├── ARCHITECTURE.md                      ✨ Daniela (done)
-│   ├── API_CONTRACTS.md                     ✨ Daniela (done)
-│   ├── AUTHORIZATION_MODEL.md               ✨ Daniela (done)
-│   ├── PERMISSIONS_MATRIX.md                ✨ Daniela (done)
+│   ├── ARCHITECTURE.md                      ✨ Daniela (done ✅)
+│   ├── API_CONTRACTS.md                     ✨ Daniela (done ✅)
+│   ├── AUTHORIZATION_MODEL.md               ✨ Daniela (done ✅)
+│   ├── PERMISSIONS_MATRIX.md                ✨ Daniela (done ✅)
 │   ├── USER_STORIES.md                      🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
 │   └── DEVELOPMENT_STANDARDS.md             ✨ Daniela (owner) + 🤜🤛 Team (input)
 │
 ├── docker-compose.yml                     🌊 Malu
+├── .env
+├── .env.example
 ├── .gitignore                             ✨ Daniela
 └── README.md                              ✨ Daniela (structure) + 🎨 Miguel (usage / screenshots)
 ```
