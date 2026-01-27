@@ -137,25 +137,18 @@ async-scrum-hub/
 │   │   │   └── security.py # JWT, hashing
 │   │   │
 │   │   ├── database/                          *FastAPI* and *SQLAlchemy*
-│   │   │   ├── __init__.py                     ✨ Daniela
+│   │   │   ├── __init__.py                     ✨ Daniela (done ✅)
 │   │   │   ├── session.py                      ✨ Daniela (done ✅)
 │   │   │   ├── base.py                         ✨ Daniela (done ✅)
 │   │   │   └── models/
-│   │   │       ├── __init__.py                 ✨ Daniela (IN PROGRESS)
+│   │   │       ├── __init__.py                 ✨ Daniela (done ✅)
 │   │   │       ├── user.py                     ✨ Daniela (done ✅)
 │   │   │       ├── organization.py             ✨ Daniela (done ✅)
-│   │   │       ├── membership.py               ✨ Daniela (IN PROGRESS)
+│   │   │       ├── membership.py               ✨ Daniela (done ✅)
 │   │   │       ├── ticket.py                   🚀 Freddy
 │   │   │       ├── task.py                     🚀 Freddy
 │   │   │       ├── standup.py                  🌊 Malu 
 │   │   │       └── blocker.py                  🌊 Malu 
-│   │   │
-│   │   ├── alembic.ini                         ✨ Daniela (created automaticaly by Alembic)
-│   │   │
-│   │   ├── migrations/                         ✨ Daniela (created automaticaly by Alembic)
-│   │   │   ├── env.py  
-│   │   │   ├── script.py.mako
-│   │   │   └── versions/
 │   │   │
 │   │   ├── api/                               ✨ Daniela
 │   │   │   ├── router.py # include all routers
@@ -198,6 +191,11 @@ async-scrum-hub/
 │   │   ├── schemas.py
 │   │   └── service.py
 │   │
+│   ├── alembic.ini                         ✨ Daniela (created automaticaly by Alembic ✅)
+│   ├── migrations/                         ✨ Daniela (created automaticaly by Alembic ✅)
+│   │   ├── env.py  
+│   │   ├── script.py.mako
+│   │   └── versions/
 │   ├── tests/                               ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
 │   ├── requirements.txt                     ✨ Daniela
 │   ├── Dockerfile                           ✨ Daniela
