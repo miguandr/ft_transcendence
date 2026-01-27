@@ -19,9 +19,8 @@ class Organization(Base):
 		nullable=False
 	)  
 
-	#es unico? se genera en csda request?
 	join_code: Mapped[str] = mapped_column(
-		String,
+		String(10),
 		unique=True,
 		index=True,
 		nullable=False
