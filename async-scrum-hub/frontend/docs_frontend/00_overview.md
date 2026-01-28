@@ -66,7 +66,7 @@ All screens currently use **static data** or **local component state**. No real 
 
 ### Next Steps for Backend Integration
 1. ✅ **Login API** - Mock service created (`services/api.ts`) matching `API_CONTRACTS.md`
-2. 🔲 **Complete Auth Flow** - Wire SignUp, RoleSelection, TeamCreation
+2. 🔲 **Complete Auth Flow** - Wire SignUp, TeamSetup
 3. 🔲 **Dashboard API** - Fetch real sprint stats and updates
 4. 🔲 **Sprint Board API** - CRUD operations for tasks with WebSocket updates
 5. 🔲 **Standups API** - Submit and retrieve standup entries
@@ -109,11 +109,11 @@ See `02_folder_structure.md` for complete directory tree.
 - [x] All 14 screens designed and rendered
 - [x] Mock API service with JWT simulation
 - [x] Login form with validation and error handling
+- [x] Extracting reusable components (Button, Card, Avatar)
 
 ### In Progress 🔄
 - [ ] SignUp form with validation
 - [ ] Backend API integration (replacing mocks)
-- [ ] Extracting reusable components (Button, Card, Avatar)
 
 ### Planned 📋
 - [ ] Unit tests (Vitest + Testing Library)
@@ -147,6 +147,9 @@ npm install
 # Start dev server (http://localhost:5173)
 npm run dev
 
+# Tests
+npm test
+
 # Build for production
 npm run build
 
@@ -157,7 +160,9 @@ npm run preview
 npm run lint
 ```
 
+
 **Test Credentials** (mock API):
-- Email: `miguel@example.com`
-- Password: `password123`
+Login:
+	- Email: `miguel@example.com`
+	- Password: `password123`
 

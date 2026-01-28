@@ -17,7 +17,7 @@ export function Login() {
 		// Validate email
 		if (!email) {
 			newErrors.email = "Email is required";
-		} else if (!/\S+@\S+\.\S+/.test(email)) {
+		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			// checks for basic email format (text@text.text)
 			newErrors.email = "Email is invalid";
 		}
@@ -95,7 +95,7 @@ export function Login() {
 					<div>
 						<Label htmlFor="email">Email</Label>
 						<Input
-							type="email"
+							type="text"
 							id="email"
 							placeholder="you@company.com"
 							value={email}
@@ -119,22 +119,31 @@ export function Login() {
 						{errors.password && <ErrorText>{errors.password}</ErrorText>}
 					</div>
 
-					<Button type="submit" variant="primary" isLoading={isLoading} className="w-full">
+					<Button
+						type="submit"
+						variant="primary"
+						isLoading={isLoading}
+						className="w-full"
+					>
 						Log in
 					</Button>
 
 					<div className="text-center space-y-2">
-					<Button
-						type="button"
-						variant="text"
-						onClick={() => navigate("/welcome")}
-						className="w-full text-gray-500 hover:text-gray-700"
-					>
-						Forgot password?
-					</Button>
+						<Button
+							type="button"
+							variant="text"
+							onClick={() => navigate("/welcome")}
+							className="w-full text-gray-500 hover:text-gray-700"
+						>
+							Forgot password?
+						</Button>
 						<p className="text-sm text-gray-500">
 							Don't have an account?{" "}
-							<Button type="button" variant="text" onClick={() => navigate("/signup")}>
+							<Button
+								type="button"
+								variant="text"
+								onClick={() => navigate("/signup")}
+							>
 								Sign up
 							</Button>
 						</p>
