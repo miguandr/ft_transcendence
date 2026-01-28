@@ -26,16 +26,18 @@
 
 ## 1. Organizations
 
-| Action                                | Organization Admin   | Scrum Master    | Product Owner   | Developer      
-|---------------------------------------|----------------------|-----------------|-----------------|----------------
-| **Create organization**               | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | (any user)                     
-| **View organization members**         | ✅                   | ✅             | ✅              | ✅ 
+| Action                                | Organization Admin   | Scrum Master  | Product Owner   | Developer
+|---------------------------------------|----------------------|---------------|-----------------|----------------
+| **Create organization**               | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
+| **Select Role**                       | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
+| **View organization members**         | ✅                   | ✅             | ✅              | ✅
 | **Invite member to organization**     | ✅                   | ❌             | ❌              | ❌
 | **Remove member from organization**   | ✅                   | ❌             | ❌              | ❌
-| **Join organization by join_code**    | ✅                   | ✅             | ✅              | ✅
+| **Join organization by join_code**    | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
 
 **Endpoints:**
 - `POST /organizations` - Create organization
+- `PATCH /organizations/{org_id}` - Select Role
 - `GET /organizations/{org_id}/members` - Get organization members
 - `POST /organizations/{org_id}/members` - Invite member by email
 - `DELETE /organizations/{org_id}/members/{user_id}` - Remove member
@@ -45,14 +47,14 @@
 
 ## 2. Tickets
 
-| Action                     | Organization Admin | Scrum Master | Product Owner  | Developer  
-|----------------------------|--------------------|--------------|----------------|------------
-| **Create ticket**          | ✅                 | ✅          | ✅             | ❌   
-| **List tickets**           | ✅                 | ✅          | ✅             | ✅   
-| **Get ticket details**     | ✅                 | ✅          | ✅             | ✅ 
-| **Update ticket**          | ✅                 | ✅          | ✅             | ❌ 
-| **Move ticket (status)**   | ✅                 | ✅          | ✅             | ❌ 
-| **Delete ticket**          | ✅                 | ✅          | ✅             | ❌ 
+| Action                     | Organization Admin | Scrum Master         | Product Owner  | Developer
+|----------------------------|--------------------|----------------------|----------------|------------
+| **Create ticket**          | ✅                 | ✅                   | ✅             | ❌
+| **List tickets**           | ✅                 | ✅        		   | ✅             | ✅
+| **Get ticket details**     | ✅                 | ✅   			       | ✅             | ✅
+| **Update ticket**          | ✅                 | ✅ (except priority) | ✅             | ❌
+| **Move ticket (status)**   | ✅                 | ✅       			   | ✅             | ❌
+| **Delete ticket**          | ✅                 | ✅                   | ✅             | ❌
 
 **Endpoints:**
 - `POST /organizations/{org_id}/tickets` - Create ticket
@@ -66,13 +68,13 @@
 
 ## 3. Tasks
 
-| Action               | Organization Admin | Scrum Master   | Product Owner  | Developer                           
+| Action               | Organization Admin | Scrum Master   | Product Owner  | Developer
 |----------------------|--------------------|----------------|----------------|------------------------
-| **Create task**      | ✅                 | ✅            | ✅             | ✅                     
-| **List tasks**       | ✅                 | ✅            | ✅             | ✅                     
-| **Get task details** | ✅                 | ✅            | ✅             | ✅                     
-| **Update task**      | ✅                 | ✅            | ✅             | ✅ (owner or assignee)  
-| **Delete task**      | ✅                 | ✅            | ✅             | ✅ (owner only)        
+| **Create task**      | ✅                 | ✅            | ✅               | ✅
+| **List tasks**       | ✅                 | ✅            | ✅               | ✅
+| **Get task details** | ✅                 | ✅            | ✅               | ✅
+| **Update task**      | ✅                 | ✅            | ✅               | ✅ (owner or assignee)
+| **Delete task**      | ✅                 | ✅            | ✅               | ✅ (owner only)
 
 **Endpoints:**
 - `POST /tickets/{ticket_id}/tasks` - Create task
@@ -85,13 +87,13 @@
 
 ## 4. Standups
 
-| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer       
+| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
 |--------------------------|--------------------|-----------------|----------------|------------------
-| **Create standup**       | ✅                 | ✅             | ✅             | ✅             
-| **List standups**        | ✅                 | ✅             | ✅             | ✅             
-| **Get standup details**  | ✅                 | ✅             | ✅             | ✅             
-| **Update standup**       | ✅                 | ✅             | ✅             | ✅ (owner only) 
-| **Delete standup**       | ✅                 | ✅             | ✅             | ✅ (owner only)
+| **Create standup**       | ✅                 | ✅               | ✅             | ✅
+| **List standups**        | ✅                 | ✅               | ✅             | ✅
+| **Get standup details**  | ✅                 | ✅               | ✅             | ✅
+| **Update standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
+| **Delete standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/standups` - Create standup
@@ -104,13 +106,13 @@
 
 ## 5. Blockers
 
-| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer       
+| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
 |--------------------------|--------------------|-----------------|----------------|------------------------
-| **Create blocker**       | ✅                 | ✅             | ✅             | ✅             
-| **List blocker**         | ✅                 | ✅             | ✅             | ✅             
-| **Get blocker details**  | ✅                 | ✅             | ✅             | ✅             
-| **Update blocker**       | ✅                 | ✅             | ✅             | ✅ (owner only) 
-| **Resolve blocker**      | ✅                 | ✅             | ✅             | ✅ (owner or assignee)
+| **Create blocker**       | ✅                 | ✅               | ✅             | ✅
+| **List blocker**         | ✅                 | ✅               | ✅             | ✅
+| **Get blocker details**  | ✅                 | ✅               | ✅             | ✅
+| **Update blocker**       | ✅                 | ✅               | ✅             | ✅ (owner only)
+| **Resolve blocker**      | ✅                 | ✅               | ✅             | ✅ (owner or assignee)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/blockers` - Create blocker
@@ -124,11 +126,11 @@
 ## 6. Users
 
 | Action	                | All Roles	 | Notes
-|-------------------------|------------|-----------
-| **Register**            | ✅         | Public endpoint
-| **Login**               | ✅         | Public endpoint
-| **Get own profile**     | ✅         | Authenticated user only
-| **Update own profile**  | ✅         | Authenticated user only
+|-------------------------|--------------|-----------
+| **Register**            | ✅           | Public endpoint
+| **Login**               | ✅           | Public endpoint
+| **Get own profile**     | ✅           | Authenticated user only
+| **Update own profile**  | ✅           | Authenticated user only
 
 **Endpoints:**
 - `POST /auth/register` - Register
@@ -141,7 +143,7 @@
 ## Special Permission Legend
 
 ### 🔑 Organization Admin
-- **Full control** over all organization resourcesn
+- **Full control** over all organization resources
 - Bypasses ownership and assignment restrictions
 - Puede editar/eliminar cualquier recurso aunque no sea owner ni assignee
 - Can manage members and roles
@@ -194,14 +196,14 @@
 ### 🎫 Tickets
 - Default status: todo
 - Status transitions are bidirectional.
-- `todo` → `in_progress` → `done`
+- `todo` → `in_progress` → `completed`
 - Deleting a ticket cascades to tasks and blockers
 
 ---
 
 ### ✅ Tasks
 - Default status: `in_process`
-- Only one transition: `in_process` → `completed`
+- Only one transition: `in_progress` → `completed`
 - Must belong to a ticket
 
 ---
@@ -228,7 +230,7 @@ Organization
  │   └─ Task
  ├─ Standup
  └─ Blocker
-     └─ (optional) Task
+	 └─ (optional) Task
 ```
 
 ---
@@ -243,11 +245,11 @@ Organization
 
 ## Common Error Codes
 
-| HTTP Status | Error Code                 | Description 
+| HTTP Status | Error Code                 | Description
 |-------------|----------------------------|------------------------------------
 | 400         | `INVALID_INPUT`            | Invalid request data
 | 400         | `INVALID_ROLE`             | Invalid role
-| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role 
+| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role
 | 401         | `UNAUTHORIZED`             | Missing or invalid JWT
 | 401         | `INVALID_CREDENTIALS`      | Invalid credentials
 | 403         | `FORBIDDEN`                | Insufficient permissions

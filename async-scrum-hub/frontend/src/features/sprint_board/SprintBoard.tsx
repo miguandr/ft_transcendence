@@ -27,8 +27,8 @@ export function SprintBoard() {
 	  ],
 	},
 	{
-	  id: "doing",
-	  title: "Doing",
+	  id: "in_progress",
+	  title: "In progress",
 	  color: "bg-gray-50",
 	  borderColor: "border-l-cyan-400",
 	  tasks: [
@@ -38,8 +38,8 @@ export function SprintBoard() {
 	  ],
 	},
 	{
-	  id: "done",
-	  title: "Done",
+	  id: "completed",
+	  title: "Completed",
 	  color: "bg-gray-50",
 	  borderColor: "border-l-emerald-400",
 	  tasks: [
