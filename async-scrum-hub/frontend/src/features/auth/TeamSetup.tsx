@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
-import { createOrganization, joinOrganization, checkJoinCode, getOrganizationMembers } from "../../services/api";
+import { createOrganization, setUserRole, joinOrganization, checkJoinCode, getOrganizationMembers } from "../../services/api";
 import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
 type TeamMode = "join" | "create";
 type Role = "scrum_master" | "product_owner" | "developer" | null;
@@ -16,6 +16,7 @@ export function TeamSetup() {
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
 	const [orgId, setOrgId] = useState<string | null>(null);
+	const [createdBy, setCreatedBy] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +49,7 @@ export function TeamSetup() {
 			//Step 3: Extract taken roles
 			const taken = members
 				.filter(m => m.scrum_role  === "scrum_master" || m.scrum_role === "product_owner") // m(each member of the array) =>(return). Keep members with roles assigned
-				.map(m => m.scrum_role) as string[]; //tells TypeScript "trust me, these arent null".
+				.map(m => m.scrum_role) as string[]; // tells TypeScript "trust me, these arent null".
 
 			//Step 4: Update state
 			setOrgId(response.id); // Save org ID for later (when joining)
@@ -73,18 +74,42 @@ export function TeamSetup() {
 		}
 	};
 
-	//TODO
-	const handleCreateTeam = () => {
-		// Mock team creation - in real app, this would call an API
-		if (teamName.trim()) {
-		const generatedCode = `SCR-${Math.floor(100 + Math.random() * 900)}`;
-		setConfirmedTeam({
-			name: teamName,
-			code: generatedCode,
-			members: 1,
-		});
-		setTeamConfirmed(true);
+	// ON THE MAKING ! ! ! ! ! ! ! ! ! ! !
+	const handleCreateTeam = async (e: React.FormEvent) => { // Accept form event parameter
+		e.preventDefault(); // Prevent page refresh
+		if (!teamName.trim()) {
+			setErrors({ team: "Team name is required "});
+			return;
 		}
+
+		setIsLoading(true); // Show loading spinner
+		setErrors({}); // Clear previous errors
+
+		try {
+			// Step 1: Get org info
+			const response = await createOrganization({ name: teamName });
+
+			//Step 2: Update state // IS THIS CORRECT?
+			setOrgId(response.id);
+			setCreatedBy(response.created_by);
+			setConfirmedTeam({
+				name: teamName,
+				code: response.join_code,
+				members: 1,
+			});
+		setTeamConfirmed(true);
+
+		} catch (error: any) {
+			// Handle API errors
+			if (error?.error?.message) {
+				setErrors({ team: error.error.message });
+			} else {
+				setErrors({ team: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+
 	};
 
 	//TODO

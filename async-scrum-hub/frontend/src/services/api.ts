@@ -72,7 +72,6 @@ interface User {
 
 interface CreateOrgRequest {
 	name: string;
-	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 }
 
 interface CreateOrgResponse {
@@ -121,7 +120,7 @@ function createApiError(code: string, message: string): never {
 	};
 }
 
-
+//Phase 1
 export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
 {
 	await delay(500);
@@ -149,7 +148,6 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 	//Update user data
 	mockUsers[0].current_organization_id = newOrg.id;
 	mockUsers[0].org_role = "admin";
-	mockUsers[0].scrum_role = data.scrum_role;
 
 	//Add to mock database
 	mockOrganizations.push(newOrg);
@@ -162,6 +160,20 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 		created_by: newOrg.created_by
 	}
 }
+
+export async function setUserRole(data: {
+	organization_id: string;
+	scrum_role: "scrum_master" | "product_owner"
+}): Promise<{ success: boolean }>
+{
+	await delay(300);
+
+	//Update user's role in the organization
+	mockUsers[0].scrum_role = data.scrum_role;
+
+	return { success: true };
+}
+
 
 
 
