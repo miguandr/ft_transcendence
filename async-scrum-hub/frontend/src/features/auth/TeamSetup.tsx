@@ -16,7 +16,6 @@ export function TeamSetup() {
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
 	const [orgId, setOrgId] = useState<string | null>(null);
-	const [createdBy, setCreatedBy] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +25,8 @@ export function TeamSetup() {
 
 	// ===== FUNCTION DEFINITIONS =====
 	//When user enters a team code and clicks "Check code"
-	const handleCheckCode = async (e: React.FormEvent) => {
+	const handleCheckCode = async (e: React.FormEvent) =>
+	{
 		e.preventDefault(); // Prevents page refresh when form submits
 
 		//Validation: checks if team-code is empty
@@ -62,8 +62,10 @@ export function TeamSetup() {
 
 		} catch (error: any) {
 			// Handle API errors
-			if (error?.error?.code === "CODE_NOT_FOUND") {
+			if (error?.error?.code === "INVALID_CODE") {
 				setErrors({ team: "Invalid team code" });
+			}else if (error?.error?.code === "ALREADY_MEMBER") {
+				setErrors({ team: "You're already a member of this organization" });
 			} else if (error?.error?.message) {
 				setErrors({ team: error.error.message });
 			} else {
@@ -74,11 +76,18 @@ export function TeamSetup() {
 		}
 	};
 
-	// ON THE MAKING ! ! ! ! ! ! ! ! ! ! !
-	const handleCreateTeam = async (e: React.FormEvent) => { // Accept form event parameter
+
+	const handleCreateTeam = async (e: React.FormEvent) => // Accept form event parameter
+	{
 		e.preventDefault(); // Prevent page refresh
 		if (!teamName.trim()) {
 			setErrors({ team: "Team name is required "});
+			return;
+		} if (teamName.trim().length < 3) {
+			setErrors({ team: "Team name must be at least 3 characters" });
+			return;
+		} if (teamName.trim().length > 50) {
+			setErrors({ team: "Team name must less than 50  characters" });
 			return;
 		}
 
@@ -89,9 +98,8 @@ export function TeamSetup() {
 			// Step 1: Get org info
 			const response = await createOrganization({ name: teamName });
 
-			//Step 2: Update state // IS THIS CORRECT?
+			//Step 2: Update state
 			setOrgId(response.id);
-			setCreatedBy(response.created_by);
 			setConfirmedTeam({
 				name: teamName,
 				code: response.join_code,
@@ -101,30 +109,73 @@ export function TeamSetup() {
 
 		} catch (error: any) {
 			// Handle API errors
+			if (error?.error?.code === "INVALID_INPUT") {
+				setErrors({ team: "Team name is required." });
+			} else if (error?.error?.code === "UNAUTHORIZED") {
+				setErrors({ team: "Authentication required" });
+			} else if (error?.error?.code === "ORG_EXISTS") {
+				setErrors({ team: "An organization with this name already exists." })
+			} else if (error?.error?.message) {
+				setErrors({ team: error.error.message });
+			} else {
+				setErrors({ team: "Something went wrong." });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+
+	const handleCopyCode = () =>
+	{
+		if (confirmedTeam?.code) {
+			navigator.clipboard.writeText(confirmedTeam.code);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}
+	};
+
+
+	const handleContinue = async () =>
+	{
+		// Step 1: Validation
+		if (!teamConfirmed || !selectedRole || !orgId) {
+			return;
+		}
+
+		// Step 2: Loading state
+		setIsLoading(true);
+		setErrors({});
+
+		try
+		{
+			// Step 3: Check which mode (create or join)
+			if (teamMode === "create") {
+				await setUserRole({
+				organization_id: orgId as string,
+				scrum_role: selectedRole as "scrum_master" | "product_owner"
+			});
+		} else {
+			await joinOrganization({
+				join_code: teamCode,
+				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer"
+			});
+		}
+
+
+		// Step 4: Success! Navigate to dashboard
+		navigate("/");
+
+		} catch (error: any) {
+			// Step 5: Handle errors
 			if (error?.error?.message) {
 				setErrors({ team: error.error.message });
 			} else {
 				setErrors({ team: "Something went wrong" });
 			}
 		} finally {
-			setIsLoading(false);
-		}
-
-	};
-
-	//TODO
-	const handleCopyCode = () => {
-		if (confirmedTeam?.code) {
-		navigator.clipboard.writeText(confirmedTeam.code);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-		}
-	};
-
-	//TODO
-	const handleContinue = () => {
-		if (teamConfirmed && selectedRole) {
-		navigate("/");
+		// Step 6: Clear loading state
+		setIsLoading(false);
 		}
 	};
 
@@ -217,15 +268,16 @@ export function TeamSetup() {
 						<button
 						type="button"
 						onClick={handleCheckCode}
-						disabled={!teamCode.trim()}
+						disabled={!teamCode.trim() || isLoading}
 						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamCode.trim()
+							teamCode.trim() && !isLoading
 							? "bg-cyan-600 text-white hover:bg-cyan-700"
 							: "bg-gray-200 text-gray-400 cursor-not-allowed"
 						}`}
 						>
-						Check code
+						{isLoading ? "Checking..." : "Check code"}
 						</button>
+						{errors.team && <ErrorText>{errors.team}</ErrorText>}
 					</div>
 					)}
 
@@ -248,15 +300,16 @@ export function TeamSetup() {
 						<button
 						type="button"
 						onClick={handleCreateTeam}
-						disabled={!teamName.trim()}
+						disabled={!teamName.trim() || isLoading}
 						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamName.trim()
+							teamName.trim() && !isLoading
 							? "bg-cyan-600 text-white hover:bg-cyan-700"
 							: "bg-gray-200 text-gray-400 cursor-not-allowed"
 						}`}
 						>
-						Create team
+						{isLoading ? "Creating..." : "Create team"}
 						</button>
+						{errors.team && <ErrorText>{errors.team}</ErrorText>}
 					</div>
 					)}
 				</div>
@@ -324,15 +377,16 @@ export function TeamSetup() {
 					const isTaken = takenRoles.includes(role.id);
 					const isSelected = selectedRole === role.id;
 					const Icon = role.icon;
+					const isDisabled = isTaken || (teamMode === "create" && role.id === "developer");
 
 					return (
 						<button
 						key={role.id}
 						type="button"
-						onClick={() => !isTaken && setSelectedRole(role.id as Role)}
-						disabled={isTaken}
+						onClick={() => !isDisabled && setSelectedRole(role.id as Role)}
+						disabled={isDisabled}
 						className={`p-5 rounded-xl border-2 text-left transition-all ${
-							isTaken
+							isDisabled
 							? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
 							: isSelected
 							? "border-cyan-500 bg-cyan-50"
@@ -382,15 +436,16 @@ export function TeamSetup() {
 			<button
 				type="button"
 				onClick={handleContinue}
-				disabled={!teamConfirmed || !selectedRole}
+				disabled={!teamConfirmed || !selectedRole || isLoading}
 				className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-				teamConfirmed && selectedRole
+				teamConfirmed && selectedRole && !isLoading
 					? "bg-cyan-600 text-white hover:bg-cyan-700"
 					: "bg-gray-200 text-gray-400 cursor-not-allowed"
 				}`}
 			>
-				Continue to dashboard
+				{isLoading ? "Loading..." : "Continue to dashboard"}
 			</button>
+			{errors.team && <ErrorText>{errors.team}</ErrorText>}
 			</div>
 		</div>
 		</div>

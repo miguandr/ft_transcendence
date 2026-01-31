@@ -147,8 +147,8 @@ async-scrum-hub/
 │   │   │       ├── membership.py               ✨ Daniela (done ✅)
 │   │   │       ├── ticket.py                   🚀 Freddy
 │   │   │       ├── task.py                     🚀 Freddy
-│   │   │       ├── standup.py                  🌊 Malu 
-│   │   │       └── blocker.py                  🌊 Malu 
+│   │   │       ├── standup.py                  🌊 Malu
+│   │   │       └── blocker.py                  🌊 Malu
 │   │   │
 │   │   ├── api/                               ✨ Daniela
 │   │   │   ├── router.py # include all routers
@@ -176,24 +176,24 @@ async-scrum-hub/
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── tasks/                             🚀 Freddy + 🌊 Malu 
+│   │   ├── tasks/                             🚀 Freddy + 🌊 Malu
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── standups/                          🌊 Malu 
+│   │   ├── standups/                          🌊 Malu
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── blockers/                          🌊 Malu 
+│   │   ├── blockers/                          🌊 Malu
 │   │   ├── routes.py                          use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
 │   │   ├── schemas.py
 │   │   └── service.py
 │   │
 │   ├── alembic.ini                         ✨ Daniela (created automaticaly by Alembic ✅)
 │   ├── migrations/                         ✨ Daniela (created automaticaly by Alembic ✅)
-│   │   ├── env.py  
+│   │   ├── env.py
 │   │   ├── script.py.mako
 │   │   └── versions/
 │   ├── tests/                               ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
@@ -201,7 +201,7 @@ async-scrum-hub/
 │   ├── Dockerfile                           ✨ Daniela
 │   └── .env.example                         ✨ Daniela
 │
-├── realtime/                              🌊 Malu      
+├── realtime/                              🌊 Malu
 │   ├── README.md # event documentation
 │   └── events.md
 │

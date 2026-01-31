@@ -92,7 +92,7 @@ export function SignUp() {
 			if (error?.error?.code === "USER_EXISTS") {
 				// Only runs if error.error.code exists AND equals "USER_EXISTS"
 				setErrors({ email: "An account with this email already exists" });
-			} else if (error?.error?.code === "INVALID_EMAIL") {
+			} else if (error?.error?.code === "INVALID_INPUT") {
 				// Only runs if error.error.code exists AND equals "INVALID_EMAIL"
 				setErrors({ email: "Email format is invalid" });
 			} else if (error?.error?.message) {
