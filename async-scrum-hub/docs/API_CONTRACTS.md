@@ -1,4 +1,4 @@
-# Async Scrum Hub – API Contract
+ # Async Scrum Hub – API Contract
 
 ## Overview
 
@@ -292,11 +292,6 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Rules:**
 - The user creating the organization becomes the organization admin.
-- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
-- Only one `scrum_master` and one `product_owner` can exist per organization.
-- Scrum roles are assigned only during organization creation and when joining an organization.
-- Once both scrum roles are assigned, new members can only join as `developer`.
-
 - The `join_code` is generated server-side when the organization is created.
 - The join code does not expire.
 - The join code consists of 3 letters followed by 3 numbers.
@@ -305,7 +300,6 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "name": "string",
-  "scrum_role": "scrum_master | product_owner"
 }
 ```
 
@@ -341,12 +335,55 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 }
 ```
 ---
+### 3.2 Select Role
 
-### 3.2 Get Organization Members
+**Endpoint:** `PATCH /organizations/{org_id}`
+
+**Description:** Select the rol inside the organization.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- The authenticated user
+
+**Rules:**
+- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
+- Only one `scrum_master` and one `product_owner` can exist per organization.
+- Scrum roles are assigned only during organization creation and when joining an organization.
+- Once both scrum roles are assigned, new members can only join as `developer`.
+
+**Request Body:**
+```json
+{
+  "scrum_role": "scrum_master | product_owner"
+}
+```
+
+**Success Response:** `201 Created`
+```json
+{
+  "scrum_role": "scrum_master | product_owner"
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+---
+
+### 3.3 Get Organization Members
 
 **Endpoint:** `GET /organizations/{org_id}/members`
 
-**Description:** Returns members of an organization. The client may allow admin-only actions based on the authenticated user’s org_role.
+**Description:** Returns members of an organization with all their information.
 
 **Authentication:** Required (JWT)
 
@@ -363,6 +400,34 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 		"id": "uuid",
 		"name": "string",
 		"org_role": "admin | member",
+		"scrum_role": "scrum_master | product_owner | developer",
+
+		"tickets": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"status": "todo | in_progress | completed",
+				"priority": "low | medium | high"
+			}
+		],
+
+		"tasks": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"status": "in_progress | completed",
+				"ticket_id": "uuid"
+			}
+		],
+
+		"blockers": [
+			{
+				"id": "uuid",
+				"description": "string",
+				"status": "open | resolved",
+				"created_at": "timestamp"
+			}
+		]
 	}
 ]
 ```
@@ -400,7 +465,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```
 ---
 
-### 3.3 Invite Member to Organization
+### 3.4 Invite Member to Organization
 
 **Endpoint:** `POST /organizations/{org_id}/members`
 
@@ -481,7 +546,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```
 ---
 
-### 3.4 Remove Member from Organization
+### 3.5 Remove Member from Organization
 
 **Endpoint:** `DELETE /organizations/{org_id}/members/{user_id}`
 
@@ -531,7 +596,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```
 ---
 
-### 3.5 Join Organization by Code
+### 3.6 Join Organization by Code
 
 **Endpoint:** `POST /organizations/join`
 
@@ -618,13 +683,13 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "title": "string",
   "description": "string | null",
-  "status": "todo | in_progress | done",
+  "status": "todo | in_progress | completed",
   "priority": "low | medium | high",
   "created_by": "uuid",
   "assignee_id": "uuid | null",
   "organization_id": "uuid",
-  "created_at": "iso",
-  "updated_at": "iso"
+  "created_at": "timestamp",
+  "updated_at": "timestamp"
 }
 ```
 
@@ -697,14 +762,14 @@ Used to render the organization board.
 - `org_id` - UUID of the organization
 
 **Query Parameters:**
-- status – todo | in_progress | done
+- status – todo | in_progress | completed
 - priority - low | medium | high
 
 **Examples:**
 - `GET /organizations/{org_id}/tickets`
 - `GET /organizations/{org_id}/tickets?status=todo`
 - `GET /organizations/{org_id}/tickets?status=in_progress`
-- `GET /organizations/{org_id}/tickets?status=done`
+- `GET /organizations/{org_id}/tickets?status=completed`
 - `GET /organizations/{org_id}/tickets?priority=low`
 - `GET /organizations/{org_id}/tickets?priority=medium`
 - `GET /organizations/{org_id}/tickets?priority=high`
@@ -715,11 +780,11 @@ Used to render the organization board.
 	{
 		"id": "uuid",
 		"title": "string",
-		"status": "todo | in_progress | done",
+		"status": "todo | in_progress | completed",
 		"priority": "low | medium | high",
 		"assignee_id": "uuid | null",
-		"created_at": "iso",
-		"updated_at": "iso"
+		"created_at": "timestamp",
+		"updated_at": "timestamp"
 	}
 ]
 ```
@@ -777,13 +842,13 @@ Used to render the organization board.
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "todo | in_progress | done",
+	"status": "todo | in_progress | completed",
 	"priority": "low | medium | high",
 	"created_by": "uuid",
 	"assignee_id": "uuid | null",
 	"organization_id": "uuid",
-	"created_at": "iso",
-	"updated_at": "iso"
+	"created_at": "timestamp",
+	"updated_at": "timestamp"
 }
 ```
 
@@ -829,12 +894,13 @@ Used to render the organization board.
 **Assignment Rules:**
 - The `assignee_id` field can only be assigned to users with the **Developer** role.
 - Scrum Masters and Product Owners cannot be assigned to tickets.
+- Only Product Owners can change the priority.
 - If `assignee_id` is provided, the backend must validate that the user has the Developer role.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
+- Scrum Master (except priority)
 - Product Owner
 
 **URL Parameters:**
@@ -846,7 +912,7 @@ Used to render the organization board.
 	"title": "string (optional)",
 	"description": "string | null (optional)",
 	"priority": "low | medium | high (optional)",
-	"status": "todo | in_progress | done (optional)",
+	"status": "todo | in_progress | completed (optional)",
 	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
@@ -857,13 +923,13 @@ Used to render the organization board.
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "todo | in_progress | done",
+	"status": "todo | in_progress | completed",
 	"priority": "low | medium | high",
 	"created_by": "uuid",
 	"assignee_id": "uuid | null",
 	"organization_id": "uuid",
-	"created_at": "iso",
-	"updated_at": "iso"
+	"created_at": "timestamp",
+	"updated_at": "timestamp"
 }
 ```
 
@@ -938,7 +1004,7 @@ Used to render the organization board.
 **Request Body:**
 ```json
 {
-	"status": "todo | in_progress | done"
+	"status": "todo | in_progress | completed"
 }
 ```
 
@@ -946,8 +1012,8 @@ Used to render the organization board.
 ```json
 {
 	"id": "uuid",
-	"status": "todo | in_progress | done",
-	"updated_at": "iso"
+	"status": "todo | in_progress | completed",
+	"updated_at": "timestamp"
 }
 ```
 
@@ -1080,7 +1146,7 @@ Used to render the organization board.
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "in_process",
+	"status": "in_progress",
   	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
 	"ticket_id": "uuid"
@@ -1155,11 +1221,11 @@ Used to render the organization board.
 - `ticket_id` - UUID of the ticket
 
 **Query Parameters:**
-- status – in_process | completed
+- status – in_progress | completed
 
 **Examples:**
 - `GET /tickets/{ticket_id}/tasks`
-- `GET /tickets/{ticket_id}/tasks?status=in_process`
+- `GET /tickets/{ticket_id}/tasks?status=in_progress`
 - `GET /tickets/{ticket_id}/tasks?status=completed`
 
 **Success Response:** `200 OK`
@@ -1168,7 +1234,7 @@ Used to render the organization board.
 	{
 		"id": "uuid",
 		"title": "string",
-		"status": "in_process | completed",
+		"status": "in_progress | completed",
 	}
 ]
 ```
@@ -1227,7 +1293,7 @@ Used to render the organization board.
 	"id": "uuid",
 	"title": "string",
 	"description": "string | null",
-	"status": "in_process | completed",
+	"status": "in_progress | completed",
   	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
 	"ticket_id": "uuid"
@@ -1293,7 +1359,7 @@ Used to render the organization board.
 {
 	"title": "string (optional)",
 	"description": "string (optional)",
-	"status": "in_process | completed (optional)",
+	"status": "in_progress | completed (optional)",
 	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
@@ -1304,7 +1370,7 @@ Used to render the organization board.
 	"id": "uuid",
 	"title": "string | null",
 	"description": "string | null",
-	"status": "in_process | completed",
+	"status": "in_progress | completed",
 	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
 	"ticket_id": "uuid"
@@ -1505,8 +1571,8 @@ Used to render the organization board.
 ```json
 {
   "error": {
-    "code": "STANDUP_ALREADY_EXISTS",
-    "message": "You have already created a standup for today"
+	"code": "STANDUP_ALREADY_EXISTS",
+	"message": "You have already created a standup for today"
   }
 }
 ```
@@ -1576,66 +1642,8 @@ Used to render the organization board.
 }
 ```
 ---
-### 6.3 Get Standup Details
 
-**Endpoint:** `GET /standups/{standup_id}`
-
-**Description:** Returns detailed information about a specific standup.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Any organization member.
-
-**URL Parameters:**
-- `standup_id` - UUID of the standup
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"created_at": "timestamp (today)",
-	"today": "string",
-	"yesterday": "string | null",
-	"blocker_ids": ["uuid"],
-	"created_by": "uuid (owner)"
-}
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Standup not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Standup not found"
-  }
-}
-```
----
-
-### 6.4 Update Standup
+### 6.3 Update Standup
 
 **Endpoint:** `PATCH /standups/{standup_id}`
 
@@ -1714,8 +1722,8 @@ Used to render the organization board.
 ```json
 {
   "error": {
-    "code": "EDIT_WINDOW_EXPIRED",
-    "message": "Standups can only be edited on the day they are created"
+	"code": "EDIT_WINDOW_EXPIRED",
+	"message": "Standups can only be edited on the day they are created"
   }
 }
 ```
@@ -1731,7 +1739,7 @@ Used to render the organization board.
 ```
 ---
 
-### 6.5 Delete Standup
+### 6.4 Delete Standup
 
 **Endpoint:** `DELETE /standups/{standup_id}`
 
@@ -1883,7 +1891,7 @@ Used to render the organization board.
 
 **Endpoint:** `GET /organizations/{org_id}/blockers`
 
-**Description:** Returns all blockers for an organization.
+**Description:** Returns all blockers for an organization and it details.
 
 **Authentication:** Required (JWT)
 
@@ -1910,6 +1918,9 @@ Used to render the organization board.
 		"description": "string",
 		"status": "open | resolved",
 		"assignee_id": "uuid | null"
+		"task_id": "uuid | null",
+		"created_at": "timestamp (today)",
+		"resolved_at": "timestamp | null"
 	}
 ]
 ```
@@ -1947,69 +1958,7 @@ Used to render the organization board.
 ```
 ---
 
-### 7.3 Get Blocker Details
-
-**Endpoint:** `GET /blockers/{blocker_id}`
-
-**Description:** Returns detailed information about a specific blocker.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- Any organization member.
-
-**URL Parameters:**
-- `blocker_id` - UUID of the blocker
-
-
-**Success Response:** `200 OK`
-```json
-{
-	"id": "uuid",
-	"description": "string",
-	"status": "open | resolved",
-	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
-	"task_id": "uuid | null",
-	"created_at": "timestamp (today)",
-	"resolved_at": "timestamp | null"
-}
-```
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`403 Forbidden` - Insufficient permissions
-```json
-{
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
-}
-```
-
-`404 Not Found` - Blocker not found
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Blocker not found"
-  }
-}
-```
----
-
-### 7.4 Update Blocker
+### 7.3 Update Blocker
 
 **Endpoint:** `PATCH /blockers/{blocker_id}`
 
@@ -2106,7 +2055,7 @@ Used to render the organization board.
 ```
 ---
 
-### 7.5 Resolve Blocker
+### 7.4 Resolve Blocker
 
 **Endpoint:** `PATCH /blockers/{blocker_id}/resolve`
 
@@ -2163,8 +2112,8 @@ Used to render the organization board.
 ```json
 {
   "error": {
-    "code": "BLOCKER_ALREADY_RESOLVED",
-    "message": "Blocker already resolved"
+	"code": "BLOCKER_ALREADY_RESOLVED",
+	"message": "Blocker already resolved"
   }
 }
 ```

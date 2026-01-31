@@ -37,7 +37,6 @@ const mockOrganizations = [
 	}
 ];
 
-
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
 	email: string;
