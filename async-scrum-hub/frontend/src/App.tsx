@@ -4,9 +4,7 @@ import { TopBar } from "./components/layout/TopBar";
 import { Welcome } from "./features/auth/Welcome";
 import { Login } from "./features/auth/Login";
 import { SignUp } from "./features/auth/SignUp";
-import { RoleSelection } from "./features/auth/RoleSelection";
-import { TeamCreation } from "./features/auth/TeamCreation";
-import { TeamJoin } from "./features/auth/TeamJoin";
+import { TeamSetup } from "./features/auth/TeamSetup";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
@@ -30,9 +28,7 @@ function AppLayout()
 			<Route path="/welcome" element={<Welcome />} />
 			<Route path="/login" element={<Login />} />
 			<Route path="/signup" element={<SignUp />} />
-			<Route path="/role-selection" element={<RoleSelection />} />
-			<Route path="/team-creation" element={<TeamCreation />} />
-			<Route path="/team-join" element={<TeamJoin />} />
+			<Route path="/team-setup" element={<TeamSetup />} />
 		</Routes>
 		);
 	}
@@ -67,9 +63,7 @@ export default function App() {
 		<Route path="/welcome" element={<Welcome />} />
 		<Route path="/login" element={<Login />} />
 		<Route path="/signup" element={<SignUp />} />
-		<Route path="/role-selection" element={<RoleSelection />} />
-		<Route path="/team-creation" element={<TeamCreation />} />
-		<Route path="/team-join" element={<TeamJoin />} />
+		<Route path="/team-setup" element={<TeamSetup />} />
 		<Route path="/*" element={<AppLayout />} />
 	  </Routes>
 	</BrowserRouter>
