@@ -225,58 +225,47 @@ export function TeamSetup() {
 				<div className="space-y-5">
 					{/* Toggle */}
 					<div className="flex gap-3">
-					<button
-						type="button"
+					<Button
+						variant="outlined"
+						isActive={teamMode === "join"}
 						onClick={() => setTeamMode("join")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "join"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+						className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 					>
 						I have a team code
-					</button>
-					<button
-						type="button"
+					</Button>
+					<Button
+						variant="outlined"
+						isActive={teamMode === "create"}
 						onClick={() => setTeamMode("create")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "create"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+						className={`flex-1 px-4 ${teamMode === "create" ? "border-cyan-500!" : ""}`}
 					>
 						Create a new team
-					</button>
+					</Button>
 					</div>
 
 					{/* Join Team */}
 					{teamMode === "join" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamCode" className="block text-sm text-gray-700 mb-2">
-							Team code
-						</label>
-						<input
+						<Label htmlFor="teamCode">Team code</Label>
+						<Input
 							type="text"
 							id="teamCode"
 							value={teamCode}
 							onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-center tracking-wider"
+							hasError={!!errors.team}
+							className="text-center tracking-wider"
 							placeholder="Enter your code"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
 						onClick={handleCheckCode}
 						disabled={!teamCode.trim() || isLoading}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamCode.trim() && !isLoading
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						variant="primary"
+						className="w-full"
 						>
 						{isLoading ? "Checking..." : "Check code"}
-						</button>
+						</Button>
 						{errors.team && <ErrorText>{errors.team}</ErrorText>}
 					</div>
 					)}
@@ -285,30 +274,24 @@ export function TeamSetup() {
 					{teamMode === "create" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamName" className="block text-sm text-gray-700 mb-2">
-							Team name
-						</label>
-						<input
+						<Label htmlFor="teamName">Team name</Label>
+						<Input
 							type="text"
 							id="teamName"
 							value={teamName}
 							onChange={(e) => setTeamName(e.target.value)}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+							hasError={!!errors.team}
 							placeholder="e.g. Product Development"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
+						variant="primary"
 						onClick={handleCreateTeam}
 						disabled={!teamName.trim() || isLoading}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamName.trim() && !isLoading
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						className="w-full"
 						>
 						{isLoading ? "Creating..." : "Create team"}
-						</button>
+						</Button>
 						{errors.team && <ErrorText>{errors.team}</ErrorText>}
 					</div>
 					)}
@@ -334,9 +317,10 @@ export function TeamSetup() {
 						<div className="flex-1 px-3 py-2 bg-white rounded-lg border border-emerald-200">
 							<span className="text-sm text-gray-900 tracking-wider">{confirmedTeam.code}</span>
 						</div>
-						<button
-							type="button"
+						<Button
 							onClick={handleCopyCode}
+							variant="secondary"
+							size="sm"
 							className="p-2 bg-white border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors"
 						>
 							{copied ? (
@@ -344,7 +328,7 @@ export function TeamSetup() {
 							) : (
 							<Copy className="w-4 h-4 text-emerald-600" />
 							)}
-						</button>
+						</Button>
 						</div>
 						<p className="text-xs text-emerald-700 mt-2">
 						Share this code with your team members
@@ -431,20 +415,16 @@ export function TeamSetup() {
 			</div>
 			</div>
 
-			{/* Primary Action */}
+			{/* Continue to Dashboard */}
 			<div className="mt-10">
-			<button
-				type="button"
+			<Button
 				onClick={handleContinue}
+				variant="primary"
 				disabled={!teamConfirmed || !selectedRole || isLoading}
-				className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-				teamConfirmed && selectedRole && !isLoading
-					? "bg-cyan-600 text-white hover:bg-cyan-700"
-					: "bg-gray-200 text-gray-400 cursor-not-allowed"
-				}`}
+				className="w-full"
 			>
 				{isLoading ? "Loading..." : "Continue to dashboard"}
-			</button>
+			</Button>
 			{errors.team && <ErrorText>{errors.team}</ErrorText>}
 			</div>
 		</div>
