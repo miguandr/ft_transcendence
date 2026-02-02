@@ -1,99 +1,201 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
-import { createOrganization } from "../../services/api";
-import { joinOrganization } from "../../services/api";
+import { createOrganization, setUserRole, joinOrganization, checkJoinCode, getOrganizationMembers } from "../../services/api";
 import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
 type TeamMode = "join" | "create";
-type Role = "scrum-master" | "product-owner" | "developer" | null;
+type Role = "scrum_master" | "product_owner" | "developer" | null;
 
 export function TeamSetup() {
 	const navigate = useNavigate();
 
-	// Team state
+	// ===== STATE DECLARATIONS =====
 	const [teamMode, setTeamMode] = useState<TeamMode>("join");
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
+	const [orgId, setOrgId] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
-	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
+	const [errors, setErrors] = useState<{
+		join?: string;
+		create?: string;
+		continue?: string
+	}>({});
 	const [isLoading, setIsLoading] = useState(false);
-
-	// Role state
+	const [takenRoles, setTakenRoles] = useState<(string[])>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
 
-	// Mock data for taken roles (in real app, this would come from API)
-	const takenRoles = ; // i need to fetch the team and check the roles in it
 
-	const handleCheckCode = async (e: React.FormEvent) => {
-		e.preventDefault();
+	// ===== FUNCTION DEFINITIONS =====
+	//When user enters a team code and clicks "Check code"
+	const handleCheckCode = async (e: React.FormEvent) =>
+	{
+		e.preventDefault(); // Prevents page refresh when form submits
+		setErrors({}); // Clear previous errors
 
-		// Mock validation - in real app, this would call an API
-		if (teamCode.trim()) {
-		setConfirmedTeam({
-			name: "Product Development Team",
-			members: 5,
-		});
-		setTeamConfirmed(true);
+		//Validation: checks if team-code is empty
+		if (!teamCode.trim()) {
+			setErrors({ join: "Team code is required" });
+			return;
 		}
 
-		// Start loading
-		setIsLoading(true);
-		// Clear previous errors
-		setErrors({});
+		//Call API
+		setIsLoading(true); // Show loading spinner
+
 
 		try {
-			//Call API
-			const response = await joinOrganization({ teamCode, selectedRole });
+			// Step 1: Validate code and get org info
+			const response = await checkJoinCode(teamCode);
 
-			console.log("Team joinned successfuly!", response);
+			//Step 2: Get members to see what roles are free/taken
+			const members = await getOrganizationMembers(response.id);
+
+			//Step 3: Extract taken roles
+			const taken = members
+				.filter(m => m.scrum_role  === "scrum_master" || m.scrum_role === "product_owner") // m(each member of the array) =>(return). Keep members with roles assigned
+				.map(m => m.scrum_role) as string[]; // tells TypeScript "trust me, these arent null".
+
+			//Step 4: Update state
+			setOrgId(response.id); // Save org ID for later (when joining)
+			setTakenRoles(taken);
+			setConfirmedTeam({
+				name: response.name,
+				members: response.members_count
+			});
 			setTeamConfirmed(true);
-			navigate("/");
+
 		} catch (error: any) {
 			// Handle API errors
-			console.error("Team not joinned", error);
+			if (error?.error?.code === "INVALID_CODE") {
+				setErrors({ join: "Invalid team code" });
+			}else if (error?.error?.code === "ALREADY_MEMBER") {
+				setErrors({ join: "You're already a member of this organization" });
+			} else if (error?.error?.message) {
+				setErrors({ join: error.error.message });
+			} else {
+				setErrors({ join: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
 		}
-
-
 	};
 
-	const handleCreateTeam = () => {
-		// Mock team creation - in real app, this would call an API
-		if (teamName.trim()) {
-		const generatedCode = `SCR-${Math.floor(100 + Math.random() * 900)}`;
-		setConfirmedTeam({
-			name: teamName,
-			code: generatedCode,
-			members: 1,
-		});
+
+	const handleCreateTeam = async (e: React.FormEvent) => // Accept form event parameter
+	{
+		e.preventDefault(); // Prevent page refresh
+		setErrors({}); // Clear previous errors
+
+		if (!teamName.trim()) {
+			setErrors({ create: "Team name is required" });
+			return;
+		} if (teamName.trim().length < 3) {
+			setErrors({ create: "Team name must be at least 3 characters" });
+			return;
+		} if (teamName.trim().length > 50) {
+			setErrors({ create: "Team name must have less than 50  characters" });
+			return;
+		}
+
+		setIsLoading(true); // Show loading spinner
+
+		try {
+			// Step 1: Get org info
+			const response = await createOrganization({ name: teamName });
+
+			//Step 2: Update state
+			setOrgId(response.id);
+			setConfirmedTeam({
+				name: teamName,
+				code: response.join_code,
+				members: 1,
+			});
 		setTeamConfirmed(true);
+
+		} catch (error: any) {
+			// Handle API errors
+			if (error?.error?.code === "INVALID_INPUT") {
+				setErrors({ create: "Team name is required." });
+			} else if (error?.error?.code === "UNAUTHORIZED") {
+				setErrors({ create: "Authentication required" });
+			} else if (error?.error?.code === "ORG_EXISTS") {
+				setErrors({ create: "An organization with this name already exists." })
+			} else if (error?.error?.message) {
+				setErrors({ create: error.error.message });
+			} else {
+				setErrors({ create: "Something went wrong." });
+			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	const handleCopyCode = () => {
+
+	const handleCopyCode = () =>
+	{
 		if (confirmedTeam?.code) {
-		navigator.clipboard.writeText(confirmedTeam.code);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+			navigator.clipboard.writeText(confirmedTeam.code);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
 		}
 	};
 
-	const handleContinue = () => {
-		if (teamConfirmed && selectedRole) {
+
+	const handleContinue = async () =>
+	{
+		setErrors({}); // Clear previous errors
+		// Step 1: Validation
+		if (!teamConfirmed || !selectedRole || !orgId) {
+			return;
+		}
+
+		// Step 2: Loading state
+		setIsLoading(true);
+
+		try
+		{
+			// Step 3: Check which mode (create or join)
+			if (teamMode === "create") {
+				await setUserRole({
+				organization_id: orgId as string,
+				scrum_role: selectedRole as "scrum_master" | "product_owner"
+			});
+		} else {
+			await joinOrganization({
+				join_code: teamCode,
+				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer"
+			});
+		}
+
+
+		// Step 4: Success! Navigate to dashboard
 		navigate("/");
+
+		} catch (error: any) {
+			// Step 5: Handle errors
+			if (error?.error?.message) {
+				setErrors({ continue: error.error.message });
+			} else {
+				setErrors({ continue: "Something went wrong" });
+			}
+		} finally {
+		// Step 6: Clear loading state
+		setIsLoading(false);
 		}
 	};
 
+
+	// ===== DATA DEFINITIONS =====
 	const roles = [
 		{
-		id: "scrum-master",
+		id: "scrum_master",
 		title: "Scrum Master",
 		icon: Target,
 		description: "Facilitate tickets and remove blockers",
 		},
 		{
-		id: "product-owner",
+		id: "product_owner",
 		title: "Product Owner",
 		icon: Users,
 		description: "Prioritize backlog and define vision",
@@ -106,6 +208,7 @@ export function TeamSetup() {
 		},
 	];
 
+	// ===== RETURN = THE UI =====
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center p-8">
 		<div className="max-w-2xl w-full">
@@ -128,58 +231,54 @@ export function TeamSetup() {
 				<div className="space-y-5">
 					{/* Toggle */}
 					<div className="flex gap-3">
-					<button
-						type="button"
-						onClick={() => setTeamMode("join")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "join"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+					<Button
+						variant="outlined"
+						isActive={teamMode === "join"}
+						onClick={() => {
+							setTeamMode("join");
+							setErrors({ create: undefined }); // Clear create errors when switching to join
+						}}
+						className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 					>
 						I have a team code
-					</button>
-					<button
-						type="button"
-						onClick={() => setTeamMode("create")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "create"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+					</Button>
+					<Button
+						variant="outlined"
+						isActive={teamMode === "create"}
+						onClick={() => {
+							setTeamMode("create")
+							setErrors({ join: undefined }); // Clear join errors when switching to create
+						}}
+						className={`flex-1 px-4 ${teamMode === "create" ? "border-cyan-500!" : ""}`}
 					>
 						Create a new team
-					</button>
+					</Button>
 					</div>
 
 					{/* Join Team */}
 					{teamMode === "join" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamCode" className="block text-sm text-gray-700 mb-2">
-							Team code
-						</label>
-						<input
+						<Label htmlFor="teamCode">Team code</Label>
+						<Input
 							type="text"
 							id="teamCode"
 							value={teamCode}
 							onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-center tracking-wider"
+							hasError={!!errors.join}
+							className="text-center tracking-wider"
 							placeholder="Enter your code"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
 						onClick={handleCheckCode}
-						disabled={!teamCode.trim()}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamCode.trim()
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						disabled={!teamCode.trim() || isLoading}
+						variant="primary"
+						className="w-full"
 						>
-						Check code
-						</button>
+						{isLoading ? "Checking..." : "Check code"}
+						</Button>
+						{errors.join && <ErrorText>{errors.join}</ErrorText>}
 					</div>
 					)}
 
@@ -187,30 +286,25 @@ export function TeamSetup() {
 					{teamMode === "create" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamName" className="block text-sm text-gray-700 mb-2">
-							Team name
-						</label>
-						<input
+						<Label htmlFor="teamName">Team name</Label>
+						<Input
 							type="text"
 							id="teamName"
 							value={teamName}
 							onChange={(e) => setTeamName(e.target.value)}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+							hasError={!!errors.create}
 							placeholder="e.g. Product Development"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
+						variant="primary"
 						onClick={handleCreateTeam}
-						disabled={!teamName.trim()}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamName.trim()
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						disabled={!teamName.trim() || isLoading}
+						className="w-full"
 						>
-						Create team
-						</button>
+						{isLoading ? "Creating..." : "Create team"}
+						</Button>
+						{errors.create && <ErrorText>{errors.create}</ErrorText>}
 					</div>
 					)}
 				</div>
@@ -235,9 +329,10 @@ export function TeamSetup() {
 						<div className="flex-1 px-3 py-2 bg-white rounded-lg border border-emerald-200">
 							<span className="text-sm text-gray-900 tracking-wider">{confirmedTeam.code}</span>
 						</div>
-						<button
-							type="button"
+						<Button
 							onClick={handleCopyCode}
+							variant="secondary"
+							size="sm"
 							className="p-2 bg-white border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors"
 						>
 							{copied ? (
@@ -245,7 +340,7 @@ export function TeamSetup() {
 							) : (
 							<Copy className="w-4 h-4 text-emerald-600" />
 							)}
-						</button>
+						</Button>
 						</div>
 						<p className="text-xs text-emerald-700 mt-2">
 						Share this code with your team members
@@ -275,18 +370,19 @@ export function TeamSetup() {
 				) : (
 				<div className="grid grid-cols-3 gap-4">
 					{roles.map((role) => {
-					const isTaken = takenRoles.includes(role.id) && role.id !== "developer";
+					const isTaken = takenRoles.includes(role.id);
 					const isSelected = selectedRole === role.id;
 					const Icon = role.icon;
+					const isDisabled = isTaken || (teamMode === "create" && role.id === "developer");
 
 					return (
 						<button
 						key={role.id}
 						type="button"
-						onClick={() => !isTaken && setSelectedRole(role.id as Role)}
-						disabled={isTaken}
+						onClick={() => !isDisabled && setSelectedRole(role.id as Role)}
+						disabled={isDisabled}
 						className={`p-5 rounded-xl border-2 text-left transition-all ${
-							isTaken
+							isDisabled
 							? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
 							: isSelected
 							? "border-cyan-500 bg-cyan-50"
@@ -331,20 +427,17 @@ export function TeamSetup() {
 			</div>
 			</div>
 
-			{/* Primary Action */}
+			{/* Continue to Dashboard */}
 			<div className="mt-10">
-			<button
-				type="button"
+			<Button
 				onClick={handleContinue}
-				disabled={!teamConfirmed || !selectedRole}
-				className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-				teamConfirmed && selectedRole
-					? "bg-cyan-600 text-white hover:bg-cyan-700"
-					: "bg-gray-200 text-gray-400 cursor-not-allowed"
-				}`}
+				variant="primary"
+				disabled={!teamConfirmed || !selectedRole || isLoading}
+				className="w-full"
 			>
-				Continue to dashboard
-			</button>
+				{isLoading ? "Loading..." : "Continue to dashboard"}
+			</Button>
+			{errors.continue && <ErrorText>{errors.continue}</ErrorText>}
 			</div>
 		</div>
 		</div>

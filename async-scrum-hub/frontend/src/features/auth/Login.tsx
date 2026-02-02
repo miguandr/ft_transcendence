@@ -63,10 +63,10 @@ export function Login() {
 			// Check for our API error format { error: { code, message } } using optional chaining
 			if (error?.error?.code === "INVALID_CREDENTIALS") {
 				// Only runs if error.error.code exists AND equals "INVALID_CREDENTIALS"
-				setErrors({ email: "Invalid email or password" });
-			} else if (error?.error?.code === "UNAUTHORIZED") {
+				setErrors({ email: "Email or password is incorrect." });
+			} else if (error?.error?.code === "INVALID_INPUT") {
 				// Only runs if error.error.code exists AND equals "UNAUTHORIZED"
-				setErrors({ email: "Session expired. Please login again." });
+				setErrors({ email: "Email or password is missing." });
 			} else if (error?.error?.message) {
 				// Only runs if error.error.message exists (Use the API's error message)
 				setErrors({ email: error.error.message });

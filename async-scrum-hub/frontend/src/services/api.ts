@@ -71,7 +71,6 @@ interface User {
 
 interface CreateOrgRequest {
 	name: string;
-	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 }
 
 interface CreateOrgResponse {
@@ -91,6 +90,20 @@ interface JoinOrgResponse {
 	org_role: "admin" | "member";
 }
 
+interface OrganizationInfo {
+	id: string;
+	name: string;
+	join_code: string;
+	members_count: number;
+}
+
+interface OrganizationMember {
+	id: string;
+	name: string;
+	org_role: "admin" | "member";
+	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+}
+
 
 interface ApiError {
 	error: {
@@ -106,14 +119,36 @@ function createApiError(code: string, message: string): never {
 	};
 }
 
+// Replace mock createOrganization with real fetch when backend ready!!!:
+// export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
+// {
+// 	const token = localStorage.getItem("token");
 
+// 	const response = await fetch(`${API_URL}/organizations`, {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/json',
+// 			'Authorization': `Bearer ${token}`
+// 		},
+// 		body: JSON.stringify(data)
+// 	});
+
+// 	if (!response.ok) {
+// 		const errorData = await response.json();
+// 		throw errorData; // Contains { error: { code, message } }
+// 	}
+
+// 	return response.json();
+// }
+
+//Phase 1
 export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
 {
 	await delay(500);
 
 	//Check if user sent empty name
 	if (!data.name.trim()) {
-		createApiError("INVALID_NAME", "Organization name is required");
+		createApiError("INVALID_INPUT", "Organization name is required");
 	}
 
 	//Check if organization already exists
@@ -134,7 +169,6 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 	//Update user data
 	mockUsers[0].current_organization_id = newOrg.id;
 	mockUsers[0].org_role = "admin";
-	mockUsers[0].scrum_role = data.scrum_role;
 
 	//Add to mock database
 	mockOrganizations.push(newOrg);
@@ -146,6 +180,19 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 		join_code: newOrg.join_code,
 		created_by: newOrg.created_by
 	}
+}
+
+export async function setUserRole(data: {
+	organization_id: string;
+	scrum_role: "scrum_master" | "product_owner"
+}): Promise<{ success: boolean }>
+{
+	await delay(300);
+
+	//Update user's role in the organization
+	mockUsers[0].scrum_role = data.scrum_role;
+
+	return { success: true };
 }
 
 
@@ -162,6 +209,7 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 		createApiError("CODE_NOT_FOUND", "Team code not found");
 	}
 
+
 	mockUsers[0].current_organization_id = matchingOrg.id;
 	mockUsers[0].org_role = "member";
 	mockUsers[0].scrum_role = data.scrum_role;
@@ -173,21 +221,46 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 	}
 }
 
-// Replace mock login with real fetch when backend ready!!!:
-// export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-// 	const response = await fetch(`${API_URL}/auth/login`, {
-// 		method: 'POST',
-// 		headers: { 'Content-Type': 'application/json' },
-// 		body: JSON.stringify(credentials)
-// 	});
+export async function checkJoinCode(join_code: string): Promise<OrganizationInfo>
+{
+	await delay(300);
 
-// 	if (!response.ok) {
-// 		const errorData = await response.json();
-// 		throw errorData; // Contains { error: { code, message } }
-// 	}
+	if (!join_code.trim()) {
+		createApiError("INVALID_CODE", "invalid cod");
+	}
 
-// 	return response.json();
-// }
+
+	const org = mockOrganizations.find(o => o.join_code === join_code);
+	if (!org) {
+		createApiError("CODE_NOT_FOUND", "Team code not found");
+	}
+
+	if (mockUsers[0].current_organization_id === org.id) {
+		createApiError("ALREADY_MEMBER", "You're already a member of this organization");
+	}
+
+	return {
+		id: org.id,
+		name: org.name,
+		join_code: org.join_code,
+		members_count: 1 // mock value for now
+	};
+}
+
+export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]>
+{
+	await delay(300);
+
+	return [
+		{
+			id: "user_0",
+			name: "creator",
+			org_role: "admin",
+			scrum_role: "scrum_master"  // ← SM is taken!
+		}
+	];
+}
+
 
 // Mock login function
 export async function login(credentials: LoginRequest): Promise<LoginResponse>
@@ -216,23 +289,6 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse>
 }
 
 
-// Replace mock login with real fetch when backend ready!!!:
-// export async function signup(data: SignUpRequest): Promise<SignUpResponse>
-// {
-// 	const response = await fetch(`${API_URL}/auth/register`, {
-// 		method: 'POST',
-// 		headers: { 'Content-Type': 'application/json' },
-// 		body: JSON.stringify(data)
-// 	});
-
-// 	if (!response.ok) {
-// 		const errorData = await response.json();
-// 		throw errorData; // Contains { error: { code, message } }
-// 	}
-
-// 	return response.json();
-// }
-
 // Mock signup function
 export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 	// Simulate network delay
@@ -246,7 +302,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 
 	// Validate email format
 	if (!/\S+@\S+\.\S+/.test(data.email)) {
-		createApiError("INVALID_EMAIL", "Email format is invalid");
+		createApiError("INVALID_INPUT", "Email format is invalid");
 	}
 
 	// Create new user
@@ -271,6 +327,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 	};
 }
 
+
 // Mock getCurrentUser function
 export async function getCurrentUser(): Promise<User> {
 	await delay(300);
@@ -285,3 +342,180 @@ export async function getCurrentUser(): Promise<User> {
 	// Return mock user data
 	return mockUsers[0]; // Return first user
 }
+
+
+// =============================================================
+// REAL FETCH VERSIONS - Replace mock functions with these
+// =============================================================
+
+/*
+// 1. LOGIN
+export async function login(credentials: LoginRequest): Promise<LoginResponse>
+{
+	const response = await fetch(`${API_URL}/auth/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(credentials)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	const data = await response.json();
+
+	// Store token in localStorage
+	localStorage.setItem("token", data.access_token);
+
+	return data;
+}
+
+// 2. SIGNUP
+export async function signup(data: SignUpRequest): Promise<SignUpResponse>
+{
+	const response = await fetch(`${API_URL}/auth/register`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 3. GET CURRENT USER
+export async function getCurrentUser(): Promise<User>
+{
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/users/me`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 4. CREATE ORGANIZATION
+export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
+{
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 5. SET USER ROLE
+export async function setUserRole(data: {
+	organization_id: string;
+	scrum_role: "scrum_master" | "product_owner"
+}): Promise<{ success: boolean }>
+{
+// This endpoint updates the current user's scrum role
+	const response = await fetch(`${API_URL}/users/me`, {
+		method: 'PATCH',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify({ scrum_role: data.scrum_role })
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return { success: true };
+}
+
+// 6. JOIN ORGANIZATION
+export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse>
+{
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/join`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 7. CHECK JOIN CODE
+export async function checkJoinCode(join_code: string): Promise<OrganizationInfo>
+{
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/check-code?join_code=${join_code}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 8. GET ORGANIZATION MEMBERS
+export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]>
+{
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+*/
