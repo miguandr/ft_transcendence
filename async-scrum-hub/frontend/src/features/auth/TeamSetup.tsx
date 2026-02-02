@@ -17,7 +17,11 @@ export function TeamSetup() {
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
 	const [orgId, setOrgId] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
-	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
+	const [errors, setErrors] = useState<{
+		join?: string;
+		create?: string;
+		continue?: string
+	}>({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [takenRoles, setTakenRoles] = useState<(string[])>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
@@ -28,16 +32,17 @@ export function TeamSetup() {
 	const handleCheckCode = async (e: React.FormEvent) =>
 	{
 		e.preventDefault(); // Prevents page refresh when form submits
+		setErrors({}); // Clear previous errors
 
 		//Validation: checks if team-code is empty
 		if (!teamCode.trim()) {
-			setErrors({ team: "Team code is required "});
+			setErrors({ join: "Team code is required" });
 			return;
 		}
 
 		//Call API
 		setIsLoading(true); // Show loading spinner
-		setErrors({}); // Clear previous errors
+
 
 		try {
 			// Step 1: Validate code and get org info
@@ -63,13 +68,13 @@ export function TeamSetup() {
 		} catch (error: any) {
 			// Handle API errors
 			if (error?.error?.code === "INVALID_CODE") {
-				setErrors({ team: "Invalid team code" });
+				setErrors({ join: "Invalid team code" });
 			}else if (error?.error?.code === "ALREADY_MEMBER") {
-				setErrors({ team: "You're already a member of this organization" });
+				setErrors({ join: "You're already a member of this organization" });
 			} else if (error?.error?.message) {
-				setErrors({ team: error.error.message });
+				setErrors({ join: error.error.message });
 			} else {
-				setErrors({ team: "Something went wrong" });
+				setErrors({ join: "Something went wrong" });
 			}
 		} finally {
 			setIsLoading(false);
@@ -80,19 +85,20 @@ export function TeamSetup() {
 	const handleCreateTeam = async (e: React.FormEvent) => // Accept form event parameter
 	{
 		e.preventDefault(); // Prevent page refresh
+		setErrors({}); // Clear previous errors
+
 		if (!teamName.trim()) {
-			setErrors({ team: "Team name is required "});
+			setErrors({ create: "Team name is required" });
 			return;
 		} if (teamName.trim().length < 3) {
-			setErrors({ team: "Team name must be at least 3 characters" });
+			setErrors({ create: "Team name must be at least 3 characters" });
 			return;
 		} if (teamName.trim().length > 50) {
-			setErrors({ team: "Team name must less than 50  characters" });
+			setErrors({ create: "Team name must have less than 50  characters" });
 			return;
 		}
 
 		setIsLoading(true); // Show loading spinner
-		setErrors({}); // Clear previous errors
 
 		try {
 			// Step 1: Get org info
@@ -110,15 +116,15 @@ export function TeamSetup() {
 		} catch (error: any) {
 			// Handle API errors
 			if (error?.error?.code === "INVALID_INPUT") {
-				setErrors({ team: "Team name is required." });
+				setErrors({ create: "Team name is required." });
 			} else if (error?.error?.code === "UNAUTHORIZED") {
-				setErrors({ team: "Authentication required" });
+				setErrors({ create: "Authentication required" });
 			} else if (error?.error?.code === "ORG_EXISTS") {
-				setErrors({ team: "An organization with this name already exists." })
+				setErrors({ create: "An organization with this name already exists." })
 			} else if (error?.error?.message) {
-				setErrors({ team: error.error.message });
+				setErrors({ create: error.error.message });
 			} else {
-				setErrors({ team: "Something went wrong." });
+				setErrors({ create: "Something went wrong." });
 			}
 		} finally {
 			setIsLoading(false);
@@ -138,6 +144,7 @@ export function TeamSetup() {
 
 	const handleContinue = async () =>
 	{
+		setErrors({}); // Clear previous errors
 		// Step 1: Validation
 		if (!teamConfirmed || !selectedRole || !orgId) {
 			return;
@@ -145,7 +152,6 @@ export function TeamSetup() {
 
 		// Step 2: Loading state
 		setIsLoading(true);
-		setErrors({});
 
 		try
 		{
@@ -169,9 +175,9 @@ export function TeamSetup() {
 		} catch (error: any) {
 			// Step 5: Handle errors
 			if (error?.error?.message) {
-				setErrors({ team: error.error.message });
+				setErrors({ continue: error.error.message });
 			} else {
-				setErrors({ team: "Something went wrong" });
+				setErrors({ continue: "Something went wrong" });
 			}
 		} finally {
 		// Step 6: Clear loading state
@@ -228,7 +234,10 @@ export function TeamSetup() {
 					<Button
 						variant="outlined"
 						isActive={teamMode === "join"}
-						onClick={() => setTeamMode("join")}
+						onClick={() => {
+							setTeamMode("join");
+							setErrors({ create: undefined }); // Clear create errors when switching to join
+						}}
 						className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 					>
 						I have a team code
@@ -236,7 +245,10 @@ export function TeamSetup() {
 					<Button
 						variant="outlined"
 						isActive={teamMode === "create"}
-						onClick={() => setTeamMode("create")}
+						onClick={() => {
+							setTeamMode("create")
+							setErrors({ join: undefined }); // Clear join errors when switching to create
+						}}
 						className={`flex-1 px-4 ${teamMode === "create" ? "border-cyan-500!" : ""}`}
 					>
 						Create a new team
@@ -253,7 +265,7 @@ export function TeamSetup() {
 							id="teamCode"
 							value={teamCode}
 							onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-							hasError={!!errors.team}
+							hasError={!!errors.join}
 							className="text-center tracking-wider"
 							placeholder="Enter your code"
 						/>
@@ -266,7 +278,7 @@ export function TeamSetup() {
 						>
 						{isLoading ? "Checking..." : "Check code"}
 						</Button>
-						{errors.team && <ErrorText>{errors.team}</ErrorText>}
+						{errors.join && <ErrorText>{errors.join}</ErrorText>}
 					</div>
 					)}
 
@@ -280,7 +292,7 @@ export function TeamSetup() {
 							id="teamName"
 							value={teamName}
 							onChange={(e) => setTeamName(e.target.value)}
-							hasError={!!errors.team}
+							hasError={!!errors.create}
 							placeholder="e.g. Product Development"
 						/>
 						</div>
@@ -292,7 +304,7 @@ export function TeamSetup() {
 						>
 						{isLoading ? "Creating..." : "Create team"}
 						</Button>
-						{errors.team && <ErrorText>{errors.team}</ErrorText>}
+						{errors.create && <ErrorText>{errors.create}</ErrorText>}
 					</div>
 					)}
 				</div>
@@ -425,7 +437,7 @@ export function TeamSetup() {
 			>
 				{isLoading ? "Loading..." : "Continue to dashboard"}
 			</Button>
-			{errors.team && <ErrorText>{errors.team}</ErrorText>}
+			{errors.continue && <ErrorText>{errors.continue}</ErrorText>}
 			</div>
 		</div>
 		</div>
