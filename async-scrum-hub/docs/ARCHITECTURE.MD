@@ -77,6 +77,19 @@ The application uses a relational database to model its domain entities and rela
 
 Core entities such as users, organizations, tickets, and tasks are represented using normalized tables to ensure data consistency and integrity. The relational model allows the system to enforce constraints and represent complex relationships clearly.
 
+### 9.1 Internal Model Fields for Authorization
+
+All domain resources (Ticket, Task, Standup, Blocker) must include certain fields to support the authorization system, even if these fields are not exposed in API responses.
+
+**Required fields for all domain resources:**
+- `organization_id`: UUID foreign key to organizations table. Required for authorization scope checks and efficient queries.
+- `created_by`: UUID foreign key to users table. Required for ownership permission checks.
+
+**Required fields for assignable resources (Ticket, Task, Blocker):**
+- `assignee_id`: UUID foreign key to users table (nullable). Required for assignee permission checks.
+
+These fields enable the `authorize()` function to perform permission checks without additional database queries. The authorization system uses a `Protocol` type hint to ensure all resources implement these fields consistently.
+
 ## 10. Configuration and Environments
 
 Configuration is managed through environment variables to separate code from environment-specific settings.
@@ -130,11 +143,11 @@ async-scrum-hub/
 │
 ├── backend/   (Architecture: ✨ Daniela / Features: 🚀 Freddy, 🌊 Malu)
 │   ├── src/
-│   │   ├── main.py # FastAPI entrypoint       ✨ Daniela
+│   │   ├── main.py # FastAPI entrypoint        ✨ Daniela
 │   │   │
-│   │   ├── config/                            ✨ Daniela
+│   │   ├── config/                             ✨ Daniela
 │   │   │   ├── settings.py
-│   │   │   └── security.py # JWT, hashing
+│   │   │   └── security.py # JWT, hashing      (IN PROGRESS)
 │   │   │
 │   │   ├── database/                          *FastAPI* and *SQLAlchemy*
 │   │   │   ├── __init__.py                     ✨ Daniela (done ✅)
@@ -147,75 +160,76 @@ async-scrum-hub/
 │   │   │       ├── membership.py               ✨ Daniela (done ✅)
 │   │   │       ├── ticket.py                   🚀 Freddy
 │   │   │       ├── task.py                     🚀 Freddy
-│   │   │       ├── standup.py                  🌊 Malu
-│   │   │       └── blocker.py                  🌊 Malu
+│   │   │       ├── standup.py                  🌊 Malu 
+│   │   │       └── blocker.py                  🌊 Malu 
 │   │   │
-│   │   ├── api/                               ✨ Daniela
-│   │   │   ├── router.py # include all routers
-│   │   │   ├── deps.py                          (IN PROGRESS)
-│   │   │   ├── permissions.py                   (done ✅)
-│   │   │   └── authorize.py                     (done ✅)
+│   │   ├── api/                                ✨ Daniela
+│   │   │   ├── router.py # include all routers 
+│   │   │   ├── deps.py                         (done ✅)
+│   │   │   ├── permissions.py                  (done ✅)
+│   │   │   └── authorize.py                    (done ✅)
 │   │   │
-│   │   ├── auth/                              ✨ Daniela
+│   │   ├── auth/                               ✨ Daniela
 │   │   │   ├── routes.py                        use *FastAPI*
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── users/                             ✨ Daniela
+│   │   ├── users/                              ✨ Daniela
 │   │   │   ├── routes.py                        use *FastAPI*
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── organizations/                     🚀 Freddy
+│   │   ├── organizations/                      🚀 Freddy
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── tickets/                           🚀 Freddy
+│   │   ├── tickets/                            🚀 Freddy
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── tasks/                             🚀 Freddy + 🌊 Malu
+│   │   ├── tasks/                              🚀 Freddy + 🌊 Malu 
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── standups/                          🌊 Malu
+│   │   ├── standups/                           🌊 Malu 
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
 │   │   │   ├── schemas.py
 │   │   │   └── service.py
 │   │   │
-│   │   ├── blockers/                          🌊 Malu
-│   │   ├── routes.py                          use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
-│   │   ├── schemas.py
-│   │   └── service.py
+│   │   └── blockers/                           🌊 Malu 
+│   │       ├── routes.py                          use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🌊 Malu (implementation)
+│   │       ├── schemas.py
+│   │       └── service.py
 │   │
-│   ├── alembic.ini                         ✨ Daniela (created automaticaly by Alembic ✅)
-│   ├── migrations/                         ✨ Daniela (created automaticaly by Alembic ✅)
-│   │   ├── env.py
+│   ├── alembic.ini                             ✨ Daniela (created automaticaly by Alembic ✅)
+│   ├── migrations/                             ✨ Daniela (created automaticaly by Alembic ✅)
+│   │   ├── env.py  
 │   │   ├── script.py.mako
 │   │   └── versions/
-│   ├── tests/                               ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
-│   ├── requirements.txt                     ✨ Daniela
-│   ├── Dockerfile                           ✨ Daniela
-│   └── .env.example                         ✨ Daniela
+│   ├── tests/                                  ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
+│   ├── requirements.txt                        ✨ Daniela
+│   ├── Dockerfile                              🌊 Malu 
+│   └── .env.example                            ✨ Daniela
 │
-├── realtime/                              🌊 Malu
+├── realtime/                                   🌊 Malu      
 │   ├── README.md # event documentation
 │   └── events.md
 │
 ├── docs/
-│   ├── ARCHITECTURE.md                      ✨ Daniela (done ✅)
-│   ├── API_CONTRACTS.md                     ✨ Daniela (done ✅)
-│   ├── AUTHORIZATION_MODEL.md               ✨ Daniela (done ✅)
-│   ├── PERMISSIONS_MATRIX.md                ✨ Daniela (done ✅)
-│   ├── USER_STORIES.md                      🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
-│   └── DEVELOPMENT_STANDARDS.md             ✨ Daniela (owner) + 🤜🤛 Team (input)
+│   ├── ARCHITECTURE.md                         ✨ Daniela (done ✅)
+│   ├── API_CONTRACTS.md                        ✨ Daniela (done ✅)
+│   ├── AUTHORIZATION_MODEL.md                  ✨ Daniela (done ✅)
+│   ├── PERMISSIONS_MATRIX.md                   ✨ Daniela (done ✅)
+│   ├── MODULES.md                              (done ✅)
+│   ├── USER_STORIES.md                         🌊 Malu + 🚀 Freddy (features) / ✨ Daniela (validation)
+│   └── DEVELOPMENT_STANDARDS.md                (done ✅)
 │
-├── docker-compose.yml                     🌊 Malu
+├── docker-compose.yml                          🌊 Malu
 ├── .env
 ├── .env.example
-├── .gitignore                             ✨ Daniela
-└── README.md                              ✨ Daniela (structure) + 🎨 Miguel (usage / screenshots)
+├── .gitignore                                  ✨ Daniela
+└── README.md                                   ✨ Daniela (structure) + 🎨 Miguel (usage / screenshots)
 ```

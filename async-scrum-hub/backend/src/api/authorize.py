@@ -23,18 +23,31 @@ Raises:
 	HTTPException: 401 si falta autenticación, 403 si no está autorizado
 """
 
-from typing import Optional
+import uuid
+from typing import Optional, Protocol
 from fastapi import HTTPException
 from .permissions import PERMISSIONS
+from src.database.models import User, Membership
 import logging
 logger = logging.getLogger("authz")
 
+"""
+Protocol defining the required attributes for resources that can be authorized.
+Any ORM model (Ticket, Task, Standup, Blocker) that implements these attributes
+will be compatible with the authorize() function.
+See ARCHITECTURE.md section 9.1 for details.
+"""
+class AuthorizableResource(Protocol):
+	organization_id: uuid.UUID
+	created_by: uuid.UUID
+	assignee_id: Optional[uuid.UUID]
+
 def authorize(
 	action: str,
-	user: Optional[dict] = None,
-	org_id: Optional[str] = None,
-	resource: Optional[dict] = None,
-	membership: Optional[dict] = None,
+	user: Optional[User] = None,
+	org_id: Optional[uuid.UUID] = None,
+	resource: Optional[AuthorizableResource] = None,
+	membership: Optional[Membership] = None,
 ) -> None:
 	
 	if action not in PERMISSIONS:
@@ -58,40 +71,40 @@ def authorize(
 	# ORG
 	if scope == "org":
 		if org_id is None:
-			if resource and resource.get("organization_id"):
-				org_id = resource["organization_id"]
+			if resource and resource.organization_id:
+				org_id = resource.organization_id
 			else:
 				raise HTTPException(500, "Organization context missing")
 		
 		if membership is None:
 			raise HTTPException(403, "Not a member of this organization")
 		
-		if not membership.get("org_role") or not membership.get("scrum_role"):
+		if not membership.org_role or not membership.scrum_role:
 			raise HTTPException(500, "Invalid membership structure")
 
 		# Admin override 
-		if membership.get("org_role") == "admin":
+		if membership.org_role == "admin":
 			return
 
 		# Role-based permission
-		if membership.get("scrum_role") in permission["roles"]:
+		if membership.scrum_role in permission["roles"]:
 			return
 		
 		# Ownership check (si aplica)
 		if permission["owner_allowed"] == True:
 			if resource is None:
 				raise HTTPException(500, "resource context missing")
-			if resource.get("created_by") == user["id"]:
+			if resource.created_by == user.id:
 				return
 
 		# Assignee check (si aplica)
 		if permission["assignee_allowed"] == True:
 			if resource is None:
 				raise HTTPException(500, "resource context missing")
-			if resource.get("assignee_id") == user["id"]:
+			if resource.assignee_id == user.id:
 				return
 			
-		logger.warning("DENIED | user=%s | action=%s | org=%s", user.get("id"), action, org_id ) #debuging		
+		logger.warning("DENIED | user=%s | action=%s | org=%s", user.id, action, org_id) #debuging		
 		raise HTTPException(403, "Insufficient permissions")
 
 
