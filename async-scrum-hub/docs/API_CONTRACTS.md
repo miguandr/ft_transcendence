@@ -341,42 +341,6 @@ file: binary (image file)
 ```
 ---
 
-### 2.4 Delete Avatar
-
-**Endpoint:** `DELETE /users/me/avatar`
-
-**Description:** Removes the avatar image for the currently authenticated user.
-
-**Authentication:** Required (JWT)
-
-**Permissions:**
-- The authenticated user
-
-**Success Response:** `204 No Content`
-
-**Error Responses:**
-
-`401 Unauthorized` - Authentication required
-```json
-{
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
-}
-```
-
-`404 Not Found` - No avatar to delete
-```json
-{
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "User does not have an avatar"
-  }
-}
-```
----
-
 ## 3. Organizations
 
 ### 3.1 Create Organization
