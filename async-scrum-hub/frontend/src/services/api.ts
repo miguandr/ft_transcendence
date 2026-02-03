@@ -21,7 +21,7 @@ const mockUsers: Array<{
 		email: "miguel@example.com",
 		password: "password123",  // In real backend, this would be hashed!
 		name: "Miguel",
-		current_organization_id: null,
+		current_organization_id: "2",
 		scrum_role: null,
 		org_role: null
 	}
@@ -36,6 +36,54 @@ const mockOrganizations = [
 		created_by: "user_0",
 	}
 ];
+
+const mockTickets: Array<{
+	id: string;
+	title: string;
+	status: "todo" | "in_progress" | "completed";
+	priority: "low" | "medium" | "high";
+	assignee_id: string;
+}> = [
+	{
+		id: "10",
+		title: "Update dashboard charts",
+		status: "todo",
+		priority: "medium",
+		assignee_id: "1"
+	}
+]
+
+const mockTasks: Array<{
+	id: string;
+	title: string;
+	status: "in_progress" | "completed";
+	ticket_id: string;
+	assignee_id: string;
+}> = [
+	{
+		id: "21",
+		title: "Build login UI",
+		status: "in_progress",
+		ticket_id: "10",
+		assignee_id: "0"
+	}
+]
+
+const mockBlocker: Array<{
+	id: string;
+	description: string;
+	status: "open" | "resolved",
+	created_at: string;
+	created_by: string;
+}> = [
+	{
+		id: "32",
+		description: "Waiting for API keys from client",
+		status: "open",
+		created_at: "1 day ago",
+		created_by: "1"
+	}
+]
 
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
@@ -104,6 +152,36 @@ interface OrganizationMember {
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 }
 
+interface OrganizationMemberWithActivity {
+	id: string;
+	name: string;
+	org_role: "admin" | "member";
+	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+
+	tickets: Array<{
+		id: string;
+		title: string;
+		status: "todo" | "in_progress" | "completed";
+		priority: "low" | "medium" | "high";
+		assignee_id: string;
+	}>
+
+	tasks: Array<{
+		id: string;
+		title: string,
+		status: "in_progress" | "completed";
+		ticket_id: string;
+		assignee_id: string;
+	}>
+
+	blockers: Array<{
+		id: string;
+		description: string;
+		status: "open" | "resolved",
+		created_at: string;
+		created_by: string;
+	}>
+}
 
 interface ApiError {
 	error: {
@@ -343,6 +421,41 @@ export async function getCurrentUser(): Promise<User> {
 	return mockUsers[0]; // Return first user
 }
 
+// Mock getCurrentUserInfo function
+export async function getCurrentUserInfo(org_id: string): Promise<OrganizationMemberWithActivity[]>
+{
+	await delay(300);
+
+	// Step 1: Which users belong to this org?
+	const orgMembers = mockUsers.filter(user => user.current_organization_id === org_id);
+	if (orgMembers.length === 0) {
+		createApiError("NOT_FOUND", "No members found in this organization")
+	}
+
+	// Step 2: For EACH user, build their data
+	const membersWithActivity = orgMembers.map(user => {
+		// Find THIS user's tickets
+		const userTickets = mockTickets.filter(ticket => ticket.assignee_id === user.id);
+
+		// Find THIS user's tasks
+		const userTasks = mockTasks.filter(task => task.assignee_id === user.id);
+
+		// Find THIS user's blockers
+		const userBlockers = mockBlocker.filter(blocker => blocker.created_by === user.id);
+
+	return {
+			id: user.id,
+			name: user.name,
+			org_role: user.org_role!,
+			scrum_role: user.scrum_role!,
+			tickets: userTickets,
+			tasks: userTasks,
+			blockers: userBlockers,
+		};
+	});
+
+	return membersWithActivity;
+}
 
 // =============================================================
 // REAL FETCH VERSIONS - Replace mock functions with these
