@@ -205,6 +205,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
+  "avatar_url": "string | null",
   "current_organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
@@ -248,6 +249,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
+  "avatar_url": "string | null",
   "current_organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
@@ -272,6 +274,104 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "error": {
 	"code": "UNAUTHORIZED",
 	"message": "Authentication required"
+  }
+}
+```
+---
+
+### 2.3 Upload Avatar
+
+**Endpoint:** `POST /users/me/avatar`
+
+**Description:** Uploads or updates the avatar image for the currently authenticated user.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- The authenticated user
+
+**Rules:**
+- Accepted formats: JPEG, PNG, GIF, WebP
+- Maximum file size: 5MB
+- Images are automatically resized to 256x256 pixels
+- Previous avatar is replaced when a new one is uploaded
+
+**Request Body:** `multipart/form-data`
+```
+file: binary (image file)
+```
+
+**Success Response:** `200 OK`
+```json
+{
+  "avatar_url": "string (URL to the uploaded avatar)"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid file type
+```json
+{
+  "error": {
+	"code": "INVALID_FILE_TYPE",
+	"message": "Only JPEG, PNG, GIF, and WebP images are allowed"
+  }
+}
+```
+
+`400 Bad Request` - File too large
+```json
+{
+  "error": {
+	"code": "FILE_TOO_LARGE",
+	"message": "File size exceeds the maximum limit of 5MB"
+  }
+}
+```
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+---
+
+### 2.4 Delete Avatar
+
+**Endpoint:** `DELETE /users/me/avatar`
+
+**Description:** Removes the avatar image for the currently authenticated user.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- The authenticated user
+
+**Success Response:** `204 No Content`
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`404 Not Found` - No avatar to delete
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "User does not have an avatar"
   }
 }
 ```
@@ -492,6 +592,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
+  "name": "string",
   "email": "string"
 }
 ```
@@ -1926,7 +2027,7 @@ Used to render the organization board.
 		"created_by": "uuid (owner)",
 		"description": "string",
 		"status": "open | resolved",
-		"assignee_id": "uuid | null"
+		"assignee_id": "uuid | null",
 		"task_id": "uuid | null",
 		"created_at": "timestamp (today)",
 		"resolved_at": "timestamp | null"
@@ -2123,6 +2224,46 @@ Used to render the organization board.
   "error": {
 	"code": "BLOCKER_ALREADY_RESOLVED",
 	"message": "Blocker already resolved"
+  }
+}
+```
+---
+
+## 8. Legal
+
+### 8.1 Get Legal Document
+
+**Endpoint:** `GET /legal/documents/{key}`
+
+**Description:** Returns a legal document by its key.
+
+**Authentication:** Public
+
+**URL Parameters:**
+- `key` - Document identifier: `privacy` | `terms`
+
+**Notes:**
+- Documents are rendered from Markdown stored in the repository (`legal/privacy.md`, `legal/terms.md`)
+- Content is converted to HTML and returned in the response
+
+**Success Response:** `200 OK`
+```json
+{
+  "key": "privacy",
+  "title": "Privacy Policy",
+  "content_html": "<h1>Privacy Policy</h1><p>...</p>",
+  "updated_at": "timestamp"
+}
+```
+
+**Error Responses:**
+
+`404 Not Found` - Document not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Legal document not found"
   }
 }
 ```

@@ -19,8 +19,10 @@
 4. [Standups](#4-standups)
 5. [Blockers](#5-blockers)
 6. [Users](#6-users)
-7. [Special Permission Legend](#special_permission_legend)
-8. [Special Rules per Resource](#special_rules_per_resource)
+7. [Legal](#7-legal)
+8. [Special Permission Legend](#special-permission-legend)
+9. [Special Rules per Resource](#special-rules-per-resource)
+10. [Common Error Codes](#common-error-codes)
 
 ---
 
@@ -131,12 +133,27 @@
 | **Login**               | ✅           | Public endpoint
 | **Get own profile**     | ✅           | Authenticated user only
 | **Update own profile**  | ✅           | Authenticated user only
+| **Upload avatar**       | ✅           | Authenticated user only
+| **Delete avatar**       | ✅           | Authenticated user only
 
 **Endpoints:**
 - `POST /auth/register` - Register
 - `POST /auth/login` - Login
 - `GET /users/me` - Get current user
 - `PATCH /users/me` - Update current user
+- `POST /users/me/avatar` - Upload avatar
+- `DELETE /users/me/avatar` - Delete avatar
+
+---
+
+## 7. Legal
+
+| Action	                | All Roles	 | Notes
+|-------------------------|--------------|-----------
+| **Get legal document**  | ✅           | Public endpoint
+
+**Endpoints:**
+- `GET /legal/documents/{key}` - Get legal document (key = `privacy` | `terms`)
 
 ---
 
@@ -248,17 +265,20 @@ Organization
 | HTTP Status | Error Code                 | Description
 |-------------|----------------------------|------------------------------------
 | 400         | `INVALID_INPUT`            | Invalid request data
-| 400         | `INVALID_ROLE`             | Invalid role
-| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role
+| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role (must be Developer)
+| 400         | `INVALID_CODE`             | Invalid organization join code
+| 400         | `INVALID_FILE_TYPE`        | Invalid file type for upload
+| 400         | `FILE_TOO_LARGE`           | File exceeds maximum size limit
 | 401         | `UNAUTHORIZED`             | Missing or invalid JWT
-| 401         | `INVALID_CREDENTIALS`      | Invalid credentials
+| 401         | `INVALID_CREDENTIALS`      | Invalid email or password
 | 403         | `FORBIDDEN`                | Insufficient permissions
 | 404         | `NOT_FOUND`                | Resource not found
-| 409         | `USER_EXISTS`              | User already exists
-| 409         | `ALREADY_MEMBER`           | User already a member
-| 409         | `STANDUP_ALREADY_EXISTS`   | Standup already created
-| 409         | `EDIT_WINDOW_EXPIRED`      | Standup edit window expired
-| 409         | `BLOCKER_ALREADY_RESOLVED` | Blocker already resolved
+| 409         | `USER_EXISTS`              | User with this email already exists
+| 409         | `ORG_EXISTS`               | Organization with this name already exists
+| 409         | `ALREADY_MEMBER`           | User is already a member of the organization
+| 409         | `STANDUP_ALREADY_EXISTS`   | User already created a standup today
+| 409         | `EDIT_WINDOW_EXPIRED`      | Standup can only be edited on creation day
+| 409         | `BLOCKER_ALREADY_RESOLVED` | Blocker has already been resolved
 
 ---
 
