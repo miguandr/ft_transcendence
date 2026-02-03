@@ -33,7 +33,7 @@ class Organization(Base):
  
 	created_by: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id"),
+		ForeignKey("users.id", ondelete="RESTRICT"),  # Prevent deleting User if they created orgs
 		nullable=False
 	)
 
@@ -46,13 +46,15 @@ class Organization(Base):
 
 	memberships: Mapped[list["Membership"]] = relationship(
 		"Membership",
-		back_populates="organization"
+		back_populates="organization",
+		cascade="all, delete-orphan"  # If Org is deleted, delete its memberships
 	)
 
 	current_users: Mapped[list["User"]] = relationship(
 		"User",
 		foreign_keys="User.current_organization_id",
-		back_populates="current_organization"
+		back_populates="current_organization",
+		passive_deletes=True  # DB handles SET NULL via FK (defined in User)
 	)
 	# End of Relationships
 	

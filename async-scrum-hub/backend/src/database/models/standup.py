@@ -7,26 +7,19 @@ IMPORTANT - Authorization Fields Required (see ARCHITECTURE.md section 9.1):
 
 NOTE: Standup does not have assignee_id (standups are not assignable)
 
-RELATIONSHIPS to add (see User, Membership, Organization for examples):
-- organization: relationship("Organization", foreign_keys=[organization_id])
-- creator: relationship("User", foreign_keys=[created_by])
+FOREIGNKEYS - Add ondelete for cascade behavior:
+- organization_id: ForeignKey("organizations.id", ondelete="CASCADE")
+- created_by: ForeignKey("users.id", ondelete="CASCADE")
 
-Example:
-    from sqlalchemy.orm import relationship
-    from typing import TYPE_CHECKING
+RELATIONSHIPS - Add Relationships and back_populates for bidirectional access:
+- organization: relationship("Organization", back_populates="standups")
+- creator: relationship("User", back_populates="standups")
 
-    if TYPE_CHECKING:
-        from .user import User
-        from .organization import Organization
+NOTE: Organization and User models will need the reverse relationships added:
+- Organization.standups: list["Standup"]
+- User.standups: list["Standup"]
 
-    class Standup(Base):
-        # ForeignKeys
-        organization_id: Mapped[uuid.UUID] = mapped_column(...)
-        created_by: Mapped[uuid.UUID] = mapped_column(...)
-
-        # Relationships
-        organization: Mapped["Organization"] = relationship("Organization", foreign_keys=[organization_id])
-        creator: Mapped["User"] = relationship("User", foreign_keys=[created_by])
+See User, Membership, Organization models for complete examples.
 """
 
 # TODO: Implement Standup model - assigned to Malu

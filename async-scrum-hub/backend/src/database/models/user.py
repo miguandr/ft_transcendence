@@ -31,7 +31,6 @@ class User(Base):
 		nullable=False
 	)  
 
-	#check with migue if pass check happens in the frontend
 	password_hash: Mapped[str] = mapped_column(
 		String, 
 		nullable=False
@@ -39,7 +38,7 @@ class User(Base):
 
 	current_organization_id: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("organizations.id"),
+		ForeignKey("organizations.id", ondelete="SET NULL"),  # If Org is deleted, set NULL
 		nullable=True,
 	)
 
@@ -52,13 +51,15 @@ class User(Base):
 
 	memberships: Mapped[list["Membership"]] = relationship(
 		"Membership",
-		back_populates="user"
+		back_populates="user",
+		cascade="all, delete-orphan"  # If User is deleted, delete their memberships
 	)
 
 	created_organizations: Mapped[list["Organization"]] = relationship(
 		"Organization",
 		foreign_keys="Organization.created_by",
-		back_populates="creator"
+		back_populates="creator",
+		passive_deletes=True
 	)
 	# End of Relationships
 	

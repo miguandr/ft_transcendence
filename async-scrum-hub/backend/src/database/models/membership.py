@@ -49,13 +49,13 @@ class Membership(Base):
 
 	user_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id"),
+		ForeignKey("users.id", ondelete="CASCADE"),  # If User is deleted, delete membership
 		nullable=False
 	)
 
 	organization_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("organizations.id"),
+		ForeignKey("organizations.id", ondelete="CASCADE"),  # If Org is deleted, delete membership
 		nullable=False,
 	)
 
