@@ -2,8 +2,12 @@ import uuid
 from datetime import datetime
 from sqlalchemy import DateTime, String, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from .organization import Organization
 
 class User(Base):
 	__tablename__ = "users"
@@ -36,6 +40,12 @@ class User(Base):
 		UUID(as_uuid=True),
 		ForeignKey("organizations.id"),
 		nullable=True,
+	)
+
+	# Relationships
+	current_organization: Mapped["Organization | None"] = relationship(
+		"Organization",
+		foreign_keys=[current_organization_id]
 	)
 
 	created_at: Mapped[datetime] = mapped_column(
