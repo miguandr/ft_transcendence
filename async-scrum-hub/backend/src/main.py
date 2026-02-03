@@ -1,0 +1,85 @@
+"""
+FastAPI Application Entry Point
+
+This is the main entry point for the Async Scrum Hub backend API.
+It initializes the FastAPI application, configures middleware, and includes API routers.
+"""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+# Create FastAPI application instance
+app = FastAPI(
+    title="Async Scrum Hub API",
+    description="Backend API for Async Scrum Hub - A remote-first collaboration platform",
+    version="1.0.0",
+    docs_url="/docs",  # Swagger UI documentation
+    redoc_url="/redoc",  # ReDoc documentation
+)
+
+# Configure CORS (Cross-Origin Resource Sharing)
+# This allows the frontend (running on port 5173) to make requests to the backend (port 8000)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Frontend dev server
+        "http://localhost:3000",  # Alternative frontend port
+        "http://frontend:5173",   # Docker service name
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
+
+# Root endpoint - Health check
+@app.get("/")
+def read_root():
+    """
+    Root endpoint that returns basic API information.
+    This is useful for health checks and verifying the API is running.
+    """
+    return {
+        "message": "Async Scrum Hub API",
+        "status": "running",
+        "version": "1.0.0",
+        "docs": "/docs",
+    }
+
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    """
+    Health check endpoint for monitoring and Docker health checks.
+    Returns a simple status indicating the API is operational.
+    """
+    return {"status": "healthy"}
+
+
+# API v1 prefix will be used for all API routes
+# Example: /api/v1/auth/register
+@app.get("/api/v1")
+def api_info():
+    """
+    API v1 information endpoint.
+    """
+    return {
+        "version": "1.0.0",
+        "endpoints": {
+            "auth": "/api/v1/auth",
+            "organizations": "/api/v1/organizations",
+            "tickets": "/api/v1/tickets",
+            "tasks": "/api/v1/tasks",
+            "standups": "/api/v1/standups",
+            "blockers": "/api/v1/blockers",
+        }
+    }
+
+
+# TODO: Include API routers here as they are implemented
+# Example:
+# from .auth import routes as auth_routes
+# from .organizations import routes as org_routes
+# app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["auth"])
+# app.include_router(org_routes.router, prefix="/api/v1/organizations", tags=["organizations"])

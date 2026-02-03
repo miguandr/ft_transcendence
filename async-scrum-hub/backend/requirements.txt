@@ -1,0 +1,33 @@
+# FastAPI - Modern, fast web framework for building APIs
+fastapi==0.115.0
+
+# Uvicorn - ASGI server for running FastAPI
+uvicorn[standard]==0.32.0
+
+# SQLAlchemy - SQL toolkit and ORM
+sqlalchemy==2.0.36
+
+# Alembic - Database migration tool for SQLAlchemy
+alembic==1.14.0
+
+# psycopg2-binary - PostgreSQL adapter for Python
+psycopg2-binary==2.9.10
+
+# Pydantic - Data validation using Python type annotations
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Python-jose - JWT token handling
+python-jose[cryptography]==3.3.0
+
+# Passlib - Password hashing library
+passlib[bcrypt]==1.7.4
+
+# Python-multipart - For handling file uploads
+python-multipart==0.0.12
+
+# Python-dotenv - Read environment variables from .env file
+python-dotenv==1.0.1
+
+# CORS middleware
+# (fastapi already includes starlette which has CORSMiddleware, no extra package needed)
