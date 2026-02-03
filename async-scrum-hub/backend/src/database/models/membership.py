@@ -60,9 +60,18 @@ class Membership(Base):
 	)
 
 	# Relationships
-	user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
-	organization: Mapped["Organization"] = relationship("Organization", foreign_keys=[organization_id])
-
+	user: Mapped["User"] = relationship(
+		"User",
+		foreign_keys=[user_id],
+		back_populates="memberships"
+	)
+	organization: Mapped["Organization"] = relationship(
+		"Organization",
+		foreign_keys=[organization_id],
+		back_populates="memberships"
+	)
+	# End of Relationships
+	
 	org_role: Mapped[str] = mapped_column(
 		String(20),
 		nullable=False,

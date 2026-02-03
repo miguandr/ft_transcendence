@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from .organization import Organization
+	from .membership import Membership
 
 class User(Base):
 	__tablename__ = "users"
@@ -45,9 +46,22 @@ class User(Base):
 	# Relationships
 	current_organization: Mapped["Organization | None"] = relationship(
 		"Organization",
-		foreign_keys=[current_organization_id]
+		foreign_keys=[current_organization_id],
+		back_populates="current_users"
 	)
 
+	memberships: Mapped[list["Membership"]] = relationship(
+		"Membership",
+		back_populates="user"
+	)
+
+	created_organizations: Mapped[list["Organization"]] = relationship(
+		"Organization",
+		foreign_keys="Organization.created_by",
+		back_populates="creator"
+	)
+	# End of Relationships
+	
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True), 
 		server_default=func.now(),
