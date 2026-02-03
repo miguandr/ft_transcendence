@@ -25,6 +25,7 @@ export function TeamSetup() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [takenRoles, setTakenRoles] = useState<(string[])>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
+	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
 
 	// ===== FUNCTION DEFINITIONS =====
@@ -71,6 +72,7 @@ export function TeamSetup() {
 				setErrors({ join: "Invalid team code" });
 			}else if (error?.error?.code === "ALREADY_MEMBER") {
 				setErrors({ join: "You're already a member of this organization" });
+				setShowLoginPrompt(true);
 			} else if (error?.error?.message) {
 				setErrors({ join: error.error.message });
 			} else {
@@ -237,6 +239,7 @@ export function TeamSetup() {
 						onClick={() => {
 							setTeamMode("join");
 							setErrors({ create: undefined }); // Clear create errors when switching to join
+							setShowLoginPrompt(false);
 						}}
 						className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 					>
@@ -279,6 +282,15 @@ export function TeamSetup() {
 						{isLoading ? "Checking..." : "Check code"}
 						</Button>
 						{errors.join && <ErrorText>{errors.join}</ErrorText>}
+						{showLoginPrompt && (
+							<Button
+								onClick={() => navigate("/login")}
+								variant="outlined"
+								className="w-full mt-2"
+							>
+								Go to Login
+							</Button>
+						)}
 					</div>
 					)}
 
