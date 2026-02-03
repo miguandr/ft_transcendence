@@ -334,6 +334,16 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   }
 }
 ```
+
+`409 Conflict` - Organization already exists
+```json
+{
+  "error": {
+    "code": "ORG_EXISTS",
+    "message": "An organization with this name already exists."
+  }
+}
+```
 ---
 ### 3.2 Select Role
 
@@ -623,13 +633,12 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```
 
 **Error Responses:**
-
-`404 Not Found` - Organization or user not found
+`400 Bad Request` - Wether a code exists
 ```json
 {
   "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization or user not found"
+    "code": "INVALID_CODE",
+    "message": "Invalid code."
   }
 }
 ```

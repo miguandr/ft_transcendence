@@ -12,7 +12,7 @@ import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
 import { BlockersEmpty } from "./features/blockers/BlockersEmpty";
 import { Analytics } from "./features/analytics/Analytics";
-import { TeamHealth } from "./features/team_health/TeamHealth";
+import { Info } from "./features/info/Info";
 
 function AppLayout()
 {
@@ -48,7 +48,7 @@ function AppLayout()
 				<Route path="/blockers" element={<Blockers />} />
 				<Route path="/blockers-empty" element={<BlockersEmpty />} />
 				<Route path="/analytics" element={<Analytics />} />
-				<Route path="/team-health" element={<TeamHealth />} />
+				<Route path="/info" element={<Info />} />
 			</Routes>
 			</main>
 		</div>

@@ -16,28 +16,34 @@ export function TeamSetup() {
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
 	const [confirmedTeam, setConfirmedTeam] = useState<{ name: string; code?: string; members?: number } | null>(null);
 	const [orgId, setOrgId] = useState<string | null>(null);
-	const [createdBy, setCreatedBy] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
-	const [errors, setErrors] = useState<{ team?: string; role?: string }>({});
+	const [errors, setErrors] = useState<{
+		join?: string;
+		create?: string;
+		continue?: string
+	}>({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [takenRoles, setTakenRoles] = useState<(string[])>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
+	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
 
 	// ===== FUNCTION DEFINITIONS =====
 	//When user enters a team code and clicks "Check code"
-	const handleCheckCode = async (e: React.FormEvent) => {
+	const handleCheckCode = async (e: React.FormEvent) =>
+	{
 		e.preventDefault(); // Prevents page refresh when form submits
+		setErrors({}); // Clear previous errors
 
 		//Validation: checks if team-code is empty
 		if (!teamCode.trim()) {
-			setErrors({ team: "Team code is required "});
+			setErrors({ join: "Team code is required" });
 			return;
 		}
 
 		//Call API
 		setIsLoading(true); // Show loading spinner
-		setErrors({}); // Clear previous errors
+
 
 		try {
 			// Step 1: Validate code and get org info
@@ -62,36 +68,46 @@ export function TeamSetup() {
 
 		} catch (error: any) {
 			// Handle API errors
-			if (error?.error?.code === "CODE_NOT_FOUND") {
-				setErrors({ team: "Invalid team code" });
+			if (error?.error?.code === "INVALID_CODE") {
+				setErrors({ join: "Invalid team code" });
+			}else if (error?.error?.code === "ALREADY_MEMBER") {
+				setErrors({ join: "You're already a member of this organization" });
+				setShowLoginPrompt(true);
 			} else if (error?.error?.message) {
-				setErrors({ team: error.error.message });
+				setErrors({ join: error.error.message });
 			} else {
-				setErrors({ team: "Something went wrong" });
+				setErrors({ join: "Something went wrong" });
 			}
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	// ON THE MAKING ! ! ! ! ! ! ! ! ! ! !
-	const handleCreateTeam = async (e: React.FormEvent) => { // Accept form event parameter
+
+	const handleCreateTeam = async (e: React.FormEvent) => // Accept form event parameter
+	{
 		e.preventDefault(); // Prevent page refresh
+		setErrors({}); // Clear previous errors
+
 		if (!teamName.trim()) {
-			setErrors({ team: "Team name is required "});
+			setErrors({ create: "Team name is required" });
+			return;
+		} if (teamName.trim().length < 3) {
+			setErrors({ create: "Team name must be at least 3 characters" });
+			return;
+		} if (teamName.trim().length > 50) {
+			setErrors({ create: "Team name must have less than 50  characters" });
 			return;
 		}
 
 		setIsLoading(true); // Show loading spinner
-		setErrors({}); // Clear previous errors
 
 		try {
 			// Step 1: Get org info
 			const response = await createOrganization({ name: teamName });
 
-			//Step 2: Update state // IS THIS CORRECT?
+			//Step 2: Update state
 			setOrgId(response.id);
-			setCreatedBy(response.created_by);
 			setConfirmedTeam({
 				name: teamName,
 				code: response.join_code,
@@ -101,30 +117,73 @@ export function TeamSetup() {
 
 		} catch (error: any) {
 			// Handle API errors
-			if (error?.error?.message) {
-				setErrors({ team: error.error.message });
+			if (error?.error?.code === "INVALID_INPUT") {
+				setErrors({ create: "Team name is required." });
+			} else if (error?.error?.code === "UNAUTHORIZED") {
+				setErrors({ create: "Authentication required" });
+			} else if (error?.error?.code === "ORG_EXISTS") {
+				setErrors({ create: "An organization with this name already exists." })
+			} else if (error?.error?.message) {
+				setErrors({ create: error.error.message });
 			} else {
-				setErrors({ team: "Something went wrong" });
+				setErrors({ create: "Something went wrong." });
 			}
 		} finally {
 			setIsLoading(false);
 		}
-
 	};
 
-	//TODO
-	const handleCopyCode = () => {
+
+	const handleCopyCode = () =>
+	{
 		if (confirmedTeam?.code) {
-		navigator.clipboard.writeText(confirmedTeam.code);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+			navigator.clipboard.writeText(confirmedTeam.code);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
 		}
 	};
 
-	//TODO
-	const handleContinue = () => {
-		if (teamConfirmed && selectedRole) {
+
+	const handleContinue = async () =>
+	{
+		setErrors({}); // Clear previous errors
+		// Step 1: Validation
+		if (!teamConfirmed || !selectedRole || !orgId) {
+			return;
+		}
+
+		// Step 2: Loading state
+		setIsLoading(true);
+
+		try
+		{
+			// Step 3: Check which mode (create or join)
+			if (teamMode === "create") {
+				await setUserRole({
+				organization_id: orgId as string,
+				scrum_role: selectedRole as "scrum_master" | "product_owner"
+			});
+		} else {
+			await joinOrganization({
+				join_code: teamCode,
+				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer"
+			});
+		}
+
+
+		// Step 4: Success! Navigate to dashboard
 		navigate("/");
+
+		} catch (error: any) {
+			// Step 5: Handle errors
+			if (error?.error?.message) {
+				setErrors({ continue: error.error.message });
+			} else {
+				setErrors({ continue: "Something went wrong" });
+			}
+		} finally {
+		// Step 6: Clear loading state
+		setIsLoading(false);
 		}
 	};
 
@@ -174,58 +233,64 @@ export function TeamSetup() {
 				<div className="space-y-5">
 					{/* Toggle */}
 					<div className="flex gap-3">
-					<button
-						type="button"
-						onClick={() => setTeamMode("join")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "join"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+					<Button
+						variant="outlined"
+						isActive={teamMode === "join"}
+						onClick={() => {
+							setTeamMode("join");
+							setErrors({ create: undefined }); // Clear create errors when switching to join
+							setShowLoginPrompt(false);
+						}}
+						className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 					>
 						I have a team code
-					</button>
-					<button
-						type="button"
-						onClick={() => setTeamMode("create")}
-						className={`flex-1 px-4 py-3 rounded-xl border-2 text-sm transition-colors ${
-						teamMode === "create"
-							? "border-cyan-500 bg-cyan-50 text-cyan-700"
-							: "border-gray-200 text-gray-600 hover:border-gray-300"
-						}`}
+					</Button>
+					<Button
+						variant="outlined"
+						isActive={teamMode === "create"}
+						onClick={() => {
+							setTeamMode("create")
+							setErrors({ join: undefined }); // Clear join errors when switching to create
+						}}
+						className={`flex-1 px-4 ${teamMode === "create" ? "border-cyan-500!" : ""}`}
 					>
 						Create a new team
-					</button>
+					</Button>
 					</div>
 
 					{/* Join Team */}
 					{teamMode === "join" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamCode" className="block text-sm text-gray-700 mb-2">
-							Team code
-						</label>
-						<input
+						<Label htmlFor="teamCode">Team code</Label>
+						<Input
 							type="text"
 							id="teamCode"
 							value={teamCode}
 							onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-center tracking-wider"
+							hasError={!!errors.join}
+							className="text-center tracking-wider"
 							placeholder="Enter your code"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
 						onClick={handleCheckCode}
-						disabled={!teamCode.trim()}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamCode.trim()
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						disabled={!teamCode.trim() || isLoading}
+						variant="primary"
+						className="w-full"
 						>
-						Check code
-						</button>
+						{isLoading ? "Checking..." : "Check code"}
+						</Button>
+						{errors.join && <ErrorText>{errors.join}</ErrorText>}
+						{showLoginPrompt && (
+							<Button
+								onClick={() => navigate("/login")}
+								variant="outlined"
+								className="w-full mt-2"
+							>
+								Go to Login
+							</Button>
+						)}
 					</div>
 					)}
 
@@ -233,30 +298,25 @@ export function TeamSetup() {
 					{teamMode === "create" && (
 					<div className="space-y-3">
 						<div>
-						<label htmlFor="teamName" className="block text-sm text-gray-700 mb-2">
-							Team name
-						</label>
-						<input
+						<Label htmlFor="teamName">Team name</Label>
+						<Input
 							type="text"
 							id="teamName"
 							value={teamName}
 							onChange={(e) => setTeamName(e.target.value)}
-							className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+							hasError={!!errors.create}
 							placeholder="e.g. Product Development"
 						/>
 						</div>
-						<button
-						type="button"
+						<Button
+						variant="primary"
 						onClick={handleCreateTeam}
-						disabled={!teamName.trim()}
-						className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-							teamName.trim()
-							? "bg-cyan-600 text-white hover:bg-cyan-700"
-							: "bg-gray-200 text-gray-400 cursor-not-allowed"
-						}`}
+						disabled={!teamName.trim() || isLoading}
+						className="w-full"
 						>
-						Create team
-						</button>
+						{isLoading ? "Creating..." : "Create team"}
+						</Button>
+						{errors.create && <ErrorText>{errors.create}</ErrorText>}
 					</div>
 					)}
 				</div>
@@ -281,9 +341,10 @@ export function TeamSetup() {
 						<div className="flex-1 px-3 py-2 bg-white rounded-lg border border-emerald-200">
 							<span className="text-sm text-gray-900 tracking-wider">{confirmedTeam.code}</span>
 						</div>
-						<button
-							type="button"
+						<Button
 							onClick={handleCopyCode}
+							variant="secondary"
+							size="sm"
 							className="p-2 bg-white border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors"
 						>
 							{copied ? (
@@ -291,7 +352,7 @@ export function TeamSetup() {
 							) : (
 							<Copy className="w-4 h-4 text-emerald-600" />
 							)}
-						</button>
+						</Button>
 						</div>
 						<p className="text-xs text-emerald-700 mt-2">
 						Share this code with your team members
@@ -324,15 +385,16 @@ export function TeamSetup() {
 					const isTaken = takenRoles.includes(role.id);
 					const isSelected = selectedRole === role.id;
 					const Icon = role.icon;
+					const isDisabled = isTaken || (teamMode === "create" && role.id === "developer");
 
 					return (
 						<button
 						key={role.id}
 						type="button"
-						onClick={() => !isTaken && setSelectedRole(role.id as Role)}
-						disabled={isTaken}
+						onClick={() => !isDisabled && setSelectedRole(role.id as Role)}
+						disabled={isDisabled}
 						className={`p-5 rounded-xl border-2 text-left transition-all ${
-							isTaken
+							isDisabled
 							? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
 							: isSelected
 							? "border-cyan-500 bg-cyan-50"
@@ -377,20 +439,17 @@ export function TeamSetup() {
 			</div>
 			</div>
 
-			{/* Primary Action */}
+			{/* Continue to Dashboard */}
 			<div className="mt-10">
-			<button
-				type="button"
+			<Button
 				onClick={handleContinue}
-				disabled={!teamConfirmed || !selectedRole}
-				className={`w-full px-6 py-3 text-sm rounded-xl transition-colors ${
-				teamConfirmed && selectedRole
-					? "bg-cyan-600 text-white hover:bg-cyan-700"
-					: "bg-gray-200 text-gray-400 cursor-not-allowed"
-				}`}
+				variant="primary"
+				disabled={!teamConfirmed || !selectedRole || isLoading}
+				className="w-full"
 			>
-				Continue to dashboard
-			</button>
+				{isLoading ? "Loading..." : "Continue to dashboard"}
+			</Button>
+			{errors.continue && <ErrorText>{errors.continue}</ErrorText>}
 			</div>
 		</div>
 		</div>
