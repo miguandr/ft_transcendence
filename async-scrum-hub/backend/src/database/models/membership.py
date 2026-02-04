@@ -2,9 +2,14 @@ import uuid
 import enum
 from sqlalchemy import String, ForeignKey, UniqueConstraint, CheckConstraint, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from ..base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from .user import User
+	from .organization import Organization
 
 
 class OrgRole(str, enum.Enum):
@@ -44,16 +49,29 @@ class Membership(Base):
 
 	user_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id"),
+		ForeignKey("users.id", ondelete="CASCADE"),  # If User is deleted, delete membership
 		nullable=False
 	)
 
 	organization_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("organizations.id"),
+		ForeignKey("organizations.id", ondelete="CASCADE"),  # If Org is deleted, delete membership
 		nullable=False,
 	)
 
+	# Relationships
+	user: Mapped["User"] = relationship(
+		"User",
+		foreign_keys=[user_id],
+		back_populates="memberships"
+	)
+	organization: Mapped["Organization"] = relationship(
+		"Organization",
+		foreign_keys=[organization_id],
+		back_populates="memberships"
+	)
+	# End of Relationships
+	
 	org_role: Mapped[str] = mapped_column(
 		String(20),
 		nullable=False,
