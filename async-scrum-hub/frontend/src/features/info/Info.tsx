@@ -1,157 +1,97 @@
-import { useState } from "react";
-import {
-	AlertCircle,
-	CheckSquare,
-	FileText,
-	ShieldAlert,
-	Trash2,
-	//X,
-	ChevronDown,
-	ChevronUp,
-} from "lucide-react";
-
-type OrgRole = "Admin" | "Member";
-type ScrumRole = "Product Owner" | "Scrum Master" | "Developer";
+import { useState, useEffect } from "react";
+import { AlertCircle, CheckSquare, FileText, ShieldAlert, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
+import { formatOrgRole, formatScrumRole, generateAvatar, assignColor } from "../../utils/formatters";
 
 interface Member {
 	id: string;
 	name: string;
 	avatar: string;
 	color: string;
-	orgRole: OrgRole;
-	scrumRole: ScrumRole;
-	activeTickets: number;
-	activeTasks: number;
-	openBlockers: number;
+	orgRole: "Admin" | "Member";
+	scrumRole: "Product Owner" | "Scrum Master" | "Developer";
+	tickets: ActivityDetail[];
+	tasks: ActivityDetail[];
+	blockers: ActivityDetail[];
 }
 
 interface ActivityDetail {
-	id: number;
+	id: string;
 	title: string;
-	status?: string;
+	status?: "todo" | "in_progress" | "completed";
+	priority?: "low" | "medium" | "high";
 }
 
 export function Info() {
-	// Mock current user (admin)
-	const currentUser = {
-		id: "sc",
-		orgRole: "Admin" as OrgRole,
-	};
-
-	const [members] = useState<Member[]>([
-		{
-			id: "sc",
-			name: "Sarah Chen",
-			avatar: "SC",
-			color: "from-emerald-200 to-green-300",
-			orgRole: "Admin",
-			scrumRole: "Product Owner",
-			activeTickets: 2,
-			activeTasks: 1,
-			openBlockers: 0,
-		},
-		{
-			id: "ak",
-			name: "Alex Kim",
-			avatar: "AK",
-			color: "from-cyan-200 to-blue-300",
-			orgRole: "Member",
-			scrumRole: "Developer",
-			activeTickets: 3,
-			activeTasks: 2,
-			openBlockers: 2,
-		},
-		{
-			id: "ml",
-			name: "Maria Lopez",
-			avatar: "ML",
-			color: "from-pink-200 to-rose-300",
-			orgRole: "Member",
-			scrumRole: "Developer",
-			activeTickets: 2,
-			activeTasks: 1,
-			openBlockers: 1,
-		},
-		{
-			id: "jl",
-			name: "Jordan Lee",
-			avatar: "JL",
-			color: "from-amber-200 to-yellow-300",
-			orgRole: "Member",
-			scrumRole: "Developer",
-			activeTickets: 1,
-			activeTasks: 0,
-			openBlockers: 0,
-		},
-	]);
-
-	// Mock activity data
-	const memberActivities: Record<
-		string,
-		{
-			tickets: ActivityDetail[];
-			tasks: ActivityDetail[];
-			blockers: ActivityDetail[];
-		}
-	> = {
-		sc: {
-			tickets: [
-				{ id: 4, title: "Update dashboard charts", status: "doing" },
-				{ id: 1, title: "Design settings page", status: "todo" },
-			],
-			tasks: [{ id: 3, title: "Add date range picker", status: "in-progress" }],
-			blockers: [],
-		},
-		ak: {
-			tickets: [
-				{ id: 3, title: "Implement OAuth flow", status: "doing" },
-				{ id: 2, title: "Write API documentation", status: "todo" },
-			],
-			tasks: [
-				{ id: 1, title: "Set up OAuth providers", status: "in-progress" },
-				{ id: 2, title: "Build login UI", status: "in-progress" },
-			],
-			blockers: [
-				{ id: 1, title: "Waiting for API keys from client" },
-				{ id: 3, title: "Third-party API rate limiting in dev environment" },
-			],
-		},
-		ml: {
-			tickets: [
-				{ id: 1, title: "Design settings page", status: "todo" },
-				{ id: 5, title: "Create mobile layouts", status: "doing" },
-			],
-			tasks: [{ id: 7, title: "Responsive navigation component", status: "in-progress" }],
-			blockers: [{ id: 4, title: "Waiting for design approval on settings page" }],
-		},
-		jl: {
-			tickets: [{ id: 2, title: "Write API documentation", status: "todo" }],
-			tasks: [],
-			blockers: [],
-		},
-	};
 
 	// Modal states
+	const [members, setMembers] = useState<Member[]>([]); // Start with empty array of members
+	const [currentUser, setCurrentUser] = useState<"Admin" | "Member" | null>(null);
+	const [orgId, setOrgId] = useState<string | null>(null);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 	const [expandedActivity, setExpandedActivity] = useState<{
 		memberId: string;
 		type: "tickets" | "tasks" | "blockers";
 	} | null>(null);
 
-	const isAdmin = currentUser.orgRole === "Admin";
-	const adminCount = members.filter((m) => m.orgRole === "Admin").length;
+	useEffect(() => { // Used to fetch API data (outside the normal React render's flow)
+		const fetchMembers = async () => {
+			try {
+				// Step 1: Get current user's org_id
+				const user = await getCurrentUser();
+				setCurrentUser(formatOrgRole(user.org_role!));
+				setOrgId(user.current_organization_id);
 
-	const handleRemoveMember = () => {
-		if (confirmDelete) {
-			// In real app, this would call an API
-			console.log("Removing member:", confirmDelete);
-			setConfirmDelete(null);
+				// Step 2: Fetch members using org_id
+				if (user.current_organization_id) {
+					const membersData = await getCurrentUserInfo(user.current_organization_id);
+
+					// Transform API data → UI data using your formatter functions
+					const transformedMembers: Member[] = membersData.map((memberData, index) => ({
+						id: memberData.id,
+						name: memberData.name,
+						avatar: generateAvatar(memberData.name),
+						color: assignColor(index),
+						orgRole: formatOrgRole(memberData.org_role),
+						scrumRole: formatScrumRole(memberData.scrum_role),
+						tickets: memberData.tickets || [],
+						tasks: memberData.tasks || [],
+						blockers: memberData.blockers.map(b => ({
+							id: b.id,
+							title: b.description,
+						})) || [],
+					}));
+					setMembers(transformedMembers);
+				}
+			} catch (error) {
+				console.error("Failed to fetch members:", error);
+			}
+		};
+		fetchMembers();
+	}, []); // Empty array = run once on mount
+
+	const isAdmin = currentUser === "Admin";
+
+	const handleRemoveMember = async () => {
+		if (confirmDelete && orgId) {
+			try {
+				// Call API to remove member
+				await removeMember(orgId, confirmDelete);
+
+				// Ipdate UI by removing member from state
+				setMembers(members.filter(m => m.id !== confirmDelete));
+
+				// Close modal
+				setConfirmDelete(null);
+			} catch (error) {
+				console.error("Failed to remove member:", error);
+			}
 		}
 	};
 
 	const canRemoveMember = (member: Member) => {
 		if (!isAdmin) return false;
-		if (member.orgRole === "Admin" && adminCount <= 1) return false;
+		if (member.orgRole === "Admin") return false;
 		return true;
 	};
 
@@ -167,12 +107,10 @@ export function Info() {
 		<div className="p-8">
 			<div className="mb-6">
 				<h2 className="text-3xl text-gray-900 mb-1">Info</h2>
-				<p className="text-sm text-gray-500">
-					Organization members and current work context
-				</p>
+				<p className="text-sm text-gray-500">Team members and current work context</p>
 			</div>
 
-			<div className="max-w-5xl">
+			<div className="w-full">
 				<div className="bg-white rounded-2xl border border-gray-100">
 					{/* Table Header */}
 					<div className="grid grid-cols-12 gap-6 px-6 py-4 border-b border-gray-100 text-xs uppercase tracking-wide text-gray-500">
@@ -184,10 +122,10 @@ export function Info() {
 					{/* Member Rows */}
 					<div className="divide-y divide-gray-100">
 						{members.map((member) => {
-							const activities = memberActivities[member.id] || {
-								tickets: [],
-								tasks: [],
-								blockers: [],
+							const activities = {
+								tickets: member.tickets || [],
+								tasks: member.tasks || [],
+								blockers: member.blockers || [],
 							};
 
 							return (
@@ -222,15 +160,15 @@ export function Info() {
 											<button
 												onClick={() => toggleActivity(member.id, "tickets")}
 												className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-													member.activeTickets > 0
+													member.tickets.length > 0
 														? "bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
 														: "bg-gray-50 text-gray-500"
 												}`}
-												disabled={member.activeTickets === 0}
+												disabled={member.tickets.length === 0}
 											>
 												<FileText className="w-3.5 h-3.5" />
-												<span>{member.activeTickets}</span>
-												{member.activeTickets > 0 &&
+												<span>{member.tickets.length}</span>
+												{member.tickets.length > 0 &&
 													(expandedActivity?.memberId === member.id &&
 													expandedActivity?.type === "tickets" ? (
 														<ChevronUp className="w-3 h-3" />
@@ -243,15 +181,15 @@ export function Info() {
 											<button
 												onClick={() => toggleActivity(member.id, "tasks")}
 												className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-													member.activeTasks > 0
+													member.tasks.length > 0
 														? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
 														: "bg-gray-50 text-gray-500"
 												}`}
-												disabled={member.activeTasks === 0}
+												disabled={member.tasks.length === 0}
 											>
 												<CheckSquare className="w-3.5 h-3.5" />
-												<span>{member.activeTasks}</span>
-												{member.activeTasks > 0 &&
+												<span>{member.tasks.length}</span>
+												{member.tasks.length > 0 &&
 													(expandedActivity?.memberId === member.id &&
 													expandedActivity?.type === "tasks" ? (
 														<ChevronUp className="w-3 h-3" />
@@ -266,15 +204,15 @@ export function Info() {
 													toggleActivity(member.id, "blockers")
 												}
 												className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-													member.openBlockers > 0
+													member.blockers.length > 0
 														? "bg-rose-50 text-rose-700 hover:bg-rose-100"
 														: "bg-gray-50 text-gray-500"
 												}`}
-												disabled={member.openBlockers === 0}
+												disabled={member.blockers.length === 0}
 											>
 												<ShieldAlert className="w-3.5 h-3.5" />
-												<span>{member.openBlockers}</span>
-												{member.openBlockers > 0 &&
+												<span>{member.blockers.length}</span>
+												{member.blockers.length > 0 &&
 													(expandedActivity?.memberId === member.id &&
 													expandedActivity?.type === "blockers" ? (
 														<ChevronUp className="w-3 h-3" />
@@ -304,7 +242,7 @@ export function Info() {
 															<Trash2 className="w-4 h-4 text-gray-300" />
 														</button>
 														<div className="absolute right-0 top-full mt-1 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-															Cannot remove last admin
+															Cannot remove admin
 														</div>
 													</div>
 												)
@@ -409,7 +347,7 @@ export function Info() {
 							</div>
 							<div>
 								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.activeTickets, 0)}
+									{members.reduce((sum, m) => sum + m.tickets.length, 0)}
 								</p>
 								<p className="text-xs text-gray-500">Active Tickets</p>
 							</div>
@@ -423,7 +361,7 @@ export function Info() {
 							</div>
 							<div>
 								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.activeTasks, 0)}
+									{members.reduce((sum, m) => sum + m.tasks.length, 0)}
 								</p>
 								<p className="text-xs text-gray-500">Active Tasks</p>
 							</div>
@@ -437,7 +375,7 @@ export function Info() {
 							</div>
 							<div>
 								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.openBlockers, 0)}
+									{members.reduce((sum, m) => sum + m.blockers.length, 0)}
 								</p>
 								<p className="text-xs text-gray-500">Open Blockers</p>
 							</div>
@@ -463,8 +401,8 @@ export function Info() {
 									Remove Member?
 								</h3>
 								<p className="text-sm text-gray-500 text-center">
-									This member will be removed from the organization and lose
-									access to all projects and data. This action cannot be undone.
+									This member will be removed from the team and lose
+									access to all data. This action cannot be undone.
 								</p>
 							</div>
 
