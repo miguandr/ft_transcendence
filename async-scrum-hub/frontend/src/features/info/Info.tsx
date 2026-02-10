@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { AlertCircle, CheckSquare, FileText, ShieldAlert, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
-import { formatOrgRole, formatScrumRole, generateAvatar, assignColor } from "../../utils/formatters";
-
+import { formatOrgRole, formatScrumRole, generateAvatar, assignColorById } from "../../utils/formatters";
+import { PageHeader, Avatar, Badge, StatCard, Modal, Button } from "../../components/custom";
 interface Member {
 	id: string;
 	name: string;
@@ -51,7 +51,7 @@ export function Info() {
 						id: memberData.id,
 						name: memberData.name,
 						avatar: generateAvatar(memberData.name),
-						color: assignColor(index),
+						color: assignColorById(memberData.id),
 						orgRole: formatOrgRole(memberData.org_role),
 						scrumRole: formatScrumRole(memberData.scrum_role),
 						tickets: memberData.tickets || [],
@@ -105,11 +105,10 @@ export function Info() {
 
 	return (
 		<div className="p-8">
-			<div className="mb-6">
-				<h2 className="text-3xl text-gray-900 mb-1">Info</h2>
-				<p className="text-sm text-gray-500">Team members and current work context</p>
-			</div>
-
+			<PageHeader
+				title="Info"
+				subtitle="Team members and current work context"
+			/>
 			<div className="w-full">
 				<div className="bg-white rounded-2xl border border-gray-100">
 					{/* Table Header */}
@@ -133,13 +132,11 @@ export function Info() {
 									<div className="grid grid-cols-12 gap-6 px-6 py-5 items-center">
 										{/* Member Info */}
 										<div className="col-span-4 flex items-center gap-3">
-											<div
-												className={`w-10 h-10 rounded-full bg-gradient-to-br ${member.color} flex items-center justify-center flex-shrink-0`}
-											>
-												<span className="text-sm text-gray-900">
-													{member.avatar}
-												</span>
-											</div>
+											<Avatar
+												initials={member.avatar}
+												color={member.color}
+												size="md"
+											/>
 											<div>
 												<p className="text-sm text-gray-900">
 													{member.name}
@@ -161,8 +158,8 @@ export function Info() {
 												onClick={() => toggleActivity(member.id, "tickets")}
 												className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
 													member.tickets.length > 0
-														? "bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
-														: "bg-gray-50 text-gray-500"
+													? "bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
+													: "bg-gray-50 text-gray-500"
 												}`}
 												disabled={member.tickets.length === 0}
 											>
@@ -274,9 +271,9 @@ export function Info() {
 																		<p className="text-sm text-gray-900">
 																			{ticket.title}
 																		</p>
-																		<span className="text-xs px-2 py-1 rounded-lg bg-gray-100 text-gray-600">
+																		<Badge variant="default" size="sm">
 																			{ticket.status}
-																		</span>
+																		</Badge>
 																	</div>
 																</div>
 															))
@@ -340,90 +337,62 @@ export function Info() {
 
 				{/* Summary Stats */}
 				<div className="mt-6 grid grid-cols-3 gap-4">
-					<div className="bg-white rounded-xl border border-gray-100 p-4">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 bg-cyan-50 rounded-lg flex items-center justify-center">
-								<FileText className="w-5 h-5 text-cyan-600" />
-							</div>
-							<div>
-								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.tickets.length, 0)}
-								</p>
-								<p className="text-xs text-gray-500">Active Tickets</p>
-							</div>
-						</div>
-					</div>
+					<StatCard
+						icon={<FileText className="w-5 h-5 text-cyan-600" />}
+						label="Active Tickets"
+						value={members.reduce((sum, m) => sum + m.tickets.length, 0)}
+						subtitle="Across team"
+						bgColor="bg-cyan-50"
+					/>
 
-					<div className="bg-white rounded-xl border border-gray-100 p-4">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
-								<CheckSquare className="w-5 h-5 text-emerald-600" />
-							</div>
-							<div>
-								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.tasks.length, 0)}
-								</p>
-								<p className="text-xs text-gray-500">Active Tasks</p>
-							</div>
-						</div>
-					</div>
+					<StatCard
+						icon={<CheckSquare className="w-5 h-5 text-emerald-600" />}
+						label="Active Tasks"
+						value={members.reduce((sum, m) => sum + m.tasks.length, 0)}
+						subtitle="Across team"
+						bgColor="bg-emerald-50"
+					/>
 
-					<div className="bg-white rounded-xl border border-gray-100 p-4">
-						<div className="flex items-center gap-3">
-							<div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center">
-								<ShieldAlert className="w-5 h-5 text-rose-600" />
-							</div>
-							<div>
-								<p className="text-2xl text-gray-900">
-									{members.reduce((sum, m) => sum + m.blockers.length, 0)}
-								</p>
-								<p className="text-xs text-gray-500">Open Blockers</p>
-							</div>
-						</div>
-					</div>
+					<StatCard
+						icon={<ShieldAlert className="w-5 h-5 text-rose-600" />}
+						label="Open Blockers"
+						value={members.reduce((sum, m) => sum + m.blockers.length, 0)}
+						subtitle="Across team"
+						bgColor="bg-rose-50"
+					/>
 				</div>
 			</div>
 
 			{/* Remove Member Confirmation Modal */}
-			{confirmDelete && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/40 z-50"
-						onClick={() => setConfirmDelete(null)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-							<div className="px-6 py-5">
-								<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
-									<AlertCircle className="w-6 h-6 text-rose-600" />
-								</div>
-								<h3 className="text-lg text-gray-900 text-center mb-2">
-									Remove Member?
-								</h3>
-								<p className="text-sm text-gray-500 text-center">
-									This member will be removed from the team and lose
-									access to all data. This action cannot be undone.
-								</p>
-							</div>
-
-							<div className="flex items-center gap-3 px-6 py-4 border-t border-gray-100">
-								<button
-									onClick={() => setConfirmDelete(null)}
-									className="flex-1 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleRemoveMember}
-									className="flex-1 px-4 py-2 text-sm text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors"
-								>
-									Remove
-								</button>
-							</div>
-						</div>
+			<Modal
+				isOpen={!!confirmDelete}
+				onClose={() => setConfirmDelete(null)}
+				title="Remove Member?"
+				size="sm"
+			>
+				<div className="text-center">
+					<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
+						<AlertCircle className="w-6 h-6 text-rose-600" />
 					</div>
-				</>
-			)}
+					<p className="text-sm text-gray-500 mb-6">
+						This member will be removed from the team and lose access to all data.
+						This action cannot be undone.
+					</p>
+
+					<div className="flex items-center gap-3">
+						<Button variant="secondary" onClick={() => setConfirmDelete(null)}>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleRemoveMember}
+							className="bg-rose-600 hover:bg-rose-700"
+						>
+							Remove
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 }
