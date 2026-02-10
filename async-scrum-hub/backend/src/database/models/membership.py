@@ -6,17 +6,18 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from ..base import Base
 from typing import TYPE_CHECKING
+#from .enums import OrgRole, ScrumRole
 
 if TYPE_CHECKING:
 	from .user import User
 	from .organization import Organization
 
-
+#DEL
 class OrgRole(str, enum.Enum):
 	admin = "admin"
 	member = "member"
 
-
+#DEL
 class ScrumRole(str, enum.Enum):
 	scrum_master = "scrum_master"
 	product_owner = "product_owner"
@@ -27,16 +28,16 @@ class Membership(Base):
 	__tablename__ = "memberships"
 	__table_args__ = (
 		UniqueConstraint(
-			"user_id", 
-			"organization_id", 
+			"user_id",
+			"organization_id",
 			name="uq_memberships_user_org"
 		),
 		CheckConstraint(
-			"org_role IN ('admin', 'member')", 
+			"org_role IN ('admin', 'member')",
 			name="ck_membership_org_role"
 		),
 		CheckConstraint(
-			"scrum_role IN ('scrum_master', 'product_owner', 'developer')", 
+			"scrum_role IN ('scrum_master', 'product_owner', 'developer')",
 			name="ck_membership_scrum_role"
 		),
 	)
@@ -71,7 +72,7 @@ class Membership(Base):
 		back_populates="memberships"
 	)
 	# End of Relationships
-	
+
 	org_role: Mapped[str] = mapped_column(
 		String(20),
 		nullable=False,
@@ -85,7 +86,7 @@ class Membership(Base):
 	)
 
 	created_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True), 
+		DateTime(timezone=True),
 		server_default=func.now(),
 		nullable=False
 	)
