@@ -169,7 +169,7 @@ export function TeamSetup() {
 		}
 
 		// Step 4: Success! Navigate to dashboard
-		navigate("/");
+		navigate("/dashboard");
 
 		} catch (error: any) {
 			// Step 5: Handle errors

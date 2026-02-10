@@ -7,7 +7,6 @@ export function formatScrumRole(
 	role: "scrum_master" | "product_owner" | "developer"):
 		"Scrum Master" | "Product Owner" | "Developer"
 {
-	if (!role) return null;
 	switch (role)
 	{
 		case "scrum_master": return "Scrum Master";
@@ -34,4 +33,18 @@ const colorPalette = [
 
 export function assignColor(index: number): string {
 	return colorPalette[index % colorPalette.length];
+}
+
+export function assignColorById(userId: string): string {
+	// Create a better hash from the user ID that distributes more evenly
+	let hash = 0;
+	for (let i = 0; i < userId.length; i++) {
+		const char = userId.charCodeAt(i);
+		hash = ((hash << 5) - hash) + char;
+		hash = hash & hash; // Convert to 32-bit integer
+	}
+
+	// Make it positive and get index
+	const index = Math.abs(hash) % colorPalette.length;
+	return colorPalette[index];
 }
