@@ -331,7 +331,7 @@ describe("TeamSetup Component", () => {
 					join_code: "SCR-456",
 					scrum_role: "developer",
 				});
-				expect(mockNavigate).toHaveBeenCalledWith("/");
+				expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
 			});
 		});
 
@@ -649,7 +649,7 @@ describe("TeamSetup Component", () => {
 					organization_id: "org-123",
 					scrum_role: "product_owner",
 				});
-				expect(mockNavigate).toHaveBeenCalledWith("/");
+				expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
 			});
 		});
 
