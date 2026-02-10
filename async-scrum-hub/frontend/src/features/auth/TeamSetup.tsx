@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
 import { createOrganization, setUserRole, joinOrganization, checkJoinCode, getOrganizationMembers } from "../../services/api";
-import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
+import { Button, Input, Label, ErrorText } from "../../components/custom";
 type TeamMode = "join" | "create";
 type Role = "scrum_master" | "product_owner" | "developer" | null;
 
@@ -35,13 +35,13 @@ export function TeamSetup() {
 		e.preventDefault(); // Prevents page refresh when form submits
 		setErrors({}); // Clear previous errors
 
-		//Validation: checks if team-code is empty
+		// Validation: checks if team-code is empty
 		if (!teamCode.trim()) {
 			setErrors({ join: "Team code is required" });
 			return;
 		}
 
-		//Call API
+		// Call API
 		setIsLoading(true); // Show loading spinner
 
 
@@ -133,7 +133,6 @@ export function TeamSetup() {
 		}
 	};
 
-
 	const handleCopyCode = () =>
 	{
 		if (confirmedTeam?.code) {
@@ -142,7 +141,6 @@ export function TeamSetup() {
 			setTimeout(() => setCopied(false), 2000);
 		}
 	};
-
 
 	const handleContinue = async () =>
 	{
@@ -169,7 +167,6 @@ export function TeamSetup() {
 				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer"
 			});
 		}
-
 
 		// Step 4: Success! Navigate to dashboard
 		navigate("/");
