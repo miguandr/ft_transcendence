@@ -191,7 +191,7 @@ describe("Login Component", () => {
 				password: "password123",
 			});
 			expect(localStorageMock.getItem("token")).toBe("mock-token-123");
-			expect(mockNavigate).toHaveBeenCalledWith("/");
+			expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
 		});
 	});
 

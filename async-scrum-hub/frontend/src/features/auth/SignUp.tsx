@@ -72,6 +72,13 @@ export function SignUp() {
 		setIsLoading(true);
 		setErrors({}); // clear any previous errors
 
+		type APIError = {
+			error?: {
+				code?: string;
+				message?: string;
+			};
+		};
+
 		try {
 			//Call API (only sends name, email and password (not confirmation password) to database via API.
 			const response = await signup({
@@ -84,23 +91,21 @@ export function SignUp() {
 
 			//Navigate to role selection if sign up was successful
 			navigate("/team-setup");
-		} catch (error: any) {
-			//Handle API errors
+		} catch (error: unknown) {
+			//Handle API errors with type guard
 			console.error("Sign up failed:", error);
 
+			const apiError = error as APIError;
 			//Check for our API error format using optional chaining
-			if (error?.error?.code === "USER_EXISTS") {
+			if (apiError?.error?.code === "USER_EXISTS") {
 				// Only runs if error.error.code exists AND equals "USER_EXISTS"
 				setErrors({ email: "An account with this email already exists" });
-			} else if (error?.error?.code === "INVALID_INPUT") {
-				// Only runs if error.error.code exists AND equals "INVALID_EMAIL"
+			} else if (apiError?.error?.code === "INVALID_INPUT") {
+				// Only runs if error.error.code exists AND equals "INVALID_INPUT"
 				setErrors({ email: "Email format is invalid" });
-			} else if (error?.error?.message) {
+			} else if (apiError?.error?.message) {
 				// Only runs if error.error.message exists (Use the API's error message)
-				setErrors({ email: error.error.message });
-			} else if (error instanceof Error) {
-				// Handles standard JavaScript Error objects
-				setErrors({ email: error.message });
+				setErrors({ email: apiError.error.message });
 			} else {
 				// Handles completely unknown errors
 				setErrors({ email: "An unexpected error occurred." });

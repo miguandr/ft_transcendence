@@ -14,7 +14,7 @@ export function Avatar({ initials, color = "from-emerald-200 to-green-300", size
 
 	return (
 		<div
-			className={`rounded-full bg-linear-to-br ${color} flex items-center justify-center shrink-0 ${sizeStyles[size]} ${className}`}
+			className={`rounded-full bg-gradient-to-br ${color} flex items-center justify-center shrink-0 ${sizeStyles[size]} ${className}`}
 		>
 			<span className="text-gray-800 font-medium">{initials}</span>
 		</div>
