@@ -2011,7 +2011,7 @@ Used to render the organization board.
 		"ticket": {
 			"id": "uuid",
 			"title": "string"
-		}
+		},
 		"created_at": "timestamp (today)",
 		"resolved_at": "timestamp | null"
 	}
