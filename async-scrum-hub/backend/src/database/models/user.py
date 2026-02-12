@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .organization import Organization
 	from .standup import Standup
+	from .blocker import Blocker
 
 class User(Base):
 	__tablename__ = "users"
@@ -92,6 +93,20 @@ class User(Base):
 		foreign_keys="Standup.created_by",
 		back_populates="creator",
 		cascade="all, delete-orphan"  # If User is deleted, delete their standups
+	)
+
+	created_blockers: Mapped[list["Blocker"]] = relationship(
+		"Blocker",
+		foreign_keys="Blocker.created_by",
+		back_populates="creator",
+		cascade="all, delete-orphan"  # If User is deleted, delete their created blockers
+	)
+
+	assigned_blockers: Mapped[list["Blocker"]] = relationship(
+		"Blocker",
+		foreign_keys="Blocker.assignee_id",
+		back_populates="assignee",
+		passive_deletes=True  # DB handles SET NULL via FK (defined in Blocker)
 	)
 	# End of Relationships
 	

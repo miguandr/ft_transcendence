@@ -21,7 +21,7 @@ NOTE: Organization and User models will need the reverse relationships added:
 - User.created_blockers: list["Blocker"]
 - User.assigned_blockers: list["Blocker"]
 
-See User, Membership, Organization models for complete examples.
+See User, Organization models for complete examples.
 """
 
 import uuid
