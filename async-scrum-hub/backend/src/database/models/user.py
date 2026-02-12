@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from .organization import Organization
+	from .standup import Standup
 
 class User(Base):
 	__tablename__ = "users"
@@ -84,6 +85,13 @@ class User(Base):
 		foreign_keys="Organization.created_by",
 		back_populates="creator",
 		passive_deletes=True
+	)
+
+	standups_created: Mapped[list["Standup"]] = relationship(
+		"Standup",
+		foreign_keys="Standup.created_by",
+		back_populates="creator",
+		cascade="all, delete-orphan"  # If User is deleted, delete their standups
 	)
 	# End of Relationships
 	
