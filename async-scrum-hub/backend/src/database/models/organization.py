@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .user import User
 	from .membership import Membership
+	from .standup import Standup
 
 class Organization(Base):
 	__tablename__ = "organizations"
@@ -55,6 +56,12 @@ class Organization(Base):
 		foreign_keys="User.current_organization_id",
 		back_populates="current_organization",
 		passive_deletes=True  # DB handles SET NULL via FK (defined in User)
+	)
+
+	standups: Mapped[list["Standup"]] = relationship(
+		"Standup",
+		back_populates="organization",
+		cascade="all, delete-orphan"  # If Organization is deleted, delete its standups
 	)
 	# End of Relationships
 	
