@@ -473,6 +473,7 @@ file: binary (image file)
 	{
 		"id": "uuid",
 		"name": "string",
+		"avatar_url": "string | null",
 		"org_role": "admin | member",
 		"scrum_role": "scrum_master | product_owner | developer",
 
@@ -856,7 +857,11 @@ Used to render the organization board.
 		"title": "string",
 		"status": "todo | in_progress | completed",
 		"priority": "low | medium | high",
-		"assignee_id": "uuid | null",
+		"assignee": {
+			"id": "uuid",
+			"name": "string",
+			"avatar_url": "string | null"
+		},
 		"created_at": "timestamp",
 		"updated_at": "timestamp"
 	}
@@ -1679,7 +1684,11 @@ Used to render the organization board.
 		"today": "string",
 		"yesterday": "string | null",
 		"blocker_ids": ["uuid"],
-		"created_by": "uuid (owner)"
+		"created_by": {
+			"id": "uuid (owner)",
+			"name": "string",
+			"avatar_url": "string | null"
+		}
 	}
 ]
 ```
@@ -1988,10 +1997,17 @@ Used to render the organization board.
 [
 	{
 		"id": "uuid",
-		"created_by": "uuid (owner)",
+		"created_by": {
+			"id": "uuid",
+			"name": "string",
+			"avatar_url": "string | null"
+		},
 		"description": "string",
 		"status": "open | resolved",
-		"assignee_id": "uuid | null",
+		"assignee": {
+			"id": "uuid",
+			"name": "string",
+		} | null,
 		"task_id": "uuid | null",
 		"created_at": "timestamp (today)",
 		"resolved_at": "timestamp | null"
