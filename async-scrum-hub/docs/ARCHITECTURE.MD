@@ -157,7 +157,6 @@ async-scrum-hub/
 │   │   │       ├── __init__.py                 ✨ Daniela (done ✅)
 │   │   │       ├── user.py                     ✨ Daniela (done ✅)
 │   │   │       ├── organization.py             ✨ Daniela (done ✅)
-│   │   │       ├── membership.py               ✨ Daniela (done ✅)
 │   │   │       ├── ticket.py                   🚀 Freddy
 │   │   │       ├── task.py                     🚀 Freddy
 │   │   │       ├── standup.py                  🌊 Malu 
