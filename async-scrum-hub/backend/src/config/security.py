@@ -4,7 +4,7 @@ Security utilities (JWT + hashing).
 This module centralizes:
 - JWT decoding/validation for protected endpoints (decode_access_token)
 - JWT creation for login (create_access_token)  [TODO --> POST /api/v1/auth/login]
-- Password hashing utilities                    [TOFO --> POST /api/v1/auth/register]
+- Password hashing utilities                    [TODO --> POST /api/v1/auth/register]
 
 Environment variables:
 - JWT_SECRET_KEY (required)
@@ -32,3 +32,12 @@ def decode_access_token(token: str) -> dict:
 	except JWTError:
 		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 	
+
+
+#This will use POST /auth/register (guardar hash) y POST /auth/login (comparar).
+#JWT_ACCESS_TOKEN_EXPIRE_MINUTES --> default
+# hash_password(plain: str) -> str
+# verify_password(plain: str, hashed: str) -> bool
+
+# JWT creation
+# create_access_token(subject: str|uuid, expires_delta=...) -> str

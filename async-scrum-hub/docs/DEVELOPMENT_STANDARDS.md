@@ -299,14 +299,14 @@ git push origin feat/auth-login
 
 ### Branch Naming Convention
 
-| Type | Example | Description |
-|------|---------|-------------|
-| `feat/` | `feat/auth-login` | New feature |
-| `fix/` | `fix/login-validation` | Bug fix |
-| `docs/` | `docs/api-contracts` | Documentation |
-| `refactor/` | `refactor/auth-service` | Code refactoring |
-| `test/` | `test/auth-endpoints` | Tests |
-| `chore/` | `chore/update-deps` | Maintenance |
+| Type        | Example                 | Description 
+|-------------|-------------------------|-------------
+| `feat/`     | `feat/auth-login`       | New feature 
+| `fix/`      | `fix/login-validation`  | Bug fix 
+| `docs/`     | `docs/api-contracts`    | Documentation 
+| `refactor/` | `refactor/auth-service` | Code refactoring 
+| `test/`     | `test/auth-endpoints`   | Tests 
+| `chore/`    | `chore/update-deps`     | Maintenance
 
 **Rules:**
 - Lowercase only

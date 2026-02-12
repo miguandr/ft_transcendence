@@ -206,11 +206,11 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "email": "string",
   "name": "string",
   "avatar_url": "string | null",
-  "current_organization_id": "uuid | null",
+  "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
 }
-```
+``````
 
 **Error Responses:**
 
@@ -250,7 +250,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "email": "string",
   "name": "string",
   "avatar_url": "string | null",
-  "current_organization_id": "uuid | null",
+  "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
 }

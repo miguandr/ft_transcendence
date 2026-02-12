@@ -51,9 +51,9 @@ For every protected request, the backend must resolve:
 - `organization_id` from:
   - request path
   - resource ownership
-- user membership in that organization
+- user belongs to that organization (via `user.organization_id`)
 
-If the user is not a member of the organization,
+If the user does not belong to the organization,
 authorization immediately fails.
 
 ---
@@ -85,7 +85,7 @@ Each user has **two independent roles** within an organization:
 - **Scrum role** (scrum_master | product_owner | developer)
 
 Roles are **never inferred**.
-They must be explicitly retrieved from persistence.
+They are stored directly on the User model (`user.org_role`, `user.scrum_role`).
 
 ---
 
