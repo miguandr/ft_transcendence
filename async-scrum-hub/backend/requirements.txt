@@ -31,3 +31,7 @@ python-dotenv==1.0.1
 
 # CORS middleware
 # (fastapi already includes starlette which has CORSMiddleware, no extra package needed)
+
+# Testing
+pytest==8.0.0
+pytest-asyncio==0.23.5
