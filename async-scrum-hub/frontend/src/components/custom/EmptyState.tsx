@@ -9,7 +9,14 @@ interface EmptyStateProps {
 	className?: string;
 }
 
-export function EmptyState({ icon, title, description, action, variant = "info", className = "" }: EmptyStateProps) {
+export function EmptyState({
+	icon,
+	title,
+	description,
+	action,
+	variant = "info",
+	className = "",
+}: EmptyStateProps) {
 	const variantStyles = {
 		success: {
 			bg: "bg-emerald-50/50",
@@ -33,7 +40,11 @@ export function EmptyState({ icon, title, description, action, variant = "info",
 	return (
 		<div className={`${styles.bg} rounded-2xl p-8 border ${styles.border} ${className}`}>
 			<div className="flex flex-col items-center text-center">
-				<div className={`w-16 h-16 ${styles.iconBg} rounded-full flex items-center justify-center mb-4`}>{icon}</div>
+				<div
+					className={`w-16 h-16 ${styles.iconBg} rounded-full flex items-center justify-center mb-4`}
+				>
+					{icon}
+				</div>
 				<h3 className="text-base text-gray-900 mb-2">{title}</h3>
 				{description && <p className="text-sm text-gray-600 mb-4">{description}</p>}
 				{action && <div className="mt-2">{action}</div>}

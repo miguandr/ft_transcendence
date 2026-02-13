@@ -256,24 +256,24 @@ describe("Info Component", () => {
 			// Find and click the first ticket button (for Admin User) - look for FileText icon specifically
 			const ticketButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-file-text'));
+				.filter((btn) => btn.querySelector("svg.lucide-file-text"));
 
 			// Filter to get the first one that is NOT disabled (has tickets)
 			const activeTicketButton = ticketButtons.find(
 				(btn) => !(btn as HTMLButtonElement).disabled
 			);
 
-				if (activeTicketButton) {
-					fireEvent.click(activeTicketButton);
+			if (activeTicketButton) {
+				fireEvent.click(activeTicketButton);
 
-					await waitFor(() => {
-						expect(
-							screen.getByRole("heading", { name: "Active Tickets" })
-						).toBeInTheDocument();
-						expect(screen.getByText("Implement login page")).toBeInTheDocument();
-						expect(screen.getByText("Fix navbar bug")).toBeInTheDocument();
-					});
-				}
+				await waitFor(() => {
+					expect(
+						screen.getByRole("heading", { name: "Active Tickets" })
+					).toBeInTheDocument();
+					expect(screen.getByText("Implement login page")).toBeInTheDocument();
+					expect(screen.getByText("Fix navbar bug")).toBeInTheDocument();
+				});
+			}
 		});
 
 		it("expands tasks section when clicked", async () => {
@@ -290,7 +290,7 @@ describe("Info Component", () => {
 			// Find and click task button
 			const taskButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-check-square'));
+				.filter((btn) => btn.querySelector("svg.lucide-check-square"));
 
 			if (taskButtons.length > 0) {
 				fireEvent.click(taskButtons[0]);
@@ -316,18 +316,18 @@ describe("Info Component", () => {
 			// Find and click blocker button
 			const blockerButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-shield-alert'));
+				.filter((btn) => btn.querySelector("svg.lucide-shield-alert"));
 
-				if (blockerButtons.length > 0) {
-					fireEvent.click(blockerButtons[0]);
+			if (blockerButtons.length > 0) {
+				fireEvent.click(blockerButtons[0]);
 
-					await waitFor(() => {
-						expect(
-							screen.getByRole("heading", { name: "Open Blockers" })
-						).toBeInTheDocument();
-						expect(screen.getByText("Waiting for API documentation")).toBeInTheDocument();
-					});
-				}
+				await waitFor(() => {
+					expect(
+						screen.getByRole("heading", { name: "Open Blockers" })
+					).toBeInTheDocument();
+					expect(screen.getByText("Waiting for API documentation")).toBeInTheDocument();
+				});
+			}
 		});
 
 		it("collapses activity section when clicked again", async () => {
@@ -344,28 +344,28 @@ describe("Info Component", () => {
 			// Find and click ticket button twice
 			const ticketButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-file-text'));
+				.filter((btn) => btn.querySelector("svg.lucide-file-text"));
 
-				if (ticketButtons.length > 0) {
-					// First click - expand
-					fireEvent.click(ticketButtons[0]);
+			if (ticketButtons.length > 0) {
+				// First click - expand
+				fireEvent.click(ticketButtons[0]);
 
-					await waitFor(() => {
-						expect(
-							screen.getByRole("heading", { name: "Active Tickets" })
-						).toBeInTheDocument();
-					});
+				await waitFor(() => {
+					expect(
+						screen.getByRole("heading", { name: "Active Tickets" })
+					).toBeInTheDocument();
+				});
 
-					// Second click - collapse
-					fireEvent.click(ticketButtons[0]);
+				// Second click - collapse
+				fireEvent.click(ticketButtons[0]);
 
-					await waitFor(() => {
-						expect(
-							screen.queryByRole("heading", { name: "Active Tickets" })
-						).not.toBeInTheDocument();
-					});
-				}
-			});
+				await waitFor(() => {
+					expect(
+						screen.queryByRole("heading", { name: "Active Tickets" })
+					).not.toBeInTheDocument();
+				});
+			}
+		});
 
 		it("displays ticket status badges correctly", async () => {
 			render(
@@ -381,7 +381,7 @@ describe("Info Component", () => {
 			// Click to expand tickets
 			const ticketButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-file-text'));
+				.filter((btn) => btn.querySelector("svg.lucide-file-text"));
 
 			if (ticketButtons.length > 0) {
 				fireEvent.click(ticketButtons[0]);
@@ -426,7 +426,7 @@ describe("Info Component", () => {
 			// Click to expand tasks
 			const taskButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-check-square'));
+				.filter((btn) => btn.querySelector("svg.lucide-check-square"));
 
 			if (taskButtons.length > 0) {
 				fireEvent.click(taskButtons[0]);
@@ -451,11 +451,9 @@ describe("Info Component", () => {
 			});
 
 			const buttons = screen.getAllByRole("button");
-			const ticketButton = buttons.find((btn) =>
-				btn.querySelector('svg.lucide-file-text')
-			);
+			const ticketButton = buttons.find((btn) => btn.querySelector("svg.lucide-file-text"));
 			const blockerButton = buttons.find((btn) =>
-				btn.querySelector('svg.lucide-shield-alert')
+				btn.querySelector("svg.lucide-shield-alert")
 			);
 
 			if (ticketButton && blockerButton) {
@@ -500,7 +498,7 @@ describe("Info Component", () => {
 			await waitFor(() => {
 				const trashIcons = screen
 					.getAllByRole("button")
-					.filter((btn) => btn.querySelector('svg.lucide-trash-2'));
+					.filter((btn) => btn.querySelector("svg.lucide-trash-2"));
 
 				expect(trashIcons.length).toBe(3);
 
@@ -530,7 +528,7 @@ describe("Info Component", () => {
 					.filter(
 						(btn) =>
 							(btn as HTMLButtonElement).disabled &&
-							btn.querySelector('svg.lucide-trash-2')
+							btn.querySelector("svg.lucide-trash-2")
 					);
 
 				expect(disabledTrash.length).toBe(1);
@@ -576,7 +574,7 @@ describe("Info Component", () => {
 			// Regular members should NOT see any trash icons
 			const trashIcons = screen
 				.queryAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-trash-2'));
+				.filter((btn) => btn.querySelector("svg.lucide-trash-2"));
 
 			expect(trashIcons.length).toBe(0);
 		});
@@ -598,7 +596,7 @@ describe("Info Component", () => {
 				.filter(
 					(btn) =>
 						!(btn as HTMLButtonElement).disabled &&
-						btn.querySelector('svg.lucide-trash-2')
+						btn.querySelector("svg.lucide-trash-2")
 				);
 
 			if (trashButtons.length > 0) {
@@ -630,7 +628,7 @@ describe("Info Component", () => {
 				.filter(
 					(btn) =>
 						!(btn as HTMLButtonElement).disabled &&
-						btn.querySelector('svg.lucide-trash-2')
+						btn.querySelector("svg.lucide-trash-2")
 				);
 
 			if (trashButtons.length > 0) {
@@ -667,7 +665,7 @@ describe("Info Component", () => {
 				.filter(
 					(btn) =>
 						!(btn as HTMLButtonElement).disabled &&
-						btn.querySelector('svg.lucide-trash-2')
+						btn.querySelector("svg.lucide-trash-2")
 				);
 
 			if (trashButtons.length > 0) {
@@ -706,24 +704,24 @@ describe("Info Component", () => {
 				.filter(
 					(btn) =>
 						!(btn as HTMLButtonElement).disabled &&
-						btn.querySelector('svg.lucide-trash-2')
+						btn.querySelector("svg.lucide-trash-2")
 				);
 
-				if (trashButtons.length > 0) {
-					fireEvent.click(trashButtons[0]);
+			if (trashButtons.length > 0) {
+				fireEvent.click(trashButtons[0]);
 
-					await waitFor(() => {
-						expect(screen.getByText("Remove Member?")).toBeInTheDocument();
-					});
+				await waitFor(() => {
+					expect(screen.getByText("Remove Member?")).toBeInTheDocument();
+				});
 
-					// Click Remove button
-					const removeButton = screen.getByRole("button", { name: /^Remove$/i });
-					fireEvent.click(removeButton);
+				// Click Remove button
+				const removeButton = screen.getByRole("button", { name: /^Remove$/i });
+				fireEvent.click(removeButton);
 
-					await waitFor(() => {
-						expect(removeMember).toHaveBeenCalledWith("org-123", "user-2");
-					});
-				}
+				await waitFor(() => {
+					expect(removeMember).toHaveBeenCalledWith("org-123", "user-2");
+				});
+			}
 		});
 	});
 
@@ -801,7 +799,7 @@ describe("Info Component", () => {
 			// Click blocker button
 			const blockerButtons = screen
 				.getAllByRole("button")
-				.filter((btn) => btn.querySelector('svg.lucide-shield-alert'));
+				.filter((btn) => btn.querySelector("svg.lucide-shield-alert"));
 
 			if (blockerButtons.length > 0) {
 				fireEvent.click(blockerButtons[0]);
@@ -905,9 +903,9 @@ describe("Info Component", () => {
 
 			activityButtons.forEach((btn) => {
 				if (
-					btn.querySelector('svg.lucide-file-text') ||
-					btn.querySelector('svg.lucide-check-square') ||
-					btn.querySelector('svg.lucide-shield-alert')
+					btn.querySelector("svg.lucide-file-text") ||
+					btn.querySelector("svg.lucide-check-square") ||
+					btn.querySelector("svg.lucide-shield-alert")
 				) {
 					expect(btn).toBeDisabled();
 				}

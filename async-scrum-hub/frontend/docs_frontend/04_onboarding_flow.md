@@ -31,6 +31,7 @@ Every user has two critical fields that determine their onboarding status:
 ### Onboarding Completion
 
 A user is **fully onboarded** when both conditions are met:
+
 - ✅ `scrum_role !== null` (they chose a role)
 - ✅ `organization_id !== null` (they joined/created a team)
 
@@ -71,6 +72,7 @@ Complete onboarding from scratch.
 ```
 
 **Key Points**:
+
 - **Developers** can only **join** teams (using a code from SM/PO)
 - **SM/PO** can either **create** or **join** teams
 - After step 3, user has both `scrum_role` and `organization_id` set
@@ -139,7 +141,9 @@ User started signup but didn't finish.
 ### Route Groups
 
 #### Pre-Auth Routes (No Sidebar/TopBar)
+
 Public or onboarding screens:
+
 - `/welcome` - Landing page
 - `/login` - Authentication
 - `/signup` - New account creation
@@ -148,7 +152,9 @@ Public or onboarding screens:
 - `/team-join` - Join team with code (Developers)
 
 #### App Routes (With Sidebar + TopBar Layout)
+
 Protected feature screens:
+
 - `/` - Dashboard (sprint overview)
 - `/board` - Sprint Board (kanban)
 - `/standup` - Async Standup submission
@@ -165,44 +171,51 @@ Protected feature screens:
 These rules must be enforced to control access:
 
 ### 1. Authentication Check
+
 ```typescript
 if (!isAuthenticated) {
-  redirect("/login");
+	redirect("/login");
 }
 ```
+
 **Triggers**: Any app route when not logged in
 
 ---
 
 ### 2. Role Check
+
 ```typescript
 if (isAuthenticated && scrum_role === null) {
-  redirect("/role-selection");
+	redirect("/role-selection");
 }
 ```
+
 **Triggers**: User logged in but hasn't chosen a role yet
 
 ---
 
 ### 3. Team Check
+
 ```typescript
 if (isAuthenticated && scrum_role !== null && organization_id === null) {
-  if (scrum_role === "developer") {
-    redirect("/team-join");
-  } else {
-    redirect("/team-creation");
-  }
+	if (scrum_role === "developer") {
+		redirect("/team-join");
+	} else {
+		redirect("/team-creation");
+	}
 }
 ```
+
 **Triggers**: User has role but no team assigned
 
 ---
 
 ### 4. Full Access
+
 ```typescript
 if (isAuthenticated && scrum_role !== null && organization_id !== null) {
-  // Allow all app routes
-  // User is fully onboarded ✅
+	// Allow all app routes
+	// User is fully onboarded ✅
 }
 ```
 
@@ -250,12 +263,14 @@ if (isAuthenticated && scrum_role !== null && organization_id !== null) {
 ## 🏗️ Current Implementation Status
 
 ### ✅ What's Built
+
 - All 6 pre-auth screens designed and rendered
 - All 8 app screens designed and rendered
 - Path-based layout switching (Sidebar shown on app routes)
 - Login form with validation and mock API
 
 ### 🔄 What's Next
+
 - **Add authentication state management** (context or Zustand)
 - **Implement guard rules** (check `scrum_role` and `organization_id`)
 - **Wire backend APIs** for signup, role selection, team creation/join
@@ -291,6 +306,7 @@ When implementing guards:
 - [ ] Add loading state while checking auth status
 
 **Example Protected Route**:
+
 ```typescript
 function ProtectedRoute({ children }) {
   const { isAuthenticated, scrum_role, organization_id } = useAuth();
@@ -316,5 +332,3 @@ function ProtectedRoute({ children }) {
 4. **Guards run in order**: Auth → Role → Team
 5. **Current app uses path-based layout**, not state-based guards (temporary)
 6. **Next step**: Add auth state management and implement guards
-
-

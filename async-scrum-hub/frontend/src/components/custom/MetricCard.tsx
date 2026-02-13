@@ -7,7 +7,14 @@ interface MetricCardProps {
 	className?: string;
 }
 
-export function MetricCard({ label, value, trend, trendType = "neutral", helperText, className = "" }: MetricCardProps) {
+export function MetricCard({
+	label,
+	value,
+	trend,
+	trendType = "neutral",
+	helperText,
+	className = "",
+}: MetricCardProps) {
 	const trendColors = {
 		positive: "text-emerald-600",
 		negative: "text-rose-600",

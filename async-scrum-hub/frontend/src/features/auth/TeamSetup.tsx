@@ -430,8 +430,8 @@ export function TeamSetup() {
 												isDisabled
 													? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
 													: isSelected
-													? "border-cyan-500 bg-cyan-50"
-													: "border-gray-200 hover:border-cyan-300 hover:bg-gray-50"
+														? "border-cyan-500 bg-cyan-50"
+														: "border-gray-200 hover:border-cyan-300 hover:bg-gray-50"
 											}`}
 										>
 											<div
@@ -439,8 +439,8 @@ export function TeamSetup() {
 													isTaken
 														? "bg-gray-200"
 														: isSelected
-														? "bg-cyan-100"
-														: "bg-gray-100"
+															? "bg-cyan-100"
+															: "bg-gray-100"
 												}`}
 											>
 												<Icon
@@ -448,8 +448,8 @@ export function TeamSetup() {
 														isTaken
 															? "text-gray-400"
 															: isSelected
-															? "text-cyan-600"
-															: "text-gray-600"
+																? "text-cyan-600"
+																: "text-gray-600"
 													}`}
 												/>
 											</div>
@@ -458,8 +458,8 @@ export function TeamSetup() {
 													isTaken
 														? "text-gray-400"
 														: isSelected
-														? "text-cyan-900"
-														: "text-gray-900"
+															? "text-cyan-900"
+															: "text-gray-900"
 												}`}
 											>
 												{role.title}

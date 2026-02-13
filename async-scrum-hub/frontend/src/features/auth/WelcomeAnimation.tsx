@@ -145,14 +145,14 @@ export function WelcomeAnimation() {
 													x: p.end.x,
 													y: p.end.y,
 													opacity: p.opacity,
-											  }
+												}
 											: animationStage === "transformation"
-											? {
-													x: p.end.x * 6.5,
-													y: p.end.y * 6.5,
-													opacity: 0,
-											  }
-											: { opacity: 0 }
+												? {
+														x: p.end.x * 6.5,
+														y: p.end.y * 6.5,
+														opacity: 0,
+													}
+												: { opacity: 0 }
 									}
 									transition={
 										animationStage === "convergence" // IF convergence stage
@@ -164,11 +164,11 @@ export function WelcomeAnimation() {
 														animationStage === "convergence"
 															? p.delay
 															: 0,
-											  }
+												}
 											: {
 													// ELSE (transformation stage)
 													duration: 3.6, // ← Duration for transformation (particles expanding OUT)
-											  }
+												}
 									}
 								/>
 							))}
@@ -184,8 +184,8 @@ export function WelcomeAnimation() {
 								animationStage === "convergence"
 									? 1
 									: animationStage === "transformation"
-									? 0
-									: 0,
+										? 0
+										: 0,
 						}}
 						transition={{
 							opacity: {

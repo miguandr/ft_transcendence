@@ -10,11 +10,11 @@ This document explains the design philosophy, styling approach, and component li
 
 **ScrumHub** uses a clean, modern design that prioritizes clarity and readability for distributed teams:
 
--   **Clean & Minimal**: White backgrounds with subtle shadows and borders
--   **Accent Color**: Cyan (#06b6d4) for primary actions and active states
--   **Soft Pastels**: Mint green, pink, yellow, blue for avatars and status indicators
--   **Rounded Corners**: Consistent border radius for cards, buttons, and inputs (12-16px)
--   **Generous Whitespace**: Breathing room between elements for better focus
+- **Clean & Minimal**: White backgrounds with subtle shadows and borders
+- **Accent Color**: Cyan (#06b6d4) for primary actions and active states
+- **Soft Pastels**: Mint green, pink, yellow, blue for avatars and status indicators
+- **Rounded Corners**: Consistent border radius for cards, buttons, and inputs (12-16px)
+- **Generous Whitespace**: Breathing room between elements for better focus
 
 ### Design Principles
 
@@ -34,12 +34,12 @@ We chose **Tailwind CSS v4** as our styling solution for several reasons:
 
 **Pros**:
 
--   ✅ **Utility-first**: Style directly in JSX without context switching
--   ✅ **No CSS files**: No separate stylesheets to manage
--   ✅ **Consistent design tokens**: Spacing, colors, and typography baked in
--   ✅ **Faster development**: No naming conventions (BEM, etc.)
--   ✅ **Tree-shakeable**: Only used utilities make it to production
--   ✅ **Easy customization**: Extend theme in `tailwind.config.js`
+- ✅ **Utility-first**: Style directly in JSX without context switching
+- ✅ **No CSS files**: No separate stylesheets to manage
+- ✅ **Consistent design tokens**: Spacing, colors, and typography baked in
+- ✅ **Faster development**: No naming conventions (BEM, etc.)
+- ✅ **Tree-shakeable**: Only used utilities make it to production
+- ✅ **Easy customization**: Extend theme in `tailwind.config.js`
 
 **Example**:
 
@@ -61,34 +61,34 @@ Our Tailwind config defines consistent tokens:
 
 **Colors**:
 
--   Primary: `cyan-600` (#06b6d4) - Buttons, links, active states
--   Success: `green-500` - Completed tasks, checkmarks
--   Warning: `yellow-400` - Pending items
--   Error: `red-500` - Blockers, validation errors
--   Gray scale: `gray-50` to `gray-900` - Text, borders, backgrounds
+- Primary: `cyan-600` (#06b6d4) - Buttons, links, active states
+- Success: `green-500` - Completed tasks, checkmarks
+- Warning: `yellow-400` - Pending items
+- Error: `red-500` - Blockers, validation errors
+- Gray scale: `gray-50` to `gray-900` - Text, borders, backgrounds
 
 **Spacing**:
 
--   4px increments (`p-1` = 4px, `p-2` = 8px, `p-4` = 16px, etc.)
--   Standard padding: `p-6` (24px) for cards
--   Standard gap: `gap-4` (16px) between elements
+- 4px increments (`p-1` = 4px, `p-2` = 8px, `p-4` = 16px, etc.)
+- Standard padding: `p-6` (24px) for cards
+- Standard gap: `gap-4` (16px) between elements
 
 **Typography**:
 
--   Base: 14px (`text-sm`)
--   Headings: `text-xl` (20px), `text-2xl` (24px), `text-3xl` (30px)
--   Font: System font stack (fast, native look)
+- Base: 14px (`text-sm`)
+- Headings: `text-xl` (20px), `text-2xl` (24px), `text-3xl` (30px)
+- Font: System font stack (fast, native look)
 
 **Border Radius**:
 
--   Buttons/Inputs: `rounded-xl` (12px)
--   Cards: `rounded-xl` (12px)
--   Avatars: `rounded-full` (perfect circle)
+- Buttons/Inputs: `rounded-xl` (12px)
+- Cards: `rounded-xl` (12px)
+- Avatars: `rounded-full` (perfect circle)
 
 **Shadows**:
 
--   Subtle: `shadow-sm` - Cards, elevated elements
--   None on hover (keeping it flat)
+- Subtle: `shadow-sm` - Cards, elevated elements
+- None on hover (keeping it flat)
 
 ---
 
@@ -100,50 +100,50 @@ We use a **two-layer component architecture**:
 
 **Layer 1: UI Primitives** (`components/ui/`)
 
--   **shadcn/ui** approach (Radix UI + Tailwind + CVA)
--   ~50 headless, accessible components
--   Not directly used in features (too low-level)
--   Available for building higher-level components
+- **shadcn/ui** approach (Radix UI + Tailwind + CVA)
+- ~50 headless, accessible components
+- Not directly used in features (too low-level)
+- Available for building higher-level components
 
 **Layer 2: Custom Components** (`components/custom/`)
 
--   **Application-specific components** built for ScrumHub
--   Opinionated styling matching our design system
--   Used directly in features (Login, SignUp, Dashboard, etc.)
--   Built on top of UI primitives OR standalone with Tailwind
+- **Application-specific components** built for ScrumHub
+- Opinionated styling matching our design system
+- Used directly in features (Login, SignUp, Dashboard, etc.)
+- Built on top of UI primitives OR standalone with Tailwind
 
 **Why two layers?**
 
--   ✅ **UI primitives** provide accessibility and behavior (Radix)
--   ✅ **Custom components** enforce consistent styling across features
--   ✅ **Separation of concerns**: Behavior (ui/) vs. Style (custom/)
--   ✅ **Easier to use**: Import from one place, pre-styled for ScrumHub
+- ✅ **UI primitives** provide accessibility and behavior (Radix)
+- ✅ **Custom components** enforce consistent styling across features
+- ✅ **Separation of concerns**: Behavior (ui/) vs. Style (custom/)
+- ✅ **Easier to use**: Import from one place, pre-styled for ScrumHub
 
 ### Custom Component Inventory (18 Components)
 
 **Currently in use** (Login.tsx, SignUp.tsx):
 
--   ✅ **Button**: Primary actions with loading states and variants
--   ✅ **Input**: Text fields with error states and icons
--   ✅ **Label**: Form labels with consistent styling
--   ✅ **ErrorText**: Validation error messages (red text)
--   ✅ **HintText**: Helper text below inputs (gray text)
--   ✅ **PageContainer**: Centered layout wrapper for auth pages
+- ✅ **Button**: Primary actions with loading states and variants
+- ✅ **Input**: Text fields with error states and icons
+- ✅ **Label**: Form labels with consistent styling
+- ✅ **ErrorText**: Validation error messages (red text)
+- ✅ **HintText**: Helper text below inputs (gray text)
+- ✅ **PageContainer**: Centered layout wrapper for auth pages
 
 **Available but not yet used**:
 
--   **Avatar**: User profile images with fallback initials
--   **Badge**: Status indicators (In Progress, Completed, Blockers)
--   **Card**: Container for grouped content
--   **EmptyState**: Placeholder for empty lists/data
--   **IconBox**: Colored circle container for icons
--   **MetricCard**: Dashboard stat cards (number + label + icon)
--   **Modal**: Dialog for confirmations/forms
--   **PageHeader**: Page title + breadcrumbs + actions
--   **Select**: Dropdown for form selections
--   **StatCard**: Dashboard statistics display
--   **TaskCard**: Sprint board task cards
--   **UpdateItem**: Activity feed item with avatar + message
+- **Avatar**: User profile images with fallback initials
+- **Badge**: Status indicators (In Progress, Completed, Blockers)
+- **Card**: Container for grouped content
+- **EmptyState**: Placeholder for empty lists/data
+- **IconBox**: Colored circle container for icons
+- **MetricCard**: Dashboard stat cards (number + label + icon)
+- **Modal**: Dialog for confirmations/forms
+- **PageHeader**: Page title + breadcrumbs + actions
+- **Select**: Dropdown for form selections
+- **StatCard**: Dashboard statistics display
+- **TaskCard**: Sprint board task cards
+- **UpdateItem**: Activity feed item with avatar + message
 
 **Full list**: See `components/custom/index.ts` for all exports.
 
@@ -153,31 +153,31 @@ Available in `src/components/ui/` but **not directly imported in features**:
 
 #### Core Components
 
--   Button, Card, Avatar, Input, Badge, Dialog, Alert
+- Button, Card, Avatar, Input, Badge, Dialog, Alert
 
 #### Form Components
 
--   Input, Textarea, Select, Checkbox, Radio, Switch, Slider, Label
+- Input, Textarea, Select, Checkbox, Radio, Switch, Slider, Label
 
 #### Layout Components
 
--   Card, Separator, Tabs, Accordion, Collapsible, Scroll Area
+- Card, Separator, Tabs, Accordion, Collapsible, Scroll Area
 
 #### Overlay Components
 
--   Dialog, Alert Dialog, Drawer, Sheet, Popover, Tooltip, Dropdown Menu
+- Dialog, Alert Dialog, Drawer, Sheet, Popover, Tooltip, Dropdown Menu
 
 #### Navigation Components
 
--   Breadcrumb, Pagination, Navigation Menu
+- Breadcrumb, Pagination, Navigation Menu
 
 #### Display Components
 
--   Avatar, Badge, Table, Calendar, Carousel, Chart (recharts wrapper)
+- Avatar, Badge, Table, Calendar, Carousel, Chart (recharts wrapper)
 
 #### Feedback Components
 
--   Alert, Toast (Sonner), Progress, Skeleton (loading states)
+- Alert, Toast (Sonner), Progress, Skeleton (loading states)
 
 **Usage**: These are building blocks for creating custom components, not for direct use in features.
 
@@ -202,9 +202,9 @@ Looking at the Dashboard screen, here are the key patterns:
 
 **Implementation**:
 
--   Sidebar: Fixed left, `bg-white`, `border-r border-gray-200`
--   TopBar: Fixed top, `bg-white`, `border-b border-gray-200`
--   Main: `bg-gray-50`, scrollable content area
+- Sidebar: Fixed left, `bg-white`, `border-r border-gray-200`
+- TopBar: Fixed top, `bg-white`, `border-b border-gray-200`
+- Main: `bg-gray-50`, scrollable content area
 
 ### 2. **Stat Cards** (In Progress / Completed / Blockers)
 
@@ -287,57 +287,57 @@ Looking at the Dashboard screen, here are the key patterns:
 
 **Component Architecture**:
 
--   ✅ 50+ UI primitives in `components/ui/` (Radix + Tailwind)
--   ✅ 18 custom components in `components/custom/`
--   ✅ Barrel export pattern (`components/custom/index.ts`)
--   ✅ Consistent Tailwind styling across all components
+- ✅ 50+ UI primitives in `components/ui/` (Radix + Tailwind)
+- ✅ 18 custom components in `components/custom/`
+- ✅ Barrel export pattern (`components/custom/index.ts`)
+- ✅ Consistent Tailwind styling across all components
 
 **Authentication Pages** (Login.tsx, SignUp.tsx):
 
--   ✅ Using `<Button>` component with loading states and variants
--   ✅ Using `<Input>` component with error states
--   ✅ Using `<Label>` for form accessibility
--   ✅ Using `<ErrorText>` for validation feedback
--   ✅ Using `<HintText>` for field descriptions
--   ✅ Using `<PageContainer>` for centered layout
--   ✅ Improved email validation regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
--   ✅ Changed from `type="email"` to `type="text"` for consistent validation
+- ✅ Using `<Button>` component with loading states and variants
+- ✅ Using `<Input>` component with error states
+- ✅ Using `<Label>` for form accessibility
+- ✅ Using `<ErrorText>` for validation feedback
+- ✅ Using `<HintText>` for field descriptions
+- ✅ Using `<PageContainer>` for centered layout
+- ✅ Improved email validation regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+- ✅ Changed from `type="email"` to `type="text"` for consistent validation
 
 **Testing**:
 
--   ✅ 28 passing unit tests (13 SignUp, 15 Login)
--   ✅ Email validation edge cases tested
--   ✅ API integration mocked and tested
--   ✅ Error handling scenarios covered
+- ✅ 28 passing unit tests (13 SignUp, 15 Login)
+- ✅ Email validation edge cases tested
+- ✅ API integration mocked and tested
+- ✅ Error handling scenarios covered
 
 **Design System**:
 
--   ✅ Consistent Tailwind tokens configured
--   ✅ Icons library (lucide-react) integrated
--   ✅ Layout components (Sidebar, TopBar) implemented
+- ✅ Consistent Tailwind tokens configured
+- ✅ Icons library (lucide-react) integrated
+- ✅ Layout components (Sidebar, TopBar) implemented
 
 ### ⚠️ Partially Used
 
 **Custom Components** (built but not fully adopted):
 
--   ⚠️ Avatar, Badge, Card, StatCard, MetricCard - available but not in auth pages
--   ⚠️ TaskCard, UpdateItem - built for Dashboard but not integrated yet
--   ⚠️ Modal, Select, PageHeader - ready for feature development
+- ⚠️ Avatar, Badge, Card, StatCard, MetricCard - available but not in auth pages
+- ⚠️ TaskCard, UpdateItem - built for Dashboard but not integrated yet
+- ⚠️ Modal, Select, PageHeader - ready for feature development
 
 **UI Primitives** (available but not directly imported):
 
--   ⚠️ All 50+ shadcn/ui components in `components/ui/`
--   ⚠️ These are building blocks, features use custom components instead
+- ⚠️ All 50+ shadcn/ui components in `components/ui/`
+- ⚠️ These are building blocks, features use custom components instead
 
 ### ❌ Not Yet Implemented
 
--   [ ] Dashboard refactored to use custom components
--   [ ] Sprint Board using TaskCard component
--   [ ] Team Health using MetricCard component
--   [ ] Dark mode support
--   [ ] Toast notifications (Sonner integration ready)
--   [ ] Skeleton loading states
--   [ ] Component Storybook documentation
+- [ ] Dashboard refactored to use custom components
+- [ ] Sprint Board using TaskCard component
+- [ ] Team Health using MetricCard component
+- [ ] Dark mode support
+- [ ] Toast notifications (Sonner integration ready)
+- [ ] Skeleton loading states
+- [ ] Component Storybook documentation
 
 ---
 
@@ -348,12 +348,12 @@ Looking at the Dashboard screen, here are the key patterns:
 **Where**: Dashboard, Sprint Board, Team Health, Analytics
 **What**: Use existing custom components:
 
--   Replace stat divs with `<StatCard>` or `<MetricCard>`
--   Replace avatar divs with `<Avatar>`
--   Replace plain cards with `<Card>`
--   Use `<Badge>` for task status
--   Use `<TaskCard>` for sprint board items
--   Use `<UpdateItem>` for activity feeds
+- Replace stat divs with `<StatCard>` or `<MetricCard>`
+- Replace avatar divs with `<Avatar>`
+- Replace plain cards with `<Card>`
+- Use `<Badge>` for task status
+- Use `<TaskCard>` for sprint board items
+- Use `<UpdateItem>` for activity feeds
 
 **Example**: Dashboard stat refactor
 
@@ -411,9 +411,9 @@ toast.error("Invalid credentials");
 **What**: Combine custom components into feature-specific patterns
 **Examples**:
 
--   `<DashboardHeader>` = PageHeader + Avatar + QuickActions
--   `<ActivityFeed>` = Multiple UpdateItems in scrollable container
--   `<SprintProgressCard>` = Card + Progress bar + Stats
+- `<DashboardHeader>` = PageHeader + Avatar + QuickActions
+- `<ActivityFeed>` = Multiple UpdateItems in scrollable container
+- `<SprintProgressCard>` = Card + Progress bar + Stats
 
 ### 5. **Add Form Validation Library**
 
@@ -587,73 +587,71 @@ export function Login() {
 
 **Authentication Components**:
 
--   ✅ Built Login.tsx and SignUp.tsx using custom components
--   ✅ Improved email validation regex to catch edge cases (multiple @, spaces, etc.)
--   ✅ Changed input type from "email" to "text" for consistent validation across browser/tests
--   ✅ Added comprehensive error handling with ErrorText component
--   ✅ Added HintText for better UX (field descriptions)
--   ✅ Implemented loading states on buttons (isLoading prop)
--   ✅ Created 28 passing unit tests with Vitest
+- ✅ Built Login.tsx and SignUp.tsx using custom components
+- ✅ Improved email validation regex to catch edge cases (multiple @, spaces, etc.)
+- ✅ Changed input type from "email" to "text" for consistent validation across browser/tests
+- ✅ Added comprehensive error handling with ErrorText component
+- ✅ Added HintText for better UX (field descriptions)
+- ✅ Implemented loading states on buttons (isLoading prop)
+- ✅ Created 28 passing unit tests with Vitest
 
 **Component System**:
 
--   ✅ Established two-layer architecture (UI primitives + Custom components)
--   ✅ Created barrel export for easy imports (`components/custom/index.ts`)
--   ✅ Built 18 reusable custom components
--   ✅ All components use consistent Tailwind styling
+- ✅ Established two-layer architecture (UI primitives + Custom components)
+- ✅ Created barrel export for easy imports (`components/custom/index.ts`)
+- ✅ Built 18 reusable custom components
+- ✅ All components use consistent Tailwind styling
 
 **Testing Infrastructure**:
 
--   ✅ Set up Vitest with Testing Library
--   ✅ Configured jsdom test environment
--   ✅ Created test utilities (mocks, helpers)
--   ✅ Achieved good coverage on auth flow
+- ✅ Set up Vitest with Testing Library
+- ✅ Configured jsdom test environment
+- ✅ Created test utilities (mocks, helpers)
+- ✅ Achieved good coverage on auth flow
 
 ### 🚧 In Progress
 
--   [ ] Refactor Dashboard to use MetricCard, StatCard, UpdateItem
--   [ ] Add Avatar component to navigation and user profiles
--   [ ] Implement Modal component for forms and confirmations
--   [ ] Add toast notifications with Sonner
+- [ ] Refactor Dashboard to use MetricCard, StatCard, UpdateItem
+- [ ] Add Avatar component to navigation and user profiles
+- [ ] Implement Modal component for forms and confirmations
+- [ ] Add toast notifications with Sonner
 
 ### 📋 Future Work
 
 **Short Term** (Next Sprint):
 
--   [ ] Replace all plain avatars with `<Avatar>` component
--   [ ] Use `<Badge>` for task status indicators
--   [ ] Add `<Skeleton>` loading states to Dashboard
--   [ ] Implement `<Modal>` for Sprint Board "Add Task"
--   [ ] Add unit tests for custom components
+- [ ] Replace all plain avatars with `<Avatar>` component
+- [ ] Use `<Badge>` for task status indicators
+- [ ] Add `<Skeleton>` loading states to Dashboard
+- [ ] Implement `<Modal>` for Sprint Board "Add Task"
+- [ ] Add unit tests for custom components
 
 **Medium Term** (Next Month):
 
--   [ ] Build composed components (DashboardStatGrid, ActivityFeed, etc.)
--   [ ] Add dark mode support (Tailwind classes ready)
--   [ ] Create Storybook documentation for all components
--   [ ] Performance audit (bundle size, render times)
--   [ ] Add E2E tests with Playwright
+- [ ] Build composed components (DashboardStatGrid, ActivityFeed, etc.)
+- [ ] Add dark mode support (Tailwind classes ready)
+- [ ] Create Storybook documentation for all components
+- [ ] Performance audit (bundle size, render times)
+- [ ] Add E2E tests with Playwright
 
 **Long Term** (Quarterly):
 
--   [ ] Component animation library (Framer Motion)
--   [ ] Advanced form validation (React Hook Form + Zod)
--   [ ] Accessibility audit and improvements
--   [ ] Design system documentation site
--   [ ] Component usage analytics
+- [ ] Component animation library (Framer Motion)
+- [ ] Advanced form validation (React Hook Form + Zod)
+- [ ] Accessibility audit and improvements
+- [ ] Design system documentation site
+- [ ] Component usage analytics
 
 ---
 
 ## 🎯 Key Takeaways
 
 1. **Two-layer component system** works well:
-
     - UI primitives (components/ui/) provide behavior + accessibility
     - Custom components (components/custom/) enforce ScrumHub styling
     - Features import from custom layer only
 
 2. **Custom components now in production**:
-
     - ✅ Button, Input, Label, ErrorText, HintText, PageContainer used in Login/SignUp
     - ✅ 28 passing tests validate component behavior
     - ✅ Consistent styling across authentication flow
@@ -665,13 +663,11 @@ export function Login() {
     ```
 
 4. **Email validation improved**:
-
     - Regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
     - Catches multiple @, spaces, missing domain/TLD
     - Consistent behavior in browser and tests
 
 5. **Next steps clear**:
-
     - Expand custom component usage to Dashboard, Sprint Board
     - Add loading states (Skeleton) and notifications (Toast)
     - Build composed components for common patterns
