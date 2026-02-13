@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, CheckSquare, FileText, ShieldAlert, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
-import { formatOrgRole, formatScrumRole, generateAvatar, assignColorById } from "../../utils/formatters";
+import { formatOrgRole, formatScrumRole } from "../../utils/formatters";
 import { PageHeader, Avatar, Badge, StatCard, Modal, Button } from "../../components/custom";
+import {
+	AlertCircle,
+	CheckSquare,
+	FileText,
+	ShieldAlert,
+	Trash2,
+	ChevronDown,
+	ChevronUp,
+} from "lucide-react";
+
 interface Member {
 	id: string;
 	name: string;
-	avatar: string;
-	color: string;
+	avatarUrl?: string | null; // Optional: URL to uploaded profile picture
 	orgRole: "Admin" | "Member";
 	scrumRole: "Product Owner" | "Scrum Master" | "Developer";
 	tickets: ActivityDetail[];
@@ -23,7 +31,6 @@ interface ActivityDetail {
 }
 
 export function Info() {
-
 	// Modal states
 	const [members, setMembers] = useState<Member[]>([]); // Start with empty array of members
 	const [currentUser, setCurrentUser] = useState<"Admin" | "Member" | null>(null);
@@ -34,32 +41,33 @@ export function Info() {
 		type: "tickets" | "tasks" | "blockers";
 	} | null>(null);
 
-	useEffect(() => { // Used to fetch API data (outside the normal React render's flow)
+	useEffect(() => {
+		// Used to fetch API data (outside the normal React render's flow)
 		const fetchMembers = async () => {
 			try {
 				// Step 1: Get current user's org_id
 				const user = await getCurrentUser();
 				setCurrentUser(formatOrgRole(user.org_role!));
-				setOrgId(user.current_organization_id);
+				setOrgId(user.organization_id);
 
 				// Step 2: Fetch members using org_id
-				if (user.current_organization_id) {
-					const membersData = await getCurrentUserInfo(user.current_organization_id);
+				if (user.organization_id) {
+					const membersData = await getCurrentUserInfo(user.organization_id);
 
 					// Transform API data → UI data using your formatter functions
-					const transformedMembers: Member[] = membersData.map((memberData, index) => ({
+					const transformedMembers: Member[] = membersData.map((memberData) => ({
 						id: memberData.id,
 						name: memberData.name,
-						avatar: generateAvatar(memberData.name),
-						color: assignColorById(memberData.id),
+						avatarUrl: memberData.avatar_url,
 						orgRole: formatOrgRole(memberData.org_role),
 						scrumRole: formatScrumRole(memberData.scrum_role),
 						tickets: memberData.tickets || [],
 						tasks: memberData.tasks || [],
-						blockers: memberData.blockers.map(b => ({
-							id: b.id,
-							title: b.description,
-						})) || [],
+						blockers:
+							memberData.blockers.map((b) => ({
+								id: b.id,
+								title: b.description,
+							})) || [],
 					}));
 					setMembers(transformedMembers);
 				}
@@ -79,7 +87,7 @@ export function Info() {
 				await removeMember(orgId, confirmDelete);
 
 				// Ipdate UI by removing member from state
-				setMembers(members.filter(m => m.id !== confirmDelete));
+				setMembers(members.filter((m) => m.id !== confirmDelete));
 
 				// Close modal
 				setConfirmDelete(null);
@@ -105,10 +113,7 @@ export function Info() {
 
 	return (
 		<div className="p-8">
-			<PageHeader
-				title="Info"
-				subtitle="Team members and current work context"
-			/>
+			<PageHeader title="Info" subtitle="Team members and current work context" />
 			<div className="w-full">
 				<div className="bg-white rounded-2xl border border-gray-100">
 					{/* Table Header */}
@@ -133,8 +138,9 @@ export function Info() {
 										{/* Member Info */}
 										<div className="col-span-4 flex items-center gap-3">
 											<Avatar
-												initials={member.avatar}
-												color={member.color}
+												avatarUrl={member.avatarUrl}
+												name={member.name}
+												userId={member.id}
 												size="md"
 											/>
 											<div>
@@ -158,8 +164,8 @@ export function Info() {
 												onClick={() => toggleActivity(member.id, "tickets")}
 												className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
 													member.tickets.length > 0
-													? "bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
-													: "bg-gray-50 text-gray-500"
+														? "bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
+														: "bg-gray-50 text-gray-500"
 												}`}
 												disabled={member.tickets.length === 0}
 											>
@@ -255,8 +261,8 @@ export function Info() {
 													{expandedActivity.type === "tickets"
 														? "Active Tickets"
 														: expandedActivity.type === "tasks"
-														? "Active Tasks"
-														: "Open Blockers"}
+															? "Active Tasks"
+															: "Open Blockers"}
 												</h4>
 
 												{expandedActivity.type === "tickets" && (
@@ -271,7 +277,10 @@ export function Info() {
 																		<p className="text-sm text-gray-900">
 																			{ticket.title}
 																		</p>
-																		<Badge variant="default" size="sm">
+																		<Badge
+																			variant="default"
+																			size="sm"
+																		>
 																			{ticket.status}
 																		</Badge>
 																	</div>
@@ -375,8 +384,8 @@ export function Info() {
 						<AlertCircle className="w-6 h-6 text-rose-600" />
 					</div>
 					<p className="text-sm text-gray-500 mb-6">
-						This member will be removed from the team and lose access to all data.
-						This action cannot be undone.
+						This member will be removed from the team and lose access to all data. This
+						action cannot be undone.
 					</p>
 
 					<div className="flex items-center gap-3">

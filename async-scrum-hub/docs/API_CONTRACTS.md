@@ -1894,7 +1894,7 @@ Used to render the organization board.
 ```json
 {
 	"description": "string",
-	"task_id": "uuid | null",
+	"ticket_id": "uuid | null",
 	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
@@ -1907,7 +1907,7 @@ Used to render the organization board.
 	"status": "open",
 	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"task_id": "uuid | null",
+	"ticket_id": "uuid | null",
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
@@ -2004,7 +2004,10 @@ Used to render the organization board.
 			"id": "uuid",
 			"name": "string",
 		} | null,
-		"task_id": "uuid | null",
+		"ticket": {
+			"id": "uuid",
+			"title": "string"
+		},
 		"created_at": "timestamp (today)",
 		"resolved_at": "timestamp | null"
 	}
@@ -2060,7 +2063,7 @@ Used to render the organization board.
 **Permissions:**
 - Scrum Master
 - Product Owner
-- Developer (Task owner)
+- Developer (Ticket owner)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker
@@ -2069,7 +2072,7 @@ Used to render the organization board.
 ```json
 {
 	"description": "string (optional)",
-	"task_id": "uuid | null (optional)",
+	"ticket_id": "uuid | null (optional)",
 	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
@@ -2082,7 +2085,10 @@ Used to render the organization board.
 	"status": "open | resolved",
 	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"task_id": "uuid | null",
+	"ticket": {
+		"id": "uuid | null",
+		"title": "string | null"
+	},
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
@@ -2155,7 +2161,7 @@ Used to render the organization board.
 **Permissions:**
 - Scrum Master
 - Product Owner
-- Developer (Task owner/assignee)
+- Developer (Ticket owner/assignee)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker

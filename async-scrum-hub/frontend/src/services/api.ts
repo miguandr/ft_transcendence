@@ -13,7 +13,8 @@ const mockUsers: Array<{
 	email: string;
 	password: string; // In real backend, this would be hashed!
 	name: string;
-	current_organization_id: string | null;
+	avatar_url: string | null;
+	organization_id: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
 }> = [
@@ -22,7 +23,8 @@ const mockUsers: Array<{
 		email: "miguel@example.com",
 		password: "password123", // In real backend, this would be hashed!
 		name: "Miguel",
-		current_organization_id: "2",
+		avatar_url: null,
+		organization_id: "2",
 		scrum_role: "scrum_master",
 		org_role: "admin",
 	},
@@ -31,7 +33,8 @@ const mockUsers: Array<{
 		email: "angel@example.com",
 		password: "password123", // In real backend, this would be hashed!
 		name: "Angel",
-		current_organization_id: "2",
+		avatar_url: null,
+		organization_id: "2",
 		scrum_role: "product_owner",
 		org_role: "member",
 	},
@@ -79,19 +82,64 @@ const mockTasks: Array<{
 	},
 ];
 
-const mockBlocker: Array<{
+const mockBlockers: Array<{
 	id: string;
 	description: string;
 	status: "open" | "resolved";
+	created_by: {
+		id: string;
+		name: string;
+		avatar_url: string | null;
+	};
+	assignee: {
+		id: string;
+		name: string;
+		avatar_url: string | null;
+	} | null;
+	ticket: {
+		id: string;
+		title: string;
+	};
 	created_at: string;
-	created_by: string;
+	resolved_at: string | null;
 }> = [
 	{
 		id: "32",
 		description: "Waiting for API keys from client",
 		status: "open",
-		created_at: "1 day ago",
-		created_by: "1",
+		created_by: {
+			id: "1",
+			name: "Miguel",
+			avatar_url: null,
+		},
+		assignee: {
+			id: "2",
+			name: "Angel",
+			avatar_url: null,
+		},
+		ticket: {
+			id: "21",
+			title: "Implement OAuth flow",
+		},
+		created_at: "2024-02-10T10:00:00Z",
+		resolved_at: null,
+	},
+	{
+		id: "33",
+		description: "Design assets not yet approved",
+		status: "resolved",
+		created_by: {
+			id: "2",
+			name: "Angel",
+			avatar_url: null,
+		},
+		assignee: null,
+		ticket: {
+			id: "1",
+			title: "Design settings page",
+		},
+		created_at: "2024-02-08T14:30:00Z",
+		resolved_at: "2024-02-11T09:15:00Z",
 	},
 ];
 
@@ -118,11 +166,12 @@ interface SignUpResponse {
 	email: string;
 }
 
-interface User {
+export interface User {
 	id: string;
 	email: string;
 	name: string;
-	current_organization_id: string | null;
+	avatar_url: string | null;
+	organization_id: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
 }
@@ -155,7 +204,7 @@ interface OrganizationInfo {
 	members_count: number;
 }
 
-interface OrganizationMember {
+export interface OrganizationMember {
 	id: string;
 	name: string;
 	org_role: "admin" | "member";
@@ -165,6 +214,7 @@ interface OrganizationMember {
 interface OrganizationMemberWithActivity {
 	id: string;
 	name: string;
+	avatar_url: string | null;
 	org_role: "admin" | "member";
 	scrum_role: "scrum_master" | "product_owner" | "developer";
 
@@ -191,6 +241,61 @@ interface OrganizationMemberWithActivity {
 		created_at: string;
 		created_by: string;
 	}>;
+}
+
+interface CreateBlockerRequest {
+	description: string;
+	ticket_id: string | null;
+	assignee_id: string | null;
+}
+
+interface CreateBlockerResponse {
+	id: string;
+	description: string;
+	status: "open";
+	created_by: string;
+	assignee_id: string | null;
+	ticket_id: string | null;
+	created_at: string;
+	resolved_at: null;
+}
+
+interface BlockerListItem {
+	id: string;
+	description: string;
+	status: "open" | "resolved";
+	created_by: {
+		id: string;
+		name: string;
+		avatar_url: string | null;
+	};
+	assignee: {
+		id: string;
+		name: string;
+	} | null;
+	ticket: {
+		id: string;
+		title: string;
+	};
+	created_at: string;
+	resolved_at: string | null;
+}
+
+interface UpdateBlockerRequest {
+	description?: string;
+	ticket_id?: string | null;
+	assignee_id?: string | null;
+}
+
+interface UpdateBlockerResponse {
+	id: string;
+	description: string;
+	status: "open" | "resolved";
+	created_by: string;
+	assignee_id: string | null;
+	ticket_id: string | null;
+	created_at: string;
+	resolved_at: string | null;
 }
 
 interface ApiError {
@@ -269,7 +374,7 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 	};
 
 	//Update user data
-	currentUser.current_organization_id = newOrg.id;
+	currentUser.organization_id = newOrg.id;
 	currentUser.org_role = "admin";
 
 	//Add to mock database
@@ -310,7 +415,7 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 		createApiError("CODE_NOT_FOUND", "Team code not found");
 	}
 
-	currentUser.current_organization_id = matchingOrg.id;
+	currentUser.organization_id = matchingOrg.id;
 	currentUser.org_role = "member";
 	currentUser.scrum_role = data.scrum_role;
 
@@ -333,7 +438,7 @@ export async function checkJoinCode(join_code: string): Promise<OrganizationInfo
 		createApiError("CODE_NOT_FOUND", "Team code not found");
 	}
 
-	if (currentUser.current_organization_id === org.id) {
+	if (currentUser.organization_id === org.id) {
 		createApiError("ALREADY_MEMBER", "You're already a member of this organization");
 	}
 
@@ -406,9 +511,10 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 		email: data.email,
 		password: data.password,
 		name: data.name,
-		current_organization_id: null,
+		organization_id: null,
 		scrum_role: null,
 		org_role: null,
+		avatar_url: null,
 	};
 
 	// Add to mock database
@@ -448,7 +554,7 @@ export async function getCurrentUserInfo(
 	await delay(300);
 
 	// Step 1: Which users belong to this org?
-	const orgMembers = mockUsers.filter((user) => user.current_organization_id === org_id);
+	const orgMembers = mockUsers.filter((user) => user.organization_id === org_id);
 	if (orgMembers.length === 0) {
 		createApiError("NOT_FOUND", "No members found in this organization");
 	}
@@ -462,11 +568,20 @@ export async function getCurrentUserInfo(
 		const userTasks = mockTasks.filter((task) => task.assignee_id === user.id);
 
 		// Find THIS user's blockers
-		const userBlockers = mockBlocker.filter((blocker) => blocker.created_by === user.id);
+		const userBlockers = mockBlockers
+			.filter((blocker) => blocker.created_by.id === user.id)
+			.map((blocker) => ({
+				id: blocker.id,
+				description: blocker.description,
+				status: blocker.status,
+				created_at: blocker.created_at,
+				created_by: blocker.created_by.id, // Extract just the ID to match interface
+			}));
 
 		return {
 			id: user.id,
 			name: user.name,
+			avatar_url: user.avatar_url,
 			org_role: user.org_role!,
 			scrum_role: user.scrum_role!,
 			tickets: userTickets,
@@ -479,8 +594,10 @@ export async function getCurrentUserInfo(
 }
 
 // Mock removeMember function
-export async function removeMember(org_id: string, member_id: string): Promise<{ success: boolean }>
-{
+export async function removeMember(
+	org_id: string,
+	member_id: string
+): Promise<{ success: boolean }> {
 	await delay(500);
 	const currentUser = getCurrentUserRecord();
 
@@ -490,13 +607,13 @@ export async function removeMember(org_id: string, member_id: string): Promise<{
 	}
 
 	// Step 2: Check if current user belongs to this organization
-	if (currentUser.current_organization_id !== org_id) {
+	if (currentUser.organization_id !== org_id) {
 		createApiError("FORBIDDEN", "You are not a member of this organization");
 	}
 
 	// Step 3: Find the member to remove
 	const memberToRemove = mockUsers.find(
-		(u) => u.id === member_id && u.current_organization_id === org_id
+		(u) => u.id === member_id && u.organization_id === org_id
 	);
 	if (!memberToRemove) {
 		createApiError("NOT_FOUND", "Member not found in this organization");
@@ -508,11 +625,312 @@ export async function removeMember(org_id: string, member_id: string): Promise<{
 	}
 
 	// Step 5: Remove the member (set their org fields to null)
-	memberToRemove.current_organization_id = null;
+	memberToRemove.organization_id = null;
 	memberToRemove.org_role = null;
 	memberToRemove.scrum_role = null;
 
 	return { success: true };
+}
+
+// =============================================================
+// TICKETS
+// =============================================================
+
+export interface TicketListItem {
+	id: string;
+	title: string;
+	status: "todo" | "in_progress" | "completed";
+	priority: "low" | "medium" | "high";
+	assignee: {
+		id: string;
+		name: string;
+		avatar_url: string | null;
+	} | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export async function listTickets(org_id: string): Promise<TicketListItem[]> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	// Validate user belongs to organization
+	if (currentUser.organization_id !== org_id) {
+		createApiError("FORBIDDEN", "You are not a member of this organization");
+	}
+
+	// Mock tickets data
+	const mockTickets: TicketListItem[] = [
+		{
+			id: "21",
+			title: "Implement user authentication",
+			status: "in_progress",
+			priority: "high",
+			assignee: {
+				id: "1",
+				name: "Alice Johnson",
+				avatar_url: null,
+			},
+			created_at: "2024-01-10T10:00:00Z",
+			updated_at: "2024-01-15T14:30:00Z",
+		},
+		{
+			id: "22",
+			title: "Design landing page",
+			status: "todo",
+			priority: "medium",
+			assignee: null,
+			created_at: "2024-01-11T09:00:00Z",
+			updated_at: "2024-01-11T09:00:00Z",
+		},
+		{
+			id: "23",
+			title: "Fix payment gateway bug",
+			status: "completed",
+			priority: "high",
+			assignee: {
+				id: "2",
+				name: "Bob Smith",
+				avatar_url: null,
+			},
+			created_at: "2024-01-08T08:00:00Z",
+			updated_at: "2024-01-14T16:00:00Z",
+		},
+	];
+
+	return mockTickets;
+}
+
+// =============================================================
+// BLOCKERS
+// =============================================================
+
+// Create Blocker
+export async function createBlocker(
+	org_id: string,
+	data: CreateBlockerRequest
+): Promise<CreateBlockerResponse> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	// Validate user belongs to organization
+	if (currentUser.organization_id !== org_id) {
+		createApiError("FORBIDDEN", "You are not a member of this organization");
+	}
+
+	// Validate description
+	if (!data.description.trim()) {
+		createApiError("INVALID_INPUT", "Description is required");
+	}
+
+	// Validate assignee is a developer if provided
+	if (data.assignee_id) {
+		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
+		if (!assignee) {
+			createApiError("INVALID_INPUT", "Assignee not found");
+		}
+		if (assignee.scrum_role !== "developer") {
+			createApiError(
+				"INVALID_ASSIGNEE",
+				"Only users with Developer role can be assigned to blockers"
+			);
+		}
+	}
+
+	// Create new blocker
+	const newBlocker = {
+		id: `blocker-${Date.now()}`,
+		description: data.description,
+		status: "open" as const,
+		created_by: {
+			id: currentUser.id,
+			name: currentUser.name,
+			avatar_url: currentUser.avatar_url,
+		},
+		assignee: data.assignee_id
+			? {
+					id: data.assignee_id,
+					name: mockUsers.find((u) => u.id === data.assignee_id)!.name,
+					avatar_url: mockUsers.find((u) => u.id === data.assignee_id)!.avatar_url,
+				}
+			: null,
+		ticket: {
+			id: data.ticket_id || "0",
+			title: "Mock Ticket Title", // In real implementation, fetch from tasks/tickets
+		},
+		created_at: new Date().toISOString(),
+		resolved_at: null,
+	};
+
+	// Add to mock database
+	mockBlockers.push(newBlocker);
+
+	// Return minimal response (contract 7.1)
+	return {
+		id: newBlocker.id,
+		description: newBlocker.description,
+		status: newBlocker.status,
+		created_by: currentUser.id,
+		assignee_id: data.assignee_id,
+		ticket_id: data.ticket_id,
+		created_at: newBlocker.created_at,
+		resolved_at: null,
+	};
+}
+
+// List Blockers
+export async function listBlockers(
+	org_id: string,
+	status?: "open" | "resolved"
+): Promise<BlockerListItem[]> {
+	await delay(300);
+	const currentUser = getCurrentUserRecord();
+
+	// Validate user belongs to organization
+	if (currentUser.organization_id !== org_id) {
+		createApiError("FORBIDDEN", "You are not a member of this organization");
+	}
+
+	// Filter blockers by organization (all blockers for this org)
+	let blockers = mockBlockers;
+
+	// Apply status filter if provided
+	if (status) {
+		blockers = blockers.filter((b) => b.status === status);
+	}
+
+	// Transform to BlockerListItem format (string ids to numbers)
+	return blockers.map((b) => ({
+		id: b.id,
+		description: b.description,
+		status: b.status,
+		created_by: {
+			id: b.created_by.id,
+			name: b.created_by.name,
+			avatar_url: b.created_by.avatar_url,
+		},
+		assignee: b.assignee
+			? {
+					id: b.assignee.id,
+					name: b.assignee.name,
+				}
+			: null,
+		ticket: {
+			id: b.ticket.id,
+			title: b.ticket.title,
+		},
+		created_at: b.created_at,
+		resolved_at: b.resolved_at,
+	}));
+}
+
+// Update Blocker
+export async function updateBlocker(
+	blocker_id: string,
+	data: UpdateBlockerRequest
+): Promise<UpdateBlockerResponse> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	// Find blocker
+	const blocker = mockBlockers.find((b) => b.id === blocker_id);
+	if (!blocker) {
+		createApiError("NOT_FOUND", "Blocker not found");
+	}
+
+	// Check permissions
+	const isOwner = blocker.created_by.id === currentUser.id;
+	const isAssignee = blocker.assignee?.id === currentUser.id;
+	const isScrumMaster = currentUser.scrum_role === "scrum_master";
+	const isProductOwner = currentUser.scrum_role === "product_owner";
+
+	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+
+	// Validate assignee if provided
+	if (data.assignee_id !== undefined && data.assignee_id !== null) {
+		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
+		if (!assignee) {
+			createApiError("INVALID_INPUT", "Assignee not found");
+		}
+		if (assignee.scrum_role !== "developer") {
+			createApiError(
+				"INVALID_ASSIGNEE",
+				"Only users with Developer role can be assigned to blockers"
+			);
+		}
+	}
+
+	// Update blocker fields
+	if (data.description !== undefined) {
+		if (!data.description.trim()) {
+			createApiError("INVALID_INPUT", "Description cannot be empty");
+		}
+		blocker.description = data.description;
+	}
+
+	if (data.ticket_id !== undefined) {
+		blocker.ticket.id = data.ticket_id || "0";
+	}
+
+	if (data.assignee_id !== undefined) {
+		if (data.assignee_id === null) {
+			blocker.assignee = null;
+		} else {
+			const assignee = mockUsers.find((u) => u.id === data.assignee_id)!;
+			blocker.assignee = {
+				id: assignee.id,
+				name: assignee.name,
+				avatar_url: assignee.avatar_url,
+			};
+		}
+	}
+
+	// Return minimal response (contract 7.3)
+	return {
+		id: blocker.id,
+		description: blocker.description,
+		status: blocker.status,
+		created_by: blocker.created_by.id,
+		assignee_id: blocker.assignee?.id || null,
+		ticket_id: blocker.ticket.id,
+		created_at: blocker.created_at,
+		resolved_at: blocker.resolved_at,
+	};
+}
+
+// Resolve Blocker
+export async function resolveBlocker(blocker_id: string): Promise<void> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	// Find blocker
+	const blocker = mockBlockers.find((b) => b.id === blocker_id);
+	if (!blocker) {
+		createApiError("NOT_FOUND", "Blocker not found");
+	}
+
+	// Check if already resolved
+	if (blocker.status === "resolved") {
+		createApiError("BLOCKER_ALREADY_RESOLVED", "Blocker already resolved");
+	}
+
+	// Check permissions
+	const isOwner = blocker.created_by.id === currentUser.id;
+	const isAssignee = blocker.assignee?.id === currentUser.id;
+	const isScrumMaster = currentUser.scrum_role === "scrum_master";
+	const isProductOwner = currentUser.scrum_role === "product_owner";
+
+	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+
+	// Resolve blocker
+	blocker.status = "resolved";
+	blocker.resolved_at = new Date().toISOString();
+
+	// Return 204 No Content (void)
 }
 
 // =============================================================

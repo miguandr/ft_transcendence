@@ -5,6 +5,7 @@
 **ScrumHub** is an async-first scrum collaboration platform designed for distributed teams. It reduces meeting overhead by providing asynchronous standups, sprint visibility, blocker tracking, and team health monitoring—all without requiring everyone to be online at the same time.
 
 ### Core Features
+
 - **Async Standups**: Team members submit daily updates on their schedule
 - **Sprint Board**: Kanban-style task tracking with drag-and-drop functionality
 - **Blocker Management**: Centralized visibility into team blockers and dependencies
@@ -12,6 +13,7 @@
 - **Team Health**: Sentiment tracking and proactive recommendations
 
 ### Tech Stack
+
 - **Build Tool**: Vite 7.2.4 (lightning-fast HMR and optimized builds)
 - **Framework**: React 19.2.0 with TypeScript 5.9.3
 - **Routing**: React Router v7 (client-side navigation)
@@ -24,26 +26,28 @@
 ## Application Routes
 
 ### Authentication Flow (6 screens)
-| Route | Component | Purpose |
-|-------|-----------|---------|
-| `/welcome` | `Welcome.tsx` | Landing page with sign up / log in options |
-| `/login` | `Login.tsx` | Email/password authentication |
-| `/signup` | `SignUp.tsx` | New user registration |
-| `/role-selection` | `RoleSelection.tsx` | Choose role (Admin, Member, etc.) |
-| `/team-creation` | `TeamCreation.tsx` | Create a new team/organization |
-| `/team-join` | `TeamJoin.tsx` | Join an existing team via invite |
+
+| Route             | Component           | Purpose                                    |
+| ----------------- | ------------------- | ------------------------------------------ |
+| `/welcome`        | `Welcome.tsx`       | Landing page with sign up / log in options |
+| `/login`          | `Login.tsx`         | Email/password authentication              |
+| `/signup`         | `SignUp.tsx`        | New user registration                      |
+| `/role-selection` | `RoleSelection.tsx` | Choose role (Admin, Member, etc.)          |
+| `/team-creation`  | `TeamCreation.tsx`  | Create a new team/organization             |
+| `/team-join`      | `TeamJoin.tsx`      | Join an existing team via invite           |
 
 ### Main Application (8 screens)
-| Route | Component | Purpose |
-|-------|-----------|---------|
-| `/` | `Dashboard.tsx` | Home screen with sprint overview and updates |
-| `/board` | `SprintBoard.tsx` | Kanban board for current sprint tasks |
-| `/standup` | `AsyncStandup.tsx` | Daily standup submission and history |
-| `/standup-empty` | `AsyncStandupEmpty.tsx` | Empty state for first-time standup |
-| `/blockers` | `Blockers.tsx` | List of active blockers across team |
-| `/blockers-empty` | `BlockersEmpty.tsx` | Empty state for blockers |
-| `/analytics` | `Analytics.tsx` | Sprint metrics and team performance |
-| `/team-health` | `TeamHealth.tsx` | Sentiment trends and team wellness |
+
+| Route             | Component               | Purpose                                      |
+| ----------------- | ----------------------- | -------------------------------------------- |
+| `/`               | `Dashboard.tsx`         | Home screen with sprint overview and updates |
+| `/board`          | `SprintBoard.tsx`       | Kanban board for current sprint tasks        |
+| `/standup`        | `AsyncStandup.tsx`      | Daily standup submission and history         |
+| `/standup-empty`  | `AsyncStandupEmpty.tsx` | Empty state for first-time standup           |
+| `/blockers`       | `Blockers.tsx`          | List of active blockers across team          |
+| `/blockers-empty` | `BlockersEmpty.tsx`     | Empty state for blockers                     |
+| `/analytics`      | `Analytics.tsx`         | Sprint metrics and team performance          |
+| `/team-health`    | `TeamHealth.tsx`        | Sentiment trends and team wellness           |
 
 **Total**: 14 screens (6 auth + 8 features)
 
@@ -52,19 +56,21 @@
 ## Data Integration Status
 
 ### Current State: Mock-Driven Development
+
 All screens currently use **static data** or **local component state**. No real backend API calls exist yet.
 
-| Feature Area | Status | Implementation |
-|-------------|--------|----------------|
+| Feature Area       | Status     | Implementation                                   |
+| ------------------ | ---------- | ------------------------------------------------ |
 | **Authentication** | 🟡 Partial | Login form wired to mock API with JWT simulation |
-| **Dashboard** | 🔴 Mock | Hard-coded stats and recent updates |
-| **Sprint Board** | 🔴 Mock | Local state for columns and tasks |
-| **Standups** | 🔴 Mock | Static standup entries |
-| **Blockers** | 🔴 Mock | Static list, actions are UI-only |
-| **Analytics** | 🔴 Mock | Hard-coded chart data |
-| **Team Health** | 🔴 Mock | Static signals and recommendations |
+| **Dashboard**      | 🔴 Mock    | Hard-coded stats and recent updates              |
+| **Sprint Board**   | 🔴 Mock    | Local state for columns and tasks                |
+| **Standups**       | 🔴 Mock    | Static standup entries                           |
+| **Blockers**       | 🔴 Mock    | Static list, actions are UI-only                 |
+| **Analytics**      | 🔴 Mock    | Hard-coded chart data                            |
+| **Team Health**    | 🔴 Mock    | Static signals and recommendations               |
 
 ### Next Steps for Backend Integration
+
 1. ✅ **Login API** - Mock service created (`services/api.ts`) matching `API_CONTRACTS.md`
 2. 🔲 **Complete Auth Flow** - Wire SignUp, TeamSetup
 3. 🔲 **Dashboard API** - Fetch real sprint stats and updates
@@ -102,6 +108,7 @@ See `02_folder_structure.md` for complete directory tree.
 ## Development Progress
 
 ### Completed ✅
+
 - [x] Vite + React + TypeScript scaffold
 - [x] Tailwind CSS integration
 - [x] React Router setup with all 14 routes
@@ -112,10 +119,12 @@ See `02_folder_structure.md` for complete directory tree.
 - [x] Extracting reusable components (Button, Card, Avatar)
 
 ### In Progress 🔄
+
 - [ ] SignUp form with validation
 - [ ] Backend API integration (replacing mocks)
 
 ### Planned 📋
+
 - [ ] Unit tests (Vitest + Testing Library)
 - [ ] E2E tests (Playwright)
 - [ ] State management (Zustand or React Query)
@@ -126,15 +135,15 @@ See `02_folder_structure.md` for complete directory tree.
 
 ## Documentation Index
 
-| File | Purpose |
-|------|---------|
-| `00_overview.md` | This file - high-level project summary |
+| File                      | Purpose                                            |
+| ------------------------- | -------------------------------------------------- |
+| `00_overview.md`          | This file - high-level project summary             |
 | `01_setup_and_tooling.md` | Vite setup, dependency installation, common errors |
-| `02_folder_structure.md` | Complete directory tree and conventions |
-| `05_ui_components.md` | Inventory of all UI primitives and usage tracking |
-| `06_deps_and_why.md` | Explanation of every package.json dependency |
-| `07_modules.md` | Feature module breakdowns (TBD) |
-| `08_dev_log` | Daily work logs and progress notes |
+| `02_folder_structure.md`  | Complete directory tree and conventions            |
+| `05_ui_components.md`     | Inventory of all UI primitives and usage tracking  |
+| `06_deps_and_why.md`      | Explanation of every package.json dependency       |
+| `07_modules.md`           | Feature module breakdowns (TBD)                    |
+| `08_dev_log`              | Daily work logs and progress notes                 |
 
 ---
 
@@ -160,9 +169,5 @@ npm run preview
 npm run lint
 ```
 
-
 **Test Credentials** (mock API):
-Login:
-	- Email: `miguel@example.com`
-	- Password: `password123`
-
+Login: - Email: `miguel@example.com` - Password: `password123`

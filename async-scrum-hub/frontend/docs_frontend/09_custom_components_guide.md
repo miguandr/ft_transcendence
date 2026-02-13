@@ -31,11 +31,13 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 2: Replace PageContainer (Line 86)
 
 **FIND:**
+
 ```tsx
 <div className="min-h-screen bg-white flex items-center justify-center p-8">
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <PageContainer>
 ```
@@ -47,6 +49,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 3: Replace Labels (Lines 96, 117)
 
 **FIND:**
+
 ```tsx
 <label htmlFor="email" className="block text-sm text-gray-700 mb-2">
 	Email
@@ -54,6 +57,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <Label htmlFor="email">Email</Label>
 ```
@@ -65,6 +69,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 4: Replace Inputs (Lines 99, 120)
 
 **FIND:**
+
 ```tsx
 <input
 	type="email"
@@ -79,6 +84,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <Input
 	type="email"
@@ -97,15 +103,19 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 5: Replace Error Messages (Lines 110, 133)
 
 **FIND:**
+
 ```tsx
-{errors.email && (
-	<p className="text-red-500 text-sm mt-1">{errors.email}</p>
-)}
+{
+	errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>;
+}
 ```
 
 **REPLACE WITH:**
+
 ```tsx
-{errors.email && <ErrorText>{errors.email}</ErrorText>}
+{
+	errors.email && <ErrorText>{errors.email}</ErrorText>;
+}
 ```
 
 **Do the same for password error (line 133)**
@@ -115,15 +125,19 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 6: Replace Hint Text (Line 127)
 
 **FIND:**
+
 ```tsx
-{!errors.password && (
-	<p className="text-xs text-gray-400 mt-1.5">At least 8 characters</p>
-)}
+{
+	!errors.password && <p className="text-xs text-gray-400 mt-1.5">At least 8 characters</p>;
+}
 ```
 
 **REPLACE WITH:**
+
 ```tsx
-{!errors.password && <HintText>At least 8 characters</HintText>}
+{
+	!errors.password && <HintText>At least 8 characters</HintText>;
+}
 ```
 
 ---
@@ -131,14 +145,13 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 7: Replace Primary Button (Line 138)
 
 **FIND:**
+
 ```tsx
 <button
 	type="submit"
 	disabled={isLoading}
 	className={`w-full px-6 py-3 text-sm text-white bg-cyan-600 rounded-xl hover:bg-cyan-700 transition-colors ${
-		isLoading
-			? "bg-gray-400 cursor-not-allowed"
-			: "bg-cyan-600 hover:bg-cyan-700"
+		isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-cyan-600 hover:bg-cyan-700"
 	}`}
 >
 	{isLoading ? "Logging in..." : "Log in"}
@@ -146,6 +159,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <Button type="submit" variant="primary" isLoading={isLoading} className="w-full">
 	Log in
@@ -157,6 +171,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ### Step 8: Replace Text Buttons (Lines 149, 160)
 
 **FIND:**
+
 ```tsx
 <button
 	type="button"
@@ -168,13 +183,20 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ```
 
 **REPLACE WITH:**
+
 ```tsx
-<Button type="button" variant="text" onClick={() => navigate("/welcome")} className="w-full text-gray-500 hover:text-gray-700">
+<Button
+	type="button"
+	variant="text"
+	onClick={() => navigate("/welcome")}
+	className="w-full text-gray-500 hover:text-gray-700"
+>
 	Forgot password?
 </Button>
 ```
 
 **FIND (Line 160):**
+
 ```tsx
 <button
 	type="button"
@@ -186,6 +208,7 @@ import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <Button type="button" variant="text" onClick={() => navigate("/signup")}>
 	Sign up
@@ -208,6 +231,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ### Step 2: Replace Stat Cards (Lines 41-82)
 
 **FIND (Lines 41-52):**
+
 ```tsx
 <div className="bg-white rounded-2xl p-6 border border-gray-100">
 	<div className="flex items-center gap-3 mb-4">
@@ -222,6 +246,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <StatCard
 	icon={<Clock className="w-5 h-5 text-cyan-600" />}
@@ -233,6 +258,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 **Do the same for:**
+
 - **Completed card** (lines 54-67): Use `bgColor="bg-emerald-100"` and icon `<CheckCircle2 className="w-5 h-5 text-emerald-600" />`
 - **Blockers card** (lines 69-82): Use `bgColor="bg-rose-100"` and icon `<AlertCircle className="w-5 h-5 text-rose-600" />`
 
@@ -241,6 +267,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ### Step 3: Replace Recent Updates Card (Line 85)
 
 **FIND:**
+
 ```tsx
 <div className="bg-white rounded-2xl p-6 border border-gray-100">
 	<h3 className="text-base text-gray-900 mb-4">Recent Updates</h3>
@@ -249,6 +276,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 **REPLACE WITH:**
+
 ```tsx
 <Card>
 	<h3 className="text-base text-gray-900 mb-4">Recent Updates</h3>
@@ -261,38 +289,46 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ### Step 4: Replace UpdateItems (Lines 90-110)
 
 **FIND:**
+
 ```tsx
-{updates.map((update, index) => (
-	<div
-		key={index}
-		className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
-	>
-		<div className={`w-10 h-10 rounded-full bg-gradient-to-br ${update.color} flex items-center justify-center flex-shrink-0`}>
-			<span className="text-sm text-gray-800">{update.avatar}</span>
-		</div>
-		<div className="flex-1">
-			<div className="flex items-center gap-2 mb-1">
-				<span className="text-sm text-gray-900 font-medium">{update.user}</span>
-				<span className="text-xs text-gray-400">{update.time}</span>
+{
+	updates.map((update, index) => (
+		<div
+			key={index}
+			className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
+		>
+			<div
+				className={`w-10 h-10 rounded-full bg-gradient-to-br ${update.color} flex items-center justify-center flex-shrink-0`}
+			>
+				<span className="text-sm text-gray-800">{update.avatar}</span>
 			</div>
-			<p className="text-sm text-gray-600">{update.text}</p>
+			<div className="flex-1">
+				<div className="flex items-center gap-2 mb-1">
+					<span className="text-sm text-gray-900 font-medium">{update.user}</span>
+					<span className="text-xs text-gray-400">{update.time}</span>
+				</div>
+				<p className="text-sm text-gray-600">{update.text}</p>
+			</div>
 		</div>
-	</div>
-))}
+	));
+}
 ```
 
 **REPLACE WITH:**
+
 ```tsx
-{updates.map((update, index) => (
-	<UpdateItem
-		key={index}
-		user={update.user}
-		avatar={update.avatar}
-		time={update.time}
-		text={update.text}
-		color={update.color}
-	/>
-))}
+{
+	updates.map((update, index) => (
+		<UpdateItem
+			key={index}
+			user={update.user}
+			avatar={update.avatar}
+			time={update.time}
+			text={update.text}
+			color={update.color}
+		/>
+	));
+}
 ```
 
 ---
@@ -300,6 +336,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ### Step 5: Replace Sprint Progress Card (Line 120)
 
 **FIND:**
+
 ```tsx
 <div className="bg-white rounded-2xl p-6 border border-gray-100">
 	{/* ... sprint progress content ... */}
@@ -307,10 +344,9 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 **REPLACE WITH:**
+
 ```tsx
-<Card>
-	{/* ... sprint progress content ... */}
-</Card>
+<Card>{/* ... sprint progress content ... */}</Card>
 ```
 
 ---
@@ -318,6 +354,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ## 🎯 Summary of Changes
 
 ### Login.tsx Changes:
+
 - ✅ Replace 1 PageContainer
 - ✅ Replace 2 Labels
 - ✅ Replace 2 Inputs
@@ -326,6 +363,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 - ✅ Replace 3 Buttons (1 primary, 2 text)
 
 ### Dashboard.tsx Changes:
+
 - ✅ Replace 3 StatCards (In Progress, Completed, Blockers)
 - ✅ Replace 2 Cards (Recent Updates, Sprint Progress)
 - ✅ Replace 3 UpdateItems (inside Recent Updates)
@@ -335,6 +373,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ## 📝 Quick Reference: Component Props
 
 ### Button (Updated - More Generic!)
+
 ```tsx
 <Button
   variant="primary" | "secondary" | "text" | "outlined" | "ghost"
@@ -375,6 +414,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 ### Input
+
 ```tsx
 <Input
   hasError={boolean}
@@ -386,17 +426,19 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 ### StatCard
+
 ```tsx
 <StatCard
-  icon={<Icon className="..." />}
-  label="Label text"
-  value={number | string}
-  subtitle="subtitle text"
-  bgColor="bg-cyan-100"
+	icon={<Icon className="..." />}
+	label="Label text"
+	value={number | string}
+	subtitle="subtitle text"
+	bgColor="bg-cyan-100"
 />
 ```
 
 ### Avatar
+
 ```tsx
 <Avatar
   initials="AK"
@@ -406,13 +448,14 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ```
 
 ### UpdateItem
+
 ```tsx
 <UpdateItem
-  user="Name"
-  avatar="AK"
-  time="2h ago"
-  text="Message"
-  color="from-emerald-200 to-green-300"
+	user="Name"
+	avatar="AK"
+	time="2h ago"
+	text="Message"
+	color="from-emerald-200 to-green-300"
 />
 ```
 
@@ -421,6 +464,7 @@ import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
 ## ✅ After Refactoring
 
 You'll have:
+
 - ✅ **11 custom reusable components**
 - ✅ **Consistent design system** (cyan colors, rounded-xl, white cards)
 - ✅ **DRY code** (no repeated className strings)

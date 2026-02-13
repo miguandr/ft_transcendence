@@ -11,7 +11,6 @@ import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
 import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
-import { BlockersEmpty } from "./features/blockers/BlockersEmpty";
 import { Analytics } from "./features/analytics/Analytics";
 import { Info } from "./features/info/Info";
 
@@ -45,7 +44,6 @@ function AppLayout() {
 						<Route path="/standup" element={<AsyncStandup />} />
 						<Route path="/standup-empty" element={<AsyncStandupEmpty />} />
 						<Route path="/blockers" element={<Blockers />} />
-						<Route path="/blockers-empty" element={<BlockersEmpty />} />
 						<Route path="/analytics" element={<Analytics />} />
 						<Route path="/info" element={<Info />} />
 					</Routes>
