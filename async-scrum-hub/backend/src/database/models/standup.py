@@ -19,12 +19,12 @@ NOTE: Organization and User models will need the reverse relationships added:
 - Organization.standups: list["Standup"]
 - User.standups_created: list["Standup"]
 
-See User, Membership, Organization models for complete examples.
+See User, Organization models for complete examples.
 """
 
 import uuid
 from datetime import datetime, date
-from sqlalchemy import DateTime, String, Text, Date, ForeignKey, UniqueConstraint, func
+from sqlalchemy import DateTime, Text, Date, ForeignKey, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..base import Base

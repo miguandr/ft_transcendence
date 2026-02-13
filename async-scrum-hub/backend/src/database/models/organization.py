@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .user import User
 	from .standup import Standup
+	from .blocker import Blocker
 
 class Organization(Base):
 	__tablename__ = "organizations"
@@ -56,6 +57,12 @@ class Organization(Base):
 		"Standup",
 		back_populates="organization",
 		cascade="all, delete-orphan"  # If Organization is deleted, delete its standups
+	)
+
+	blockers: Mapped[list["Blocker"]] = relationship(
+		"Blocker",
+		back_populates="organization",
+		cascade="all, delete-orphan"  # If Organization is deleted, delete its blockers
 	)
 	# End of Relationships
 	
