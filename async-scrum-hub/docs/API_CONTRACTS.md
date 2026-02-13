@@ -1743,8 +1743,6 @@ Used to render the organization board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
-- Product Owner
 - Developer (Standup owner)
 
 **URL Parameters:**
@@ -1831,8 +1829,6 @@ Used to render the organization board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
-- Product Owner
 - Developer (Standup owner)
 
 **URL Parameters:**
