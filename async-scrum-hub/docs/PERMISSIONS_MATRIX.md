@@ -28,8 +28,8 @@
 
 ## 1. Organizations
 
-| Action                                | Organization Admin   | Scrum Master  | Product Owner   | Developer
-|---------------------------------------|----------------------|---------------|-----------------|----------------
+| Action                                | Organization Admin   | Scrum Master    | Product Owner    | Developer
+|---------------------------------------|----------------------|-----------------|------------------|----------------
 | **Create organization**               | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
 | **Select Role**                       | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
 | **View organization members**         | ✅                   | ✅             | ✅              | ✅
@@ -89,13 +89,13 @@
 
 ## 4. Standups
 
-| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
-|--------------------------|--------------------|-----------------|----------------|------------------
+| Action                   | Organization Admin | Scrum Master      | Product Owner  | Developer
+|--------------------------|--------------------|-------------------|----------------|------------------
 | **Create standup**       | ✅                 | ✅               | ✅             | ✅
 | **List standups**        | ✅                 | ✅               | ✅             | ✅
 | **Get standup details**  | ✅                 | ✅               | ✅             | ✅
-| **Update standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
-| **Delete standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
+| **Update standup**       | ✅                 | ❌               | ❌             | ✅ (owner only)
+| **Delete standup**       | ✅                 | ❌               | ❌             | ✅ (owner only)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/standups` - Create standup
@@ -110,11 +110,11 @@
 
 | Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
 |--------------------------|--------------------|-----------------|----------------|------------------------
-| **Create blocker**       | ✅                 | ✅               | ✅             | ✅
-| **List blocker**         | ✅                 | ✅               | ✅             | ✅
-| **Get blocker details**  | ✅                 | ✅               | ✅             | ✅
-| **Update blocker**       | ✅                 | ✅               | ✅             | ✅ (owner only)
-| **Resolve blocker**      | ✅                 | ✅               | ✅             | ✅ (owner or assignee)
+| **Create blocker**       | ✅                 | ✅             | ✅             | ✅
+| **List blocker**         | ✅                 | ✅             | ✅             | ✅
+| **Get blocker details**  | ✅                 | ✅             | ✅             | ✅
+| **Update blocker**       | ✅                 | ✅             | ✅             | ✅ (owner only)
+| **Resolve blocker**      | ✅                 | ✅             | ✅             | ✅ (owner or assignee)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/blockers` - Create blocker

@@ -189,14 +189,14 @@ PERMISSIONS = {
 	"standups:update":
 	{
 		"scope": "org",
-		"roles": ["scrum_master", "product_owner"],
+		"roles": [],
 		"owner_allowed": True,
 		"assignee_allowed": False,
 	},
 	"standups:delete":
 	{
 		"scope": "org",
-		"roles": ["scrum_master", "product_owner"],
+		"roles": [],
 		"owner_allowed": True,
 		"assignee_allowed": False,
 	},
