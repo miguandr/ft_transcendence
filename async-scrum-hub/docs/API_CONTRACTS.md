@@ -1600,7 +1600,11 @@ Used to render the organization board.
 	"today": "string",
 	"yesterday": "string | null",
 	"blocker_ids": ["uuid"],
-	"created_by": "uuid (owner)"
+	"created_by": {
+		"id": "uuid (owner)",
+		"name": "string",
+		"avatar_url": "string",
+	},
 }
 ```
 
@@ -1683,7 +1687,10 @@ Used to render the organization board.
 		"created_at": "timestamp(today)",
 		"today": "string",
 		"yesterday": "string | null",
-		"blocker_ids": ["uuid"],
+		"blockers": {
+			"id": "uuid",
+			"title": "string",
+		},
 		"created_by": {
 			"id": "uuid (owner)",
 			"name": "string",
@@ -1762,8 +1769,15 @@ Used to render the organization board.
 	"created_at": "timestamp (today)",
 	"today": "string",
 	"yesterday": "string | null",
-	"blockers": "string",
-	"created_by": "uuid (owner)"
+	"blockers": {
+		"id": "uuid",
+		"title": "string",
+	},
+	"created_by": {
+		"id":  "uuid",
+		"name": "string",
+		"avatar_url": "string | null",
+	},
 }
 ```
 
