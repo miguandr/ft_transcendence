@@ -2107,13 +2107,20 @@ Used to render the organization board.
 ```json
 {
 	"id": "uuid",
+	"created_by": {
+		"id": "uuid",
+		"name": "string",
+		"avatar_url": "string | null"
+	},
 	"description": "string",
 	"status": "open | resolved",
-	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
+	"assignee": {
+		"id": "uuid",
+		"name": "string",
+	} | null,
 	"ticket": {
-		"id": "uuid | null",
-		"title": "string | null"
+		"id": "uuid",
+		"title": "string"
 	},
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
