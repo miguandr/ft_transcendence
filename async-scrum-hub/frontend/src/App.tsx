@@ -16,14 +16,14 @@ import { Info } from "./features/info/Info";
 
 function AppLayout() {
 	const location = useLocation();
-	const preAuthPaths = ["/", "/login", "/signup", "/team-setup"];
+	const preAuthPaths = ["/welcome", "/login", "/signup", "/team-setup"];
 	const isPreAuth = preAuthPaths.includes(location.pathname);
 
 	// User is on auth pages (not logged in)
 	if (isPreAuth) {
 		return (
 			<Routes>
-				<Route path="/" element={<Welcome />} />
+				<Route path="/welcome" element={<Welcome />} />
 				<Route path="/login" element={<Login />} />
 				<Route path="/signup" element={<SignUp />} />
 				<Route path="/team-setup" element={<TeamSetup />} />
