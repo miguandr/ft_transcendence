@@ -692,17 +692,24 @@ interface CreateStandupResponse {
 	blocker_ids: string[];
 	created_by: {
 		name: string;
-		id: string
-		avatar_url: string | null,
+		id: string;
+		avatar_url: string | null;
 	}
-}
+};
 
 interface StandupListItem {
 	id: string;
 	created_at: string;
 	today: string;
 	yesterday: string | null;
-	blocker_ids: string[];
+	blockers: {
+		id: string;
+		title: string;
+		ticket: {
+			id: string;
+			title: string;
+		}
+	} [];
 	created_by: {
 		id: string;
 		name: string;
@@ -716,15 +723,7 @@ interface UpdateStandupRequest {
 
 interface UpdateStandupResponse {
 	id: string;
-	created_at: string;
 	today: string;
-	yesterday: string | null;
-	blocker_ids: string[];
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null,
-	}
 }
 
 
@@ -815,7 +814,24 @@ export async function listStandups(
 		return creator?.organization_id === org_id;
 	});
 
-	return filteredStandups;
+	return filteredStandups.map((s) => ({
+		id: s.id,
+		created_at: s.created_at,
+		today: s.today,
+		yesterday: s.yesterday,
+		blockers: s.blocker_ids
+		.map((id) => mockBlockers.find((b) => b.id === id))
+		.filter((b): b is NonNullable<typeof b> => Boolean(b))
+		.map((b) => ({
+			id: b.id,
+			title: b.description,
+			ticket: {
+				id: b.ticket.id,
+				title: b.ticket.title,
+			},
+		})),
+		created_by: s.created_by,
+	}));
 }
 
 // Update Standup
@@ -862,15 +878,7 @@ export async function updateStandup(
 
 	return {
 		id: standup.id,
-		created_at: standup.created_at,
 		today: standup.today,
-		yesterday: standup.yesterday,
-		blocker_ids: standup.blocker_ids,
-		created_by: {
-			id: standup.created_by.id,
-			name: standup.created_by.name,
-			avatar_url: standup.created_by.avatar_url,
-		}
 	};
 }
 
