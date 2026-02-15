@@ -1770,8 +1770,26 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"today": "string",
+	{
+		"id": "uuid",
+		"created_at": "timestamp(today)",
+		"today": "string",
+		"yesterday": "string | null",
+		"blockers": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"ticket" {
+					"id":  "uuid",
+					"title": "string",
+				}
+		}],
+		"created_by": {
+			"id": "uuid (owner)",
+			"name": "string",
+			"avatar_url": "string | null"
+		}
+	}
 }
 ```
 
