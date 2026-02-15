@@ -820,9 +820,9 @@ export async function listStandups(
 		today: s.today,
 		yesterday: s.yesterday,
 		blockers: s.blocker_ids
-		.map((id) => mockBlockers.find((b) => b.id === id))
-		.filter((b): b is NonNullable<typeof b> => Boolean(b))
-		.map((b) => ({
+		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
+		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
+		.map((b) => ({ // map the data how we need it
 			id: b.id,
 			title: b.description,
 			ticket: {
