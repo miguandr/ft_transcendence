@@ -1,7 +1,11 @@
 from enum import StrEnum
 
-class Status(StrEnum):
+class TicketStatus(StrEnum):
 	TODO = "todo"
+	IN_PROGRESS = "in_progress"
+	COMPLETED = "completed"
+
+class TaskStatus(StrEnum):
 	IN_PROGRESS = "in_progress"
 	COMPLETED = "completed"
 
@@ -11,11 +15,11 @@ class Priority(StrEnum):
 	HIGH = "high"
 
 
-#class OrgRole(StrEnum):
-#	admin = "admin"
-#	member = "member"
+class OrgRole(StrEnum):
+	admin = "admin"
+	member = "member"
 
-#class ScrumRole(StrEnum):
-#	scrum_master = "scrum_master"
-#	product_owner = "product_owner"
-#	developer = "developer"
+class ScrumRole(StrEnum):
+	scrum_master = "scrum_master"
+	product_owner = "product_owner"
+	developer = "developer"
