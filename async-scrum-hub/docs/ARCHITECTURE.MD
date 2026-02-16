@@ -146,8 +146,8 @@ async-scrum-hub/
 │   │   ├── main.py # FastAPI entrypoint        ✨ Daniela
 │   │   │
 │   │   ├── config/                             ✨ Daniela
-│   │   │   ├── settings.py
-│   │   │   └── security.py # JWT, hashing      (IN PROGRESS)
+│   │   │   ├── settings.py                     (done ✅)
+│   │   │   └── security.py # JWT, hashing      (done ✅)
 │   │   │
 │   │   ├── database/                          *FastAPI* and *SQLAlchemy*
 │   │   │   ├── __init__.py                     ✨ Daniela (done ✅)
@@ -170,7 +170,7 @@ async-scrum-hub/
 │   │   │
 │   │   ├── auth/                               ✨ Daniela
 │   │   │   ├── routes.py                        use *FastAPI*
-│   │   │   ├── schemas.py
+│   │   │   ├── schemas.py                      (IN PROGRESS)
 │   │   │   └── service.py
 │   │   │
 │   │   ├── users/                              ✨ Daniela
@@ -209,9 +209,9 @@ async-scrum-hub/
 │   │   ├── script.py.mako
 │   │   └── versions/
 │   ├── tests/                                  ✨ Daniela (base) + 🚀 Freddy / 🌊 Malu (feature tests)
-│   ├── requirements.txt                        ✨ Daniela
+│   ├── requirements.txt                        (done ✅)
 │   ├── Dockerfile                              🌊 Malu 
-│   └── .env.example                            ✨ Daniela
+│   └── .env.example                            ✨ Daniela (IN PROGRESS)
 │
 ├── realtime/                                   🌊 Malu      
 │   ├── README.md # event documentation
