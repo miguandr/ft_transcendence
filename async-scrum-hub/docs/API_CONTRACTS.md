@@ -1600,7 +1600,11 @@ Used to render the organization board.
 	"today": "string",
 	"yesterday": "string | null",
 	"blocker_ids": ["uuid"],
-	"created_by": "uuid (owner)"
+	"created_by": {
+		"id": "uuid (owner)",
+		"name": "string",
+		"avatar_url": "string",
+	},
 }
 ```
 
@@ -1683,7 +1687,15 @@ Used to render the organization board.
 		"created_at": "timestamp(today)",
 		"today": "string",
 		"yesterday": "string | null",
-		"blocker_ids": ["uuid"],
+		"blockers": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"ticket" {
+					"id":  "uuid",
+					"title": "string",
+				}
+		}],
 		"created_by": {
 			"id": "uuid (owner)",
 			"name": "string",
@@ -1758,12 +1770,26 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"created_at": "timestamp (today)",
-	"today": "string",
-	"yesterday": "string | null",
-	"blockers": "string",
-	"created_by": "uuid (owner)"
+	{
+		"id": "uuid",
+		"created_at": "timestamp(today)",
+		"today": "string",
+		"yesterday": "string | null",
+		"blockers": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"ticket" {
+					"id":  "uuid",
+					"title": "string",
+				}
+		}],
+		"created_by": {
+			"id": "uuid (owner)",
+			"name": "string",
+			"avatar_url": "string | null"
+		}
+	}
 }
 ```
 
@@ -2081,13 +2107,20 @@ Used to render the organization board.
 ```json
 {
 	"id": "uuid",
+	"created_by": {
+		"id": "uuid",
+		"name": "string",
+		"avatar_url": "string | null"
+	},
 	"description": "string",
 	"status": "open | resolved",
-	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
+	"assignee": {
+		"id": "uuid",
+		"name": "string",
+	} | null,
 	"ticket": {
-		"id": "uuid | null",
-		"title": "string | null"
+		"id": "uuid",
+		"title": "string"
 	},
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"

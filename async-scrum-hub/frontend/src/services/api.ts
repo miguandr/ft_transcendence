@@ -7,7 +7,12 @@ const CURRENT_USER_ID_KEY = "current_user_id";
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Mock user database (in real backend, this is PostgreSQL)
+
+// =============================================================
+// MOCK DATA
+// =============================================================
+
+// Mock User database (in real backend, this is PostgreSQL)
 const mockUsers: Array<{
 	id: string;
 	email: string;
@@ -22,7 +27,7 @@ const mockUsers: Array<{
 		id: "1",
 		email: "miguel@example.com",
 		password: "password123", // In real backend, this would be hashed!
-		name: "Miguel",
+		name: "Miguel Andrade",
 		avatar_url: null,
 		organization_id: "2",
 		scrum_role: "scrum_master",
@@ -32,7 +37,7 @@ const mockUsers: Array<{
 		id: "2",
 		email: "angel@example.com",
 		password: "password123", // In real backend, this would be hashed!
-		name: "Angel",
+		name: "Pepa Perez",
 		avatar_url: null,
 		organization_id: "2",
 		scrum_role: "product_owner",
@@ -50,6 +55,7 @@ const mockOrganizations = [
 	},
 ];
 
+// Mock Tickets
 const mockTickets: Array<{
 	id: string;
 	title: string;
@@ -66,6 +72,7 @@ const mockTickets: Array<{
 	},
 ];
 
+//Mock Tasks
 const mockTasks: Array<{
 	id: string;
 	title: string;
@@ -82,6 +89,7 @@ const mockTasks: Array<{
 	},
 ];
 
+// Mock Blockers
 const mockBlockers: Array<{
 	id: string;
 	description: string;
@@ -109,12 +117,12 @@ const mockBlockers: Array<{
 		status: "open",
 		created_by: {
 			id: "1",
-			name: "Miguel",
+			name: "Miguel Andrade",
 			avatar_url: null,
 		},
 		assignee: {
 			id: "2",
-			name: "Angel",
+			name: "Pepa Perez",
 			avatar_url: null,
 		},
 		ticket: {
@@ -130,7 +138,7 @@ const mockBlockers: Array<{
 		status: "resolved",
 		created_by: {
 			id: "2",
-			name: "Angel",
+			name: "Pepa Perez",
 			avatar_url: null,
 		},
 		assignee: null,
@@ -142,6 +150,45 @@ const mockBlockers: Array<{
 		resolved_at: "2024-02-11T09:15:00Z",
 	},
 ];
+
+// Mock Standups
+const mockStandups: Array<{
+	id: string;
+	created_at: string;
+	today: string;
+	yesterday: string | null,
+	blocker_ids: string[];
+	created_by: {
+		name: string;
+		id: string;
+		avatar_url: string | null;
+	}
+}> = [
+	{
+		id: "11",
+		created_at: "2024-02-10T10:00:00Z",
+		today: "Working on OAuth integration with Google and GitHub",
+		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
+		blocker_ids: ["32", "33"],
+		created_by: {
+			name: "Miguel Andrade",
+			id: "1",
+			avatar_url: null,
+		}
+	},
+	{
+		id: "12",
+		created_at: "2024-02-08T14:30:00Z",
+		today: "Creating responsive layouts for mobile view",
+		yesterday: "Finalized dashboard redesign, updated component library",
+		blocker_ids: [],
+		created_by: {
+			name: "Pepa Perez",
+			id: "2",
+			avatar_url: null,
+		}
+	}
+]
 
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
@@ -305,13 +352,18 @@ interface ApiError {
 	};
 }
 
-// Helper to create API errors matching contract format
+// =============================================================
+// HELPER FUNCTIONS
+// =============================================================
+
+// API errors matching contract format
 function createApiError(code: string, message: string): never {
 	throw {
 		error: { code, message },
 	};
 }
 
+// Uses data from local storage
 function getCurrentUserRecord() {
 	const currentUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
 	if (!currentUserId) {
@@ -326,29 +378,11 @@ function getCurrentUserRecord() {
 	return user;
 }
 
-// Replace mock createOrganization with real fetch when backend ready!!!:
-// export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
-// {
-// 	const token = localStorage.getItem("token");
+// =============================================================
+// MOCK SIGN UP
+// =============================================================
 
-// 	const response = await fetch(`${API_URL}/organizations`, {
-// 		method: 'POST',
-// 		headers: {
-// 			'Content-Type': 'application/json',
-// 			'Authorization': `Bearer ${token}`
-// 		},
-// 		body: JSON.stringify(data)
-// 	});
-
-// 	if (!response.ok) {
-// 		const errorData = await response.json();
-// 		throw errorData; // Contains { error: { code, message } }
-// 	}
-
-// 	return response.json();
-// }
-
-//Phase 1
+// Create Organization
 export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse> {
 	await delay(500);
 	const currentUser = getCurrentUserRecord();
@@ -389,19 +423,8 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 	};
 }
 
-export async function setUserRole(data: {
-	organization_id: string;
-	scrum_role: "scrum_master" | "product_owner";
-}): Promise<{ success: boolean }> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
 
-	//Update user's role in the organization
-	currentUser.scrum_role = data.scrum_role;
-
-	return { success: true };
-}
-
+// Join Organization
 export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse> {
 	await delay(500);
 	const currentUser = getCurrentUserRecord();
@@ -425,6 +448,7 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 	};
 }
 
+// Check Join-Code
 export async function checkJoinCode(join_code: string): Promise<OrganizationInfo> {
 	await delay(300);
 	const currentUser = getCurrentUserRecord();
@@ -450,6 +474,20 @@ export async function checkJoinCode(join_code: string): Promise<OrganizationInfo
 	};
 }
 
+// Set User Role
+export async function setUserRole(data: {
+	organization_id: string;
+	scrum_role: "scrum_master" | "product_owner";
+}): Promise<{ success: boolean }> {
+	await delay(300);
+	const currentUser = getCurrentUserRecord();
+
+	//Update user's role in the organization
+	currentUser.scrum_role = data.scrum_role;
+
+	return { success: true };
+}
+
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
 	await delay(300);
 
@@ -463,7 +501,12 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 	];
 }
 
-// Mock login function
+
+// =============================================================
+// MOCK LOGIN
+// =============================================================
+
+// Login
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
 	// Simulate network delay (500ms)
 	await delay(500);
@@ -633,9 +676,249 @@ export async function removeMember(
 }
 
 // =============================================================
+// STANDUPS
+// =============================================================
+
+// Interfaces
+interface CreateStandupRequest {
+	today: string;
+}
+
+interface CreateStandupResponse {
+	id: string;
+	created_at: string;
+	today: string;
+	yesterday: string | null;
+	blocker_ids: string[];
+	created_by: {
+		name: string;
+		id: string;
+		avatar_url: string | null;
+	}
+};
+
+interface StandupListItem {
+	id: string;
+	created_at: string;
+	today: string;
+	yesterday: string | null;
+	blockers: {
+		id: string;
+		title: string;
+		ticket: {
+			id: string;
+			title: string;
+		}
+	} [];
+	created_by: {
+		id: string;
+		name: string;
+		avatar_url: string | null;
+	}
+}
+
+interface UpdateStandupRequest {
+	today?: string;
+}
+
+interface UpdateStandupResponse {
+	id: string;
+	today: string;
+}
+
+
+// Create Standup
+export async function createStandup(
+	org_id: string,
+	data: CreateStandupRequest
+) : Promise<CreateStandupResponse> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	if (currentUser.organization_id !== org_id) {
+		createApiError("FORBIDDEN", "You are not a member of this organization");
+	}
+
+	if (!data.today.trim()) {
+		createApiError("INVALID_INPUT", "Entry is required");
+	}
+
+	// ---DATE SETUP---
+	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+	const now = new Date();
+	const today = now.toISOString().split('T')[0];
+
+	//Calculate yesterday
+	const yesterdayDate = new Date();
+	yesterdayDate.setDate(now.getDate() - 1);
+	const yesterday = yesterdayDate.toISOString().split('T')[0];
+
+	// Check if this user already has a standup starting with that date string
+	const alreadySubmitted = mockStandups.some(s =>
+		s.created_by.id ===currentUser.id &&
+		s.created_at.startsWith(today)
+	);
+	if (alreadySubmitted) {
+		createApiError("STANDUP_ALREADY_EXISTS", "You have already created a standup for today");
+	}
+
+	// ---FILTERED BLOCKERS---
+	// Get active blockers
+	const openBlockerIds = mockBlockers
+	.filter(blockers => {
+		const isOpen = blockers.status === "open";
+		const creator = mockUsers.find(u => u.id === blockers.created_by.id);
+		return isOpen && creator?.organization_id == org_id;
+	})
+	.map(blocker => blocker.id);
+
+	// Get the standup created on the prebious calender date
+	const YesterdayStandup = mockStandups.find(s =>
+		s.created_by.id == currentUser.id &&
+		s.created_at.startsWith(yesterday)
+	);
+
+	// Create new standup
+	const newStandup = {
+		id: `standup-${Date.now()}`,
+		created_at: now.toISOString(),
+		today: data.today,
+		yesterday: YesterdayStandup?.today || null,
+		blocker_ids: openBlockerIds,
+		created_by: {
+			id: currentUser.id,
+			name: currentUser.name,
+			avatar_url: currentUser.avatar_url,
+		}
+	};
+
+	mockStandups.push(newStandup);
+	return (newStandup);
+}
+
+//List Standups
+export async function listStandups(
+	org_id: string,
+): Promise<StandupListItem[]> {
+	await delay(300);
+	const currentUser = getCurrentUserRecord();
+
+	// Validate user belongs to organization
+	if (currentUser.organization_id !== org_id) {
+		createApiError("FORBIDDEN", "You are not a member of this organization");
+	}
+
+	const filteredStandups = mockStandups.filter((standups) => {
+		const creator = mockUsers.find((u) => u.id === standups.created_by.id);
+
+		return creator?.organization_id === org_id;
+	});
+
+	return filteredStandups.map((s) => ({
+		id: s.id,
+		created_at: s.created_at,
+		today: s.today,
+		yesterday: s.yesterday,
+		blockers: s.blocker_ids
+		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
+		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
+		.map((b) => ({ // map the data how we need it
+			id: b.id,
+			title: b.description,
+			ticket: {
+				id: b.ticket.id,
+				title: b.ticket.title,
+			},
+		})),
+		created_by: s.created_by,
+	}));
+}
+
+// Update Standup
+export async function updateStandup(
+	standup_id: string,
+	data: UpdateStandupRequest
+): Promise<UpdateStandupResponse> {
+	await delay(500);
+
+	const currentUser = getCurrentUserRecord();
+	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+
+	// Find standup
+	const standup = mockStandups.find((b) => b.id === standup_id);
+	if (!standup) {
+		createApiError("NOT_FOUND", "Standup not found");
+	}
+
+	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+	const todayDate = new Date().toISOString().split('T')[0];
+	const createDate = standup.created_at.split('T')[0];
+
+	// Check if this user already has a standup starting with that date string
+	if (todayDate !== createDate) {
+		createApiError("EDIT_WINDOW_EXPIRED", "Standups can only be edited on the day they are created");
+	}
+
+	// Check permissions
+	const isOwner = standup.created_by.id === currentUser.id;
+	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+	const isAdmin = admin?.id === currentUser.id;
+
+	if (!isOwner && !isAdmin) {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+
+	// Update Standup field
+	if (data.today !== undefined) {
+		if (!data.today.trim()) {
+			createApiError("INVALID_INPUT", "Entry cannot be empty");
+		}
+		standup.today = data.today;
+	}
+
+	return {
+		id: standup.id,
+		today: standup.today,
+	};
+}
+
+// Delete Standup
+export async function deleteStandup(
+	standup_id: string
+): Promise<void> {
+	await delay(500);
+
+	const currentUser = getCurrentUserRecord();
+	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+
+	// Find index of the standup in mock array
+	const standupIndex = mockStandups.findIndex((u) => u.id === standup_id);
+	if (standupIndex === -1) {
+		createApiError("NOT_FOUND", "Standup not found");
+	}
+
+	// Find standup to delete
+	const standupToDelete = mockStandups[standupIndex];
+
+	// Check permissions
+	const isOwner = standupToDelete.created_by.id === currentUser.id;
+	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+	const isAdmin = admin?.id === currentUser.id;
+
+	if (!isOwner && !isAdmin) {
+		createApiError("FORBIDDEN", "You dont own permission to delete this standup");
+	}
+
+	// Remove Standup from the array
+	mockStandups.splice(standupIndex, 1);
+}
+
+
+// =============================================================
 // TICKETS
 // =============================================================
 
+// Interfaces
 export interface TicketListItem {
 	id: string;
 	title: string;
@@ -1150,5 +1433,9 @@ export async function removeMember(org_id: string, member_id: string): Promise<{
 
 	return response.json();
 }
+
+11. STANDUP FUNCTION (PENDING)
+12. TICKETS FUNCTIONS (PENDING)
+13. BLOCKERS FUNCTIONS (PENDING)
 
 */
