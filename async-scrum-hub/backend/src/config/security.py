@@ -37,7 +37,7 @@ def create_access_token(subject: str|uuid.UUID) -> str:
 		"sub": str(subject),
 		"exp":  expiration_time
 	}
-	token = jwt.encode(payload, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
+	token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 	return token
 
 #Decodes and validates a JWT access token.
