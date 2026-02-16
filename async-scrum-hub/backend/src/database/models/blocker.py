@@ -36,7 +36,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .user import User
 	from .organization import Organization
-	from .task import Task
+	#TODO task or ticket? see below
+	from .ticket import Ticket
+	#from .task import Task
 
 
 class BlockerStatus(str, Enum):
@@ -105,14 +107,20 @@ class Blocker(Base):
 		index=True
 	)
 
-	# Optional task reference
-	task_id: Mapped[uuid.UUID | None] = mapped_column(
+	#TODO task or ticket? Optional task reference
+	ticket_id: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("tasks.id", ondelete="SET NULL"),
+		ForeignKey("tickets.id", ondelete="SET NULL"),
 		nullable=True,
 		index=True
 	)
 
+#	task_id: Mapped[uuid.UUID | None] = mapped_column(
+#		UUID(as_uuid=True),
+#		ForeignKey("tasks.id", ondelete="SET NULL"),
+#		nullable=True,
+#		index=True
+#	)
 	# Timestamps
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True),
@@ -142,11 +150,15 @@ class Blocker(Base):
 		foreign_keys=[assignee_id],
 		back_populates="assigned_blockers"
 	)
-
-	task: Mapped["Task | None"] = relationship(
-		"Task",
+#TODO task or ticket?
+	ticket: Mapped["Ticket | None"] = relationship(
+		"Ticket",
 		back_populates="blockers"
 	)
 
+#	task: Mapped["Task | None"] = relationship(
+#		"Task",
+#		back_populates="blockers"
+#	)
 	def __repr__(self):
 		return f"<Blocker(id={self.id}, status={self.status.value}, created_by={self.created_by})>"
