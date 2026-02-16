@@ -14,13 +14,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..base import Base
-from .enum import TicketStatus, Priority
+from .enums import TicketStatus, Priority
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from .task import Task
 	from .user import User
 	from .organization import Organization
+	from .blocker import Blocker
 
 
 class Ticket(Base):
@@ -71,14 +72,13 @@ class Ticket(Base):
 		default=Priority.MEDIUM,
 	)
 
-#TODO what happens if the created_by user is deleted?
 	created_by: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id", ondelete="RESTRICT"),
+		ForeignKey("users.id", ondelete="CASCADE"),
 		nullable=False
 	)
 
-	organization_id: Mapped[uuid.UUID | None] = mapped_column(
+	organization_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
 		ForeignKey("organizations.id", ondelete="CASCADE"),
 		nullable=False,
@@ -114,13 +114,23 @@ class Ticket(Base):
 
 	creator: Mapped["User"] = relationship(
 		"User",
-		foreign_keys=[created_by]
+		foreign_keys=[created_by],
+		back_populates="tickets_created",
 	)
 
 	assignee: Mapped["User | None"] = relationship(
 		"User",
-		foreign_keys=[assignee_id]
+		foreign_keys=[assignee_id],
+		back_populates="tickets_assigned",
 	)
 
-	organization: Mapped["Organization"] = relationship("Organization")
+	organization: Mapped["Organization"] = relationship(
+		"Organization",
+		back_populates="tickets",
+	)
 
+	blockers: Mapped[list["Blocker"]] = relationship(
+		"Blocker",
+		back_populates="ticket",
+		passive_deletes=True,
+	)
