@@ -48,7 +48,7 @@ def get_current_user(
 	if not user_id_str:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
-			detail="Token missing subject",
+			detail={"error": {"code": "INVALID_TOKEN", "message": "Token missing subject"}},
 		)
 
 	# Validates the string has a valid UUID format
@@ -58,7 +58,7 @@ def get_current_user(
 	except ValueError:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
-			detail="Invalid token subject",
+			detail={"error": {"code": "INVALID_TOKEN", "message": "Invalid token subject"}},
 		)
 
 	# Uses the db session to query the users table, filters by users.id == user_id, and returns the first result
@@ -66,7 +66,7 @@ def get_current_user(
 	if not user:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
-			detail="User not found",
+			detail={"error": {"code": "UNAUTHORIZED", "message": "User not found"}},
 		)
 
 	return user
@@ -88,7 +88,7 @@ def require_org_member(
 	if current_user.organization_id != org_id:
 		raise HTTPException(
 			status_code=status.HTTP_403_FORBIDDEN,
-			detail="Not a member of this organization",
+			detail={"error": {"code": "FORBIDDEN", "message": "Not a member of this organization"}},
 		)
 	return current_user
 
@@ -111,7 +111,7 @@ def require_org_permission(action: str) -> Callable:
 		if current_user.organization_id != org_id:
 			raise HTTPException(
 				status_code=status.HTTP_403_FORBIDDEN,
-				detail="Not a member of this organization",
+				detail={"error": {"code": "FORBIDDEN", "message": "Not a member of this organization"}},
 			)
 		authorize(
 			action=action,
@@ -142,7 +142,7 @@ def require_resource_permission(action: str, loader: Callable) -> Callable:
 		if current_user.organization_id != org_id:
 			raise HTTPException(
 				status_code=status.HTTP_403_FORBIDDEN,
-				detail="Not a member of this organization",
+				detail={"error": {"code": "FORBIDDEN", "message": "Not a member of this organization"}},
 			)
 
 		authorize(
