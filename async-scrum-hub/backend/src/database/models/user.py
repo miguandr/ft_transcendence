@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 	from .organization import Organization
 	from .standup import Standup
 	from .blocker import Blocker
+	from .ticket import Ticket
+	from .task import Task
 
 class User(Base):
 	__tablename__ = "users"
@@ -88,6 +90,13 @@ class User(Base):
 		passive_deletes=True
 	)
 
+	tasks_created: Mapped[list["Task"]] = relationship(
+		"Task",
+		foreign_keys="Task.created_by",
+		back_populates="creator",
+		passive_deletes=True,
+	)
+
 	standups_created: Mapped[list["Standup"]] = relationship(
 		"Standup",
 		foreign_keys="Standup.created_by",
@@ -108,10 +117,31 @@ class User(Base):
 		back_populates="assignee",
 		passive_deletes=True  # DB handles SET NULL via FK (defined in Blocker)
 	)
+
+	tickets_created: Mapped[list["Ticket"]] = relationship(
+		"Ticket",
+		foreign_keys="Ticket.created_by",
+		back_populates="creator",
+		passive_deletes=True,
+	)
+
+	tickets_assigned: Mapped[list["Ticket"]] = relationship(
+		"Ticket",
+		foreign_keys="Ticket.assignee_id",
+		back_populates="assignee",
+		passive_deletes=True,
+	)
+
+	tasks_assigned: Mapped[list["Task"]] = relationship(
+		"Task",
+		foreign_keys="Task.assignee_id",
+		back_populates="assignee",
+		passive_deletes=True,
+	)
 	# End of Relationships
-	
+
 	created_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True), 
+		DateTime(timezone=True),
 		server_default=func.now(),
 		nullable=False
 	)

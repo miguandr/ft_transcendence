@@ -10,20 +10,22 @@ if TYPE_CHECKING:
 	from .user import User
 	from .standup import Standup
 	from .blocker import Blocker
+	from .ticket import Ticket
+	from .task import Task
 
 class Organization(Base):
 	__tablename__ = "organizations"
 
 	id: Mapped[uuid.UUID] = mapped_column(
-		UUID(as_uuid=True), 
-		primary_key=True, 
+		UUID(as_uuid=True),
+		primary_key=True,
 		default=uuid.uuid4
 	)
 
 	name: Mapped[str] = mapped_column(
 		String,
 		nullable=False
-	)  
+	)
 
 	join_code: Mapped[str] = mapped_column(
 		String(10),
@@ -31,7 +33,7 @@ class Organization(Base):
 		index=True,
 		nullable=False
 	)
- 
+
 	created_by: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
 		ForeignKey("users.id", ondelete="RESTRICT"),  # Prevent deleting User if they created orgs
@@ -64,10 +66,24 @@ class Organization(Base):
 		back_populates="organization",
 		cascade="all, delete-orphan"  # If Organization is deleted, delete its blockers
 	)
+
+	tickets: Mapped[list["Ticket"]] = relationship(
+		"Ticket",
+		back_populates="organization",
+		cascade="all, delete-orphan",
+		passive_deletes=True,
+	)
+
+	tasks: Mapped[list["Task"]] = relationship(
+		"Task",
+		back_populates="organization",
+		cascade="all, delete-orphan",
+		passive_deletes=True,
+	)
 	# End of Relationships
-	
+
 	created_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True), 
+		DateTime(timezone=True),
 		server_default=func.now(),
 		nullable=False
 	)
