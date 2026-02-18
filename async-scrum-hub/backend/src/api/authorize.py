@@ -61,7 +61,7 @@ def authorize(
 
 	# GLOBAL and ORG: JWT required.
 	if user is None:
-		raise HTTPException(401, "Authentication required")
+		raise HTTPException(401, {"error": {"code": "UNAUTHORIZED", "message": "Authentication required"}})
 
 	# GLOBAL
 	if scope == "global":
@@ -101,4 +101,4 @@ def authorize(
 				return
 
 		logger.warning("DENIED | user=%s | action=%s | org=%s", user.id, action, org_id)
-		raise HTTPException(403, "Insufficient permissions")
+		raise HTTPException(403, {"error": {"code": "FORBIDDEN", "message": "You do not have permission to perform this action"}})
