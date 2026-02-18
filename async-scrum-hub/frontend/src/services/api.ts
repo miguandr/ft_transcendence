@@ -35,12 +35,22 @@ const mockUsers: Array<{
 	},
 	{
 		id: "2",
-		email: "angel@example.com",
+		email: "pedro@example.com",
 		password: "password123", // In real backend, this would be hashed!
-		name: "Pepa Perez",
+		name: "Pedro Perez",
 		avatar_url: null,
 		organization_id: "2",
 		scrum_role: "product_owner",
+		org_role: "member",
+	},
+	{
+		id: "3",
+		email: "pepa@example.com",
+		password: "password123", // In real backend, this would be hashed!
+		name: "Pepa Rodriguez",
+		avatar_url: null,
+		organization_id: "2",
+		scrum_role: "developer",
 		org_role: "member",
 	},
 ];
@@ -146,8 +156,8 @@ const mockBlockers: Array<{
 			id: "1",
 			title: "Design settings page",
 		},
-		created_at: "2024-02-08T14:30:00Z",
-		resolved_at: "2024-02-11T09:15:00Z",
+		created_at: "2026-02-08T14:30:00Z",
+		resolved_at: "2026/02/17",
 	},
 ];
 
@@ -166,7 +176,7 @@ const mockStandups: Array<{
 }> = [
 	{
 		id: "11",
-		created_at: "2024-02-10T10:00:00Z",
+		created_at: "2026-02-17T10:00:00Z",
 		today: "Working on OAuth integration with Google and GitHub",
 		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
 		blocker_ids: ["32", "33"],
@@ -178,7 +188,7 @@ const mockStandups: Array<{
 	},
 	{
 		id: "12",
-		created_at: "2024-02-08T14:30:00Z",
+		created_at: "2024-02-18T14:30:00Z",
 		today: "Creating responsive layouts for mobile view",
 		yesterday: "Finalized dashboard redesign, updated component library",
 		blocker_ids: [],
@@ -697,7 +707,7 @@ interface CreateStandupResponse {
 	}
 };
 
-interface StandupListItem {
+export interface StandupListItem {
 	id: string;
 	created_at: string;
 	today: string;
@@ -717,11 +727,11 @@ interface StandupListItem {
 	}
 }
 
-interface UpdateStandupRequest {
+interface EditStandupRequest {
 	today?: string;
 }
 
-interface UpdateStandupResponse {
+interface EditStandupResponse {
 	id: string;
 	today: string;
 }
@@ -834,11 +844,11 @@ export async function listStandups(
 	}));
 }
 
-// Update Standup
-export async function updateStandup(
+// Edit Standup
+export async function editStandup(
 	standup_id: string,
-	data: UpdateStandupRequest
-): Promise<UpdateStandupResponse> {
+	data: EditStandupRequest
+): Promise<EditStandupResponse> {
 	await delay(500);
 
 	const currentUser = getCurrentUserRecord();
@@ -868,7 +878,7 @@ export async function updateStandup(
 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
 	}
 
-	// Update Standup field
+	// Edit Standup field
 	if (data.today !== undefined) {
 		if (!data.today.trim()) {
 			createApiError("INVALID_INPUT", "Entry cannot be empty");
