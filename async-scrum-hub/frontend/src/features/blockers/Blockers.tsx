@@ -12,7 +12,6 @@ import {
 	getCurrentUser,
 } from "../../services/api";
 import type { TicketListItem, OrganizationMember, User } from "../../services/api";
-//type UserRole = "Product Owner" | "Scrum Master" | "Developer";
 
 interface Blocker {
 	id: string;
@@ -40,27 +39,37 @@ export function Blockers() {
 	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
 	const [isEditBlockerOpen, setIsEditBlockerOpen] = useState(false);
 	const [selectedBlocker, setSelectedBlocker] = useState<Blocker | null>(null);
-	const [orgId, setOrgId] = useState<string | null>(null);
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [blockers, setBlockers] = useState<Blocker[]>([]);
-	const [ticketList, setTicketList] = useState<TicketListItem[]>([]);
+	const [confirmResolved, setConfirmResolved] = useState<string | null>(null);
+	// Form states
 	const [blockerForm, setBlockerForm] = useState({
 		description: "",
 		ticket_id: "",
 		assignee_id: "",
 	});
-
+	// Auth states
+	const [orgId, setOrgId] = useState<string | null>(null);
+	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	// Data states
+	const [blockers, setBlockers] = useState<Blocker[]>([]);
+	const [ticketList, setTicketList] = useState<TicketListItem[]>([]);
 	const [teamMembers, setTeamMembers] = useState<OrganizationMember[]>([]);
+	//Routing states
 	const location = useLocation();
 	const highlightBlockerId = (location.state as { blockerId?: string })?.blockerId;
+	//Loading states
+	const [isLoading, setIsLoading] = useState(false);
+	const [isCreating, setIsCreating] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
+	const [isResolving, setIsResolving] = useState(false);
 
 	// Fetch blockers and user at the same time.
 	const fetchBlockers = async () => {
+		setIsLoading(true);
 		try {
 			// Step 1: Get user's org_id
 			const user = await getCurrentUser();
 			setCurrentUser(user);
-			setOrgId(user.organization_id); // we dont use currentUser cuz a useState is async and doesnt update inmidiatly (race condition)
+			setOrgId(user.organization_id); // we dont use currentUser state cuz as useState is async and doesnt update inmidiatly (race condition)
 
 			// Step 2: Fetch blockers and team members
 			if (user.organization_id) {
@@ -77,6 +86,8 @@ export function Blockers() {
 			} else {
 				console.error("Failed to fetch blockers:", error);
 			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -86,6 +97,7 @@ export function Blockers() {
 	}, []); // Empty array = run once on mount. setState functions are stable and don't need to be dependencies
 
 	const handleCreateBlocker = async () => {
+		setIsCreating(true);
 		try {
 			// Call API to create blocker
 			await createBlocker(orgId!, {
@@ -100,6 +112,8 @@ export function Blockers() {
 			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" }); // Reset form values
 		} catch (error) {
 			console.error("Failed to create blocker:", error);
+		} finally {
+			setIsCreating(false);
 		}
 	};
 
@@ -107,15 +121,19 @@ export function Blockers() {
 
 	const canEditBlocker = (blocker: Blocker) =>
 		blocker.created_by.id === currentUser?.id ||
+		blocker.assignee?.id === currentUser?.id ||
 		currentUser?.scrum_role === "scrum_master" ||
 		currentUser?.scrum_role === "product_owner";
+
 	const canResolveBlocker = (blocker: Blocker) =>
+		blocker.created_by.id === currentUser?.id ||
 		blocker.assignee?.id === currentUser?.id ||
 		currentUser?.scrum_role === "scrum_master" ||
 		currentUser?.scrum_role === "product_owner";
 
 	// Handle functions
 	const handleEditBlocker = async () => {
+		setIsSaving(true);
 		try {
 			// Call API to edit blocker
 			await updateBlocker(selectedBlocker!.id, {
@@ -131,19 +149,25 @@ export function Blockers() {
 			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" }); // Reset form values
 		} catch (error) {
 			console.error("Failed to edit blocker:", error);
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
-	const handleResolveBlocker = async (blocker: Blocker) => {
+	const handleResolveBlocker = async () => {
+		if (!confirmResolved) return;
+		setIsResolving(true);
 		try {
 			// Call API to resolve blocker
-			await resolveBlocker(blocker.id);
-
+			await resolveBlocker(confirmResolved);
 			// Refresh the list and close modal
 			await fetchBlockers();
+			setConfirmResolved(null);
 			setSelectedBlocker(null);
 		} catch (error) {
 			console.error("Failed to resolve blocker:", error);
+		} finally {
+			setIsResolving(false);
 		}
 	};
 
@@ -162,8 +186,9 @@ export function Blockers() {
 		setIsEditBlockerOpen(true);
 	};
 
-	const openBlockers = blockers.filter((b) => b.status === "open");
-	const resolvedBlockers = blockers.filter((b) => b.status === "resolved");
+	// Get the open and resolved blockers, and sort them from newest to oldest
+	const openBlockers = blockers.filter((b) => b.status === "open").sort((a, b) => b.created_at.localeCompare(a.created_at));
+	const resolvedBlockers = blockers.filter((b) => b.status === "resolved").sort((a, b) => b.created_at.localeCompare(a.created_at));
 
 	return (
 		<div className="p-8">
@@ -182,122 +207,154 @@ export function Blockers() {
 			/>
 
 			<div className="max-w-3xl space-y-6">
+				{isLoading && (
+					<div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+						Loading blockers...
+					</div>
+				)}
+
 				{/* Open Blockers */}
-				<div>
-					<h3 className="text-sm text-gray-700 mb-3">Active ({openBlockers.length})</h3>
-					{openBlockers.length === 0 ? (
-						<div className="bg-emerald-50/50 rounded-2xl p-8 border border-emerald-100">
-							<div className="flex flex-col items-center text-center">
-								<div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-									<CheckCircle2 className="w-8 h-8 text-emerald-600" />
+				{!isLoading && (
+					<div>
+						<h3 className="text-sm text-gray-700 mb-3">Active ({openBlockers.length})</h3>
+						{openBlockers.length === 0 ? (
+							<div className="bg-emerald-50/50 rounded-2xl p-8 border border-emerald-100">
+								<div className="flex flex-col items-center text-center">
+									<div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+										<CheckCircle2 className="w-8 h-8 text-emerald-600" />
+									</div>
+									<h3 className="text-base text-gray-900 mb-2">No active blockers</h3>
+									<p className="text-sm text-gray-600">
+										Your team is currently unblocked and moving smoothly.
+									</p>
 								</div>
-								<h3 className="text-base text-gray-900 mb-2">No active blockers</h3>
-								<p className="text-sm text-gray-600">
-									Your team is currently unblocked and moving smoothly.
-								</p>
 							</div>
-						</div>
-					) : (
-						<div className="space-y-3">
-							{openBlockers.map((blocker) => {
-								const isHighlighted = blocker.id === highlightBlockerId;
-								return (
-									<div
-										key={blocker.id}
-										id={`blocker-${blocker.id}`}
-										className={`bg-rose-50/30 rounded-2xl p-6 border-l-4 border-l-rose-400 border border-rose-100 transition-all ${
-											isHighlighted
-												? "ring-2 ring-rose-400 ring-offset-2"
-												: ""
-										}`}
-									>
-										<div className="flex items-start gap-4">
-											<div className="p-3 bg-rose-100 rounded-xl mt-1 border border-rose-200">
-												<AlertCircle className="w-6 h-6 text-rose-600" />
-											</div>
-
-											<div className="flex-1">
-												<div className="flex items-start justify-between gap-4 mb-3">
-													<p className="text-sm text-gray-900">
-														{blocker.description}
-													</p>
+						) : (
+							<div className="space-y-3">
+								{openBlockers.map((blocker) => {
+									const isHighlighted = blocker.id === highlightBlockerId;
+									return (
+										<div
+											key={blocker.id}
+											id={`blocker-${blocker.id}`}
+											className={`bg-rose-50/30 rounded-2xl p-6 border-l-4 border-l-rose-400 border border-rose-100 transition-all ${
+												isHighlighted
+													? "ring-2 ring-rose-400 ring-offset-2"
+													: ""
+											}`}
+										>
+											<div className="flex items-start gap-4">
+												<div className="p-3 bg-rose-100 rounded-xl mt-1 border border-rose-200">
+													<AlertCircle className="w-6 h-6 text-rose-600" />
 												</div>
 
-												<div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-													<div className="flex items-center gap-2">
-														<Avatar
-															avatarUrl={
-																blocker.created_by.avatar_url
-															}
-															name={blocker.created_by.name}
-															userId={blocker.created_by.id}
-															size="sm"
-														/>
-														<span>
-															Created by {blocker.created_by.name}
+												<div className="flex-1">
+													<div className="flex items-start justify-between gap-4 mb-3">
+														<p className="text-sm text-gray-900">
+															{blocker.description}
+														</p>
+														<span className="text-xs px-2 py-1 rounded-lg bg-rose-100 text-rose-700">
+															Open
 														</span>
 													</div>
 
-													<div className="flex items-center gap-2">
-														<Clock className="w-3 h-3" />
-														<span>{blocker.created_at}</span>
-													</div>
-												</div>
+																										<div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
+														<div className="flex items-center gap-2">
+															<Avatar
+																avatarUrl={blocker.created_by.avatar_url}
+																name={blocker.created_by.name}
+																userId={blocker.created_by.id}
+																size="sm"
+															/>
+															<span>
+																Created by {blocker.created_by.name}
+															</span>
+														</div>
 
-												<div className="flex items-center gap-3 text-xs">
-													<span className="text-gray-500">
-														Ticket:{" "}
-														<span className="text-gray-700">
-															{blocker.ticket.title}
-														</span>
-													</span>
-													{blocker.assignee && ( // check if object "assignee" exists. Optional chaining also ok "blocker.assignee?.id"
+														<div className="flex items-center gap-2">
+															<Clock className="w-3 h-3" />
+															<span>{new Date(blocker.created_at).toLocaleDateString("en-GB")}</span>
+														</div>
+													</div>
+
+													<div className="flex items-center gap-3 text-xs">
 														<span className="text-gray-500">
-															Related to:{" "}
+															Ticket:{" "}
 															<span className="text-gray-700">
-																{blocker.assignee.name}
+																{blocker.ticket.title}
 															</span>
 														</span>
-													)}
+														{blocker.assignee && ( // check if object "assignee" exists. Optional chaining also ok "blocker.assignee?.id"
+															<span className="text-gray-500">
+																Related to:{" "}
+																<span className="text-gray-700">
+																	{blocker.assignee.name}
+																</span>
+															</span>
+														)}
+													</div>
 												</div>
 											</div>
-										</div>
 
-										<div className="mt-4 pt-4 border-t border-rose-100 flex items-center gap-3">
-											{canResolveBlocker(blocker) && (
-												<Button
-													variant="text"
-													onClick={() => handleResolveBlocker(blocker)}
-													className="text-emerald-600 hover:text-emerald-700"
-												>
-													Mark as resolved
-												</Button>
-											)}
-											{canEditBlocker(blocker) && (
-												<Button
-													variant="text"
-													onClick={() => openEditModal(blocker)}
-													icon={<Edit2 className="w-3 h-3" />}
-												>
-													Edit
-												</Button>
-											)}
-											{!canEditBlocker(blocker) &&
-												!canResolveBlocker(blocker) && (
-													<span className="text-xs text-gray-400">
-														Read-only
-													</span>
+											{(canEditBlocker(blocker) || canResolveBlocker(blocker)) && (
+											<div className="mt-4 pt-4 border-t border-rose-100 flex items-center gap-3">
+												{canResolveBlocker(blocker) && (
+													<Button
+														variant="text"
+														onClick={() => setConfirmResolved(blocker.id)}
+														className="text-emerald-600 hover:text-emerald-700 p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
+													>
+														Resolve Blocker
+													</Button>
 												)}
+												{canEditBlocker(blocker) && (
+													<Button
+														variant="text"
+														onClick={() => openEditModal(blocker)}
+														icon={<Edit2 className="w-3 h-3" />}
+													>
+														Edit
+													</Button>
+												)}
+											</div>
+											)}
+
+									{/*		<div className="mt-4 pt-4 border-t border-rose-100 flex items-center gap-3">
+												{canResolveBlocker(blocker) && (
+													<Button
+														variant="text"
+														onClick={() => setConfirmResolved(blocker.id)}
+														className="text-emerald-600 hover:text-emerald-700 p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
+													>
+														Resolve Blocker
+													</Button>
+												)}
+												{canEditBlocker(blocker) && (
+													<Button
+														variant="text"
+														onClick={() => openEditModal(blocker)}
+														icon={<Edit2 className="w-3 h-3" />}
+													>
+														Edit
+													</Button>
+												)}
+												{!canEditBlocker(blocker) &&
+													!canResolveBlocker(blocker) && (
+														<span className="text-xs text-gray-400">
+															Read-only
+														</span>
+													)}
+											</div>  */}
 										</div>
-									</div>
-								);
-							})}
-						</div>
-					)}
-				</div>
+									);
+								})}
+							</div>
+						)}
+					</div>
+				)}
 
 				{/* Resolved Blockers */}
-				{resolvedBlockers.length > 0 && (
+				{!isLoading && resolvedBlockers.length > 0 && (
 					<div>
 						<h3 className="text-sm text-gray-700 mb-3">
 							Resolved ({resolvedBlockers.length})
@@ -341,7 +398,12 @@ export function Blockers() {
 
 													<div className="flex items-center gap-2">
 														<CheckCircle2 className="w-3 h-3" />
-														<span>Resolved {blocker.resolved_at}</span>
+														<span>
+															Resolved{" "}
+															{blocker.resolved_at
+																? new Date(blocker.resolved_at).toLocaleDateString("en-GB")
+																: ""}
+														</span>
 													</div>
 												</div>
 
@@ -370,6 +432,46 @@ export function Blockers() {
 					</div>
 				)}
 			</div>
+
+			{/* Resolve Blocker Confirmation Modal */}
+			{confirmResolved && (
+				<>
+					<div
+						className="fixed inset-0 bg-black/40 z-50"
+						onClick={() => setConfirmResolved(null)}
+					/>
+					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+						<div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
+							<div className="px-6 py-5">
+								<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
+									<CheckCircle2 className="w-6 h-6 text-emerald-600" />
+								</div>
+								<h3 className="text-lg text-gray-900 text-center mb-2">
+									Mark blocker as resolved?
+								</h3>
+								<p className="text-sm text-gray-500 text-center">
+									This will mark the blocker as resolved for your team.
+								</p>
+							</div>
+							<div className="flex items-center gap-3 px-6 py-4 border-t border-gray-100">
+								<button
+									onClick={() => setConfirmResolved(null)}
+									className="flex-1 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+								>
+									Cancel
+								</button>
+								<button
+									onClick={handleResolveBlocker}
+									disabled={isResolving}
+									className="flex-1 px-4 py-2 text-sm text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{isResolving ? "Resolving..." : "Confirm"}
+								</button>
+							</div>
+						</div>
+					</div>
+				</>
+			)}
 
 			{/* Create Blocker Modal */}
 			<Modal
@@ -453,9 +555,9 @@ export function Blockers() {
 					<Button
 						variant="primary"
 						onClick={handleCreateBlocker}
-						disabled={!blockerForm.description.trim() || !blockerForm.ticket_id}
+						disabled={isCreating || !blockerForm.description.trim() || !blockerForm.ticket_id}
 					>
-						Create blocker
+						{isCreating ? "Creating..." : "Create blocker"}
 					</Button>
 				</div>
 			</Modal>
@@ -545,9 +647,9 @@ export function Blockers() {
 					<Button
 						variant="primary"
 						onClick={handleEditBlocker}
-						disabled={!blockerForm.description.trim() || !blockerForm.ticket_id}
+						disabled={isSaving || !blockerForm.description.trim() || !blockerForm.ticket_id}
 					>
-						Save changes
+						{isSaving ? "Saving..." : "Save changes"}
 					</Button>
 				</div>
 			</Modal>

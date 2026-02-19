@@ -206,7 +206,7 @@ describe("Blockers Component", () => {
 			renderBlockers();
 
 			await waitFor(() => {
-				expect(screen.getByText("2024-02-10T10:00:00Z")).toBeInTheDocument();
+				expect(screen.getByText("10/02/2024")).toBeInTheDocument();
 			});
 		});
 	});
@@ -517,8 +517,8 @@ describe("Blockers Component", () => {
 				expect(screen.getByText("Waiting for API keys from client")).toBeInTheDocument();
 			});
 
-			expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
-			expect(screen.getByRole("button", { name: /mark as resolved/i })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: /Edit/i })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: /Resolve Blocker/i })).toBeInTheDocument();
 		});
 
 		it("shows edit and resolve buttons for scrum master", async () => {
@@ -552,7 +552,7 @@ describe("Blockers Component", () => {
 			});
 
 			// User-2 is assignee of blocker-1
-			expect(screen.getByRole("button", { name: /mark as resolved/i })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: /Resolve Blocker/i })).toBeInTheDocument();
 		});
 
 		it("shows read-only for users without permissions", async () => {
@@ -573,10 +573,10 @@ describe("Blockers Component", () => {
 				expect(screen.getByText("Waiting for API keys from client")).toBeInTheDocument();
 			});
 
-			expect(screen.getByText("Read-only")).toBeInTheDocument();
+			expect(screen.queryByText("Resolve Blocker")).not.toBeInTheDocument();
 		});
 
-		it("resolves blocker when resolve button clicked", async () => {
+		it("resolves blocker after confirming the modal", async () => {
 			const user = userEvent.setup();
 			const { resolveBlocker } = await import("../../services/api");
 			renderBlockers();
@@ -585,8 +585,11 @@ describe("Blockers Component", () => {
 				expect(screen.getByText("Waiting for API keys from client")).toBeInTheDocument();
 			});
 
-			const resolveButton = screen.getByRole("button", { name: /mark as resolved/i });
-			await user.click(resolveButton);
+			const openModalButton = screen.getByRole("button", { name: /Resolve Blocker/i });
+			await user.click(openModalButton);
+
+			const confirmButton = await screen.findByRole("button", {name: /confirm/i });
+			await user.click(confirmButton);
 
 			await waitFor(() => {
 				expect(resolveBlocker).toHaveBeenCalledWith("blocker-1");
@@ -617,7 +620,7 @@ describe("Blockers Component", () => {
 			renderBlockers();
 
 			await waitFor(() => {
-				expect(screen.getByText(/Resolved 2024-02-11T09:15:00Z/)).toBeInTheDocument();
+				expect(screen.getByText(/Resolved 17\/02\/2026/)).toBeInTheDocument();;
 			});
 		});
 
@@ -1016,7 +1019,7 @@ describe("Blockers Component", () => {
 			await waitFor(() => {
 				expect(screen.getByText("2024-02-10T10:00:00Z")).toBeInTheDocument();
 				expect(
-					screen.getByText(/Resolved 2024-02-11T09:15:00Z/)
+					screen.getByText(/Resolved 17\/02\/2026/)
 				).toBeInTheDocument();
 			});
 
