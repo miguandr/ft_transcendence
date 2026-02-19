@@ -33,7 +33,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       # Check if PostgreSQL is ready to accept connections
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-db_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-db_user} -d ${DB_NAME:-db_name}"]
       interval: 10s
       timeout: 5s
       retries: 5
