@@ -25,7 +25,7 @@ See User, Organization models for complete examples.
 import uuid
 from datetime import datetime, date
 from sqlalchemy import DateTime, Text, Date, ForeignKey, UniqueConstraint, func, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..base import Base
 from typing import TYPE_CHECKING
@@ -85,7 +85,7 @@ class Standup(Base):
 	)
 
 	blocker_ids: Mapped[list[uuid.UUID] | None] = mapped_column(
-		JSON,
+		ARRAY(UUID(as_uuid=True)).with_variant(JSON(), "sqlite"),
 		nullable=True,
 		default=list
 	)
