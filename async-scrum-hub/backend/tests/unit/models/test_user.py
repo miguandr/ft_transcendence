@@ -54,6 +54,10 @@ class TestUserModel:
         assert hasattr(User, 'standups_created')
         assert hasattr(User, 'created_blockers')
         assert hasattr(User, 'assigned_blockers')
+        assert hasattr(User, 'tasks_created')
+        assert hasattr(User, 'tasks_assigned')
+        assert hasattr(User, 'tickets_created')
+        assert hasattr(User, 'tickets_assigned')
 
     def test_user_instance_creation(self):
         """Test creating a User instance without database."""

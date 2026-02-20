@@ -10,6 +10,8 @@ from sqlalchemy.exc import IntegrityError
 
 from src.database.models import User, Organization, Standup, Blocker
 from src.database.models.blocker import BlockerStatus
+from src.database.models import Ticket, Task
+from src.database.models.enums import TicketStatus, TaskStatus, Priority
 
 
 class TestUserCRUD:
@@ -175,6 +177,102 @@ class TestUserRelationships:
 
         assert len(sample_user.assigned_blockers) == 1
         assert sample_user.assigned_blockers[0].description == "Assigned to me"
+
+    def test_user_to_tickets_created_relationship(self, test_session, sample_user, sample_organization):
+        """Test user can access tickets they created."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Test Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+
+        test_session.add(ticket)
+        test_session.commit()
+        test_session.refresh(sample_user)
+
+        assert len(sample_user.tickets_created) == 1
+        assert sample_user.tickets_created[0].title == "Test Ticket"
+
+    def test_user_to_tickets_assigned_relationship(self, test_session, sample_user, sample_organization):
+        """Test user can access tickets assigned to them."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Assigned Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            assignee_id=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+
+        test_session.add(ticket)
+        test_session.commit()
+        test_session.refresh(sample_user)
+
+        assert len(sample_user.tickets_assigned) == 1
+        assert sample_user.tickets_assigned[0].title == "Assigned Ticket"
+
+    def test_user_to_tasks_created_relationship(self, test_session, sample_user, sample_organization):
+        """Test user can access tasks they created."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Parent Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        task = Task(
+            id=uuid4(),
+            title="Test Task",
+            ticket_id=ticket.id,
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TaskStatus.IN_PROGRESS
+        )
+
+        test_session.add(task)
+        test_session.commit()
+        test_session.refresh(sample_user)
+
+        assert len(sample_user.tasks_created) == 1
+        assert sample_user.tasks_created[0].title == "Test Task"
+
+    def test_user_to_tasks_assigned_relationship(self, test_session, sample_user, sample_organization):
+        """Test user can access tasks assigned to them."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Parent Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        task = Task(
+            id=uuid4(),
+            title="Assigned Task",
+            ticket_id=ticket.id,
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            assignee_id=sample_user.id,
+            status=TaskStatus.IN_PROGRESS
+        )
+
+        test_session.add(task)
+        test_session.commit()
+        test_session.refresh(sample_user)
+
+        assert len(sample_user.tasks_assigned) == 1
+        assert sample_user.tasks_assigned[0].title == "Assigned Task"
 
 
 class TestUserConstraints:

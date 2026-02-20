@@ -29,7 +29,7 @@ class TestBlockerModel:
             'assignee_id',
             'description',
             'status',
-            'task_id',
+            'ticket_id',
             'created_at',
             'resolved_at'
         ]
@@ -50,7 +50,7 @@ class TestBlockerModel:
         assert hasattr(Blocker, 'organization')
         assert hasattr(Blocker, 'creator')
         assert hasattr(Blocker, 'assignee')
-        assert hasattr(Blocker, 'task')
+        assert hasattr(Blocker, 'ticket')
 
     def test_blocker_repr(self):
         """Test Blocker __repr__ method."""
@@ -107,9 +107,9 @@ class TestBlockerColumnTypes:
         status_column = Blocker.__table__.columns['status']
         assert status_column.nullable is False
 
-    def test_task_id_is_nullable(self):
-        """Test task_id is optional."""
-        task_column = Blocker.__table__.columns['task_id']
+    def test_ticket_id_is_nullable(self):
+        """Test ticket_id is optional."""
+        task_column = Blocker.__table__.columns['ticket_id']
         assert task_column.nullable is True
 
     def test_resolved_at_is_nullable(self):

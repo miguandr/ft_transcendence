@@ -13,6 +13,8 @@ from sqlalchemy.exc import IntegrityError
 
 from src.database.models import Organization, User, Standup, Blocker
 from src.database.models.blocker import BlockerStatus
+from src.database.models import Ticket, Task
+from src.database.models.enums import TicketStatus, TaskStatus, Priority
 
 
 class TestOrganizationCRUD:
@@ -142,6 +144,53 @@ class TestOrganizationRelationships:
 
         assert len(sample_organization.blockers) == 1
 
+    def test_organization_to_tickets_relationship(self, test_session, sample_user, sample_organization):
+        """Test organization can access its tickets."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Org Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+
+        test_session.add(ticket)
+        test_session.commit()
+        test_session.refresh(sample_organization)
+
+        assert len(sample_organization.tickets) == 1
+        assert sample_organization.tickets[0].title == "Org Ticket"
+
+    def test_organization_to_tasks_relationship(self, test_session, sample_user, sample_organization):
+        """Test organization can access its tasks."""
+        ticket = Ticket(
+            id=uuid4(),
+            title="Parent Ticket",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        task = Task(
+            id=uuid4(),
+            title="Org Task",
+            ticket_id=ticket.id,
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TaskStatus.IN_PROGRESS
+        )
+
+        test_session.add(task)
+        test_session.commit()
+        test_session.refresh(sample_organization)
+
+        assert len(sample_organization.tasks) == 1
+        assert sample_organization.tasks[0].title == "Org Task"
+
 
 class TestOrganizationConstraints:
     """Test Organization constraints."""
@@ -254,6 +303,77 @@ class TestOrganizationCascadeDelete:
         test_session.commit()
 
         retrieved = test_session.query(Blocker).filter_by(id=blocker_id).first()
+        assert retrieved is None
+
+    def test_delete_organization_deletes_tickets(self, test_session, sample_user):
+        """Test deleting organization cascades to delete its tickets."""
+        org = Organization(
+            id=uuid4(),
+            name="Cascade Org",
+            join_code="CASC03",
+            created_by=sample_user.id
+        )
+        test_session.add(org)
+        test_session.commit()
+
+        ticket = Ticket(
+            id=uuid4(),
+            title="Cascade Ticket",
+            organization_id=org.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        ticket_id = ticket.id
+
+        test_session.delete(org)
+        test_session.commit()
+
+        retrieved = test_session.query(Ticket).filter_by(id=ticket_id).first()
+        assert retrieved is None
+
+    def test_delete_organization_deletes_tasks(self, test_session, sample_user):
+        """Test deleting organization cascades to delete its tasks."""
+        org = Organization(
+            id=uuid4(),
+            name="Cascade Org",
+            join_code="CASC04",
+            created_by=sample_user.id
+        )
+        test_session.add(org)
+        test_session.commit()
+
+        ticket = Ticket(
+            id=uuid4(),
+            title="Parent Ticket",
+            organization_id=org.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        task = Task(
+            id=uuid4(),
+            title="Cascade Task",
+            ticket_id=ticket.id,
+            organization_id=org.id,
+            created_by=sample_user.id,
+            status=TaskStatus.IN_PROGRESS
+        )
+        test_session.add(task)
+        test_session.commit()
+
+        task_id = task.id
+
+        test_session.delete(org)
+        test_session.commit()
+
+        retrieved = test_session.query(Task).filter_by(id=task_id).first()
         assert retrieved is None
 
     def test_delete_organization_sets_user_org_null(self, test_session):
