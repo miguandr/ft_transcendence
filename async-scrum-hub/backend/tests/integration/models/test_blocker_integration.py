@@ -219,12 +219,22 @@ class TestBlockerStatus:
 class TestBlockerCascadeDelete:
     """Test cascade delete behavior."""
 
-    def test_delete_user_deletes_created_blockers(self, test_session, sample_user, sample_organization):
+    def test_delete_user_deletes_created_blockers(self, test_session, sample_organization):
         """Test deleting user cascades to delete their created blockers."""
+        # Use a fresh user with no org (avoids RESTRICT FK from sample_organization.created_by)
+        user = User(
+            id=uuid4(),
+            email="standalone_blocker@example.com",
+            name="Standalone User",
+            password_hash="hash"
+        )
+        test_session.add(user)
+        test_session.commit()
+
         blocker = Blocker(
             id=uuid4(),
             organization_id=sample_organization.id,
-            created_by=sample_user.id,
+            created_by=user.id,
             description="Test blocker",
             status=BlockerStatus.OPEN
         )
@@ -233,11 +243,9 @@ class TestBlockerCascadeDelete:
 
         blocker_id = blocker.id
 
-        # Delete user
-        test_session.delete(sample_user)
+        test_session.delete(user)
         test_session.commit()
 
-        # Blocker should be deleted too
         retrieved = test_session.query(Blocker).filter_by(id=blocker_id).first()
         assert retrieved is None
 

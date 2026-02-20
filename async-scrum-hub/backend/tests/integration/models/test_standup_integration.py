@@ -188,13 +188,22 @@ class TestStandupConstraints:
 class TestStandupCascadeDelete:
     """Test cascade delete behavior."""
 
-    def test_delete_user_deletes_standups(self, test_session, sample_user, sample_organization):
+    def test_delete_user_deletes_standups(self, test_session, sample_organization):
         """Test deleting user cascades to delete their standups."""
-        # Create standup for user
+        # Use a fresh user with no org (avoids RESTRICT FK from sample_organization.created_by)
+        user = User(
+            id=uuid4(),
+            email="standalone_standup@example.com",
+            name="Standalone User",
+            password_hash="hash"
+        )
+        test_session.add(user)
+        test_session.commit()
+
         standup = Standup(
             id=uuid4(),
             organization_id=sample_organization.id,
-            created_by=sample_user.id,
+            created_by=user.id,
             today="Test standup",
             standup_date=date.today()
         )
@@ -203,11 +212,9 @@ class TestStandupCascadeDelete:
 
         standup_id = standup.id
 
-        # Delete user
-        test_session.delete(sample_user)
+        test_session.delete(user)
         test_session.commit()
 
-        # Standup should be deleted too
         retrieved = test_session.query(Standup).filter_by(id=standup_id).first()
         assert retrieved is None
 

@@ -49,6 +49,8 @@ class TestOrganizationModel:
         assert hasattr(Organization, 'users')
         assert hasattr(Organization, 'standups')
         assert hasattr(Organization, 'blockers')
+        assert hasattr(Organization, 'tickets')
+        assert hasattr(Organization, 'tasks')
 
 
 class TestOrganizationColumnTypes:

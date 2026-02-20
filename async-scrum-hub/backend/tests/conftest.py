@@ -7,15 +7,17 @@ This file provides shared fixtures for all tests including:
 - Sample data factories
 """
 
+import sqlite3
 import pytest
 from datetime import datetime, date
 from uuid import uuid4
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.database.base import Base
-from src.database.models import User, Organization, Standup, Blocker
+from src.database.models import User, Organization, Standup, Blocker, Ticket, Task
+from src.database.models.enums import TicketStatus, TaskStatus, Priority
 
 
 @pytest.fixture(scope="function")
@@ -26,8 +28,18 @@ def test_engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        if isinstance(dbapi_connection, sqlite3.Connection):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
     Base.metadata.create_all(bind=engine)
     yield engine
+    with engine.connect() as conn:
+        conn.execute(text("PRAGMA foreign_keys=OFF"))
     Base.metadata.drop_all(bind=engine)
 
 
@@ -107,3 +119,37 @@ def sample_blocker(test_session, sample_user, sample_organization):
     test_session.commit()
     test_session.refresh(blocker)
     return blocker
+
+
+@pytest.fixture
+def sample_ticket(test_session, sample_user, sample_organization):
+    """Create a sample ticket for testing."""
+    ticket = Ticket(
+        id=uuid4(),
+        title="Test Ticket",
+        organization_id=sample_organization.id,
+        created_by=sample_user.id,
+        status=TicketStatus.TODO,
+        priority=Priority.MEDIUM
+    )
+    test_session.add(ticket)
+    test_session.commit()
+    test_session.refresh(ticket)
+    return ticket
+
+
+@pytest.fixture
+def sample_task(test_session, sample_user, sample_organization, sample_ticket):
+    """Create a sample task for testing."""
+    task = Task(
+        id=uuid4(),
+        title="Test Task",
+        ticket_id=sample_ticket.id,
+        organization_id=sample_organization.id,
+        created_by=sample_user.id,
+        status=TaskStatus.IN_PROGRESS
+    )
+    test_session.add(task)
+    test_session.commit()
+    test_session.refresh(task)
+    return task
