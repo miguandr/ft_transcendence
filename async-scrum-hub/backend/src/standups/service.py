@@ -54,7 +54,7 @@ def create_standup(db: Session, org_id: uuid.UUID, user: User, today: str) -> St
 		created_by=user.id,
 		today=today,
 		yesterday=yesterday_content,
-		blocker_ids=blocker_ids,
+		blocker_ids=blocker_ids if blocker_ids else None,
 		standup_date=today_date,
 	)
 	db.add(standup)
