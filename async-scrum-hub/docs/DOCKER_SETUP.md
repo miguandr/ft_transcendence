@@ -21,8 +21,14 @@ docker-compose --version
 ```bash
 # Copy the example environment file
 cp .env.example .env
+```
 
-# Edit .env if needed (optional for local development)
+Then open `.env` and set a real JWT secret key (required — the app won't start without it):
+```bash
+# Generate a secure key
+openssl rand -hex 32
+
+# Paste the output into .env as the value for JWT_SECRET_KEY
 ```
 
 ### **2. Start all services**
@@ -145,6 +151,19 @@ All services are connected through a custom bridge network called `async-scrum-n
 ---
 
 ## **Troubleshooting**
+
+### **Problem: JWT_SECRET_KEY missing**
+
+**Error:** `pydantic_core.ValidationError: 1 validation error for Settings — JWT_SECRET_KEY — Field required`
+
+**Solution:**
+```bash
+# Generate a key and add it to your .env file
+openssl rand -hex 32
+# Then set JWT_SECRET_KEY=<output> in .env
+```
+
+---
 
 ### **Problem: Port already in use**
 

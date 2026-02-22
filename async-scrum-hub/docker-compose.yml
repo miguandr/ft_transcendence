@@ -55,6 +55,11 @@ services:
       DB_PORT: 5432      # Internal PostgreSQL port
       DB_NAME: ${DB_NAME:-db_name}
 
+      # JWT / Auth settings
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+
       # Application settings
       PYTHONUNBUFFERED: 1  # Show Python output in real-time
       PYTHONDONTWRITEBYTECODE: 1  # Don't create .pyc files
