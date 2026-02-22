@@ -21,4 +21,119 @@ Example loader signature:
         return standup
 """
 
-# TODO: Implement standup routes - assigned to Malu
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from src.database import get_db
+from src.database.models import User
+from src.database.models.organization import Organization
+from src.database.models.standup import Standup
+from src.api.deps import require_org_permission, require_resource_permission
+from src.standups import service
+from src.standups.schemas import (
+	StandupCreateRequest,
+	StandupUpdateRequest,
+	StandupCreateResponse,
+	StandupResponse,
+)
+
+router = APIRouter()
+
+
+def get_standup_loader(standup_id: uuid.UUID, db: Session = Depends(get_db)) -> Standup:
+	return service.get_standup_by_id(standup_id, db)
+
+
+@router.post(
+	"/organizations/{org_id}/standups",
+	response_model=StandupCreateResponse,
+	status_code=status.HTTP_201_CREATED,
+)
+def create_standup(
+	org_id: uuid.UUID,
+	body: StandupCreateRequest,
+	db: Session = Depends(get_db),
+	current_user: User = Depends(require_org_permission("organizations:standups:create")),
+):
+	org = db.query(Organization).filter(Organization.id == org_id).first()
+	if not org:
+		raise HTTPException(
+			status_code=status.HTTP_404_NOT_FOUND,
+			detail={"error": {"code": "NOT_FOUND", "message": "Organization not found"}},
+		)
+
+	standup = service.create_standup(db, org_id, current_user, body.today)
+	return StandupCreateResponse(
+		id=standup.id,
+		created_at=standup.created_at,
+		today=standup.today,
+		yesterday=standup.yesterday,
+		blocker_ids=standup.blocker_ids,
+		created_by=standup.creator,
+	)
+
+
+@router.get(
+	"/organizations/{org_id}/standups",
+	response_model=list[StandupResponse],
+	status_code=status.HTTP_200_OK,
+)
+def list_standups(
+	org_id: uuid.UUID,
+	db: Session = Depends(get_db),
+	current_user: User = Depends(require_org_permission("organizations:standups:list")),
+):
+	org = db.query(Organization).filter(Organization.id == org_id).first()
+	if not org:
+		raise HTTPException(
+			status_code=status.HTTP_404_NOT_FOUND,
+			detail={"error": {"code": "NOT_FOUND", "message": "Organization not found"}},
+		)
+
+	standups = service.list_standups(db, org_id)
+	result = []
+	for standup in standups:
+		blockers = service.resolve_blocker_ids(db, standup.blocker_ids)
+		result.append(StandupResponse(
+			id=standup.id,
+			created_at=standup.created_at,
+			today=standup.today,
+			yesterday=standup.yesterday,
+			blockers=blockers,
+			created_by=standup.creator,
+		))
+	return result
+
+
+@router.patch(
+	"/standups/{standup_id}",
+	response_model=StandupResponse,
+	status_code=status.HTTP_200_OK,
+)
+def update_standup(
+	body: StandupUpdateRequest,
+	db: Session = Depends(get_db),
+	standup: Standup = Depends(require_resource_permission("standups:update", get_standup_loader)),
+):
+	updated = service.update_standup(db, standup, body.today)
+	blockers = service.resolve_blocker_ids(db, updated.blocker_ids)
+	return StandupResponse(
+		id=updated.id,
+		created_at=updated.created_at,
+		today=updated.today,
+		yesterday=updated.yesterday,
+		blockers=blockers,
+		created_by=updated.creator,
+	)
+
+
+@router.delete(
+	"/standups/{standup_id}",
+	status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_standup(
+	db: Session = Depends(get_db),
+	standup: Standup = Depends(require_resource_permission("standups:delete", get_standup_loader)),
+):
+	service.delete_standup(db, standup)

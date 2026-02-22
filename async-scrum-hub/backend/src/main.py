@@ -77,9 +77,6 @@ def api_info():
     }
 
 
-# TODO: Include API routers here as they are implemented
-# Example:
-# from .auth import routes as auth_routes
-# from .organizations import routes as org_routes
-# app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["auth"])
-# app.include_router(org_routes.router, prefix="/api/v1/organizations", tags=["organizations"])
+from src.api.routes import api_router
+
+app.include_router(api_router, prefix="/api/v1")

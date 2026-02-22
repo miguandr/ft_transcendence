@@ -36,9 +36,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from .user import User
 	from .organization import Organization
-	#TODO task or ticket? see below
 	from .ticket import Ticket
-	#from .task import Task
 
 
 class BlockerStatus(str, Enum):
@@ -52,7 +50,7 @@ class Blocker(Base):
 	Blocker model representing impediments that block progress.
 
 	Blockers are issues that prevent team members from completing their work.
-	They can be assigned to developers and optionally linked to tasks.
+	They can be assigned to developers and optionally linked to tickets.
 
 	Business Rules:
 	- Blockers cannot be deleted, only resolved
@@ -107,7 +105,6 @@ class Blocker(Base):
 		index=True
 	)
 
-	#TODO task or ticket? Optional task reference
 	ticket_id: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
 		ForeignKey("tickets.id", ondelete="SET NULL"),
@@ -115,12 +112,6 @@ class Blocker(Base):
 		index=True
 	)
 
-#	task_id: Mapped[uuid.UUID | None] = mapped_column(
-#		UUID(as_uuid=True),
-#		ForeignKey("tasks.id", ondelete="SET NULL"),
-#		nullable=True,
-#		index=True
-#	)
 	# Timestamps
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True),
@@ -157,15 +148,10 @@ class Blocker(Base):
 		foreign_keys=[assignee_id],
 		back_populates="assigned_blockers"
 	)
-#TODO task or ticket?
 	ticket: Mapped["Ticket | None"] = relationship(
 		"Ticket",
 		back_populates="blockers"
 	)
 
-#	task: Mapped["Task | None"] = relationship(
-#		"Task",
-#		back_populates="blockers"
-#	)
 	def __repr__(self):
 		return f"<Blocker(id={self.id}, status={self.status.value}, created_by={self.created_by})>"
