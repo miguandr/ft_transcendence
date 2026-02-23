@@ -1,12 +1,10 @@
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
-
 class RegisterRequest(BaseModel):
 	email: EmailStr
 	name: str = Field(..., min_length=1)
 	password: str = Field(..., min_length=8)
-
 
 class RegisterResponse(BaseModel):
 	id: UUID
@@ -15,11 +13,9 @@ class RegisterResponse(BaseModel):
 
 	model_config = ConfigDict(from_attributes=True)
 	
-
 class LoginRequest(BaseModel):
 	email: EmailStr
 	password: str
-
 
 class LoginResponse(BaseModel):
 	access_token: str

@@ -48,6 +48,19 @@ limiting, documentation, and at least 5 endpoints:
 	◦ Should add meaningful value to your project.
 	◦ Requires justification in README.md (similar to Major, but for 1 point).
 
+• Minor (Custom): JWT for authentication
+	◦ Must still demonstrate technical skill and creativity.
+	◦ Should add meaningful value to your project.
+	◦ Requires justification in README.md (similar to Major, but for 1 point).
+
+• Minor (Custom): An organization system
+	◦ Create, edit, and delete organizations.
+	◦ Add users to organizations.
+	◦ Remove users from organizations.
+	◦ View organizations and allow users to perform specific actions within an or-
+		ganization (minimum: create, read, update).
+
+
 *******************
 maybe:
 

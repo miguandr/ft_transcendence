@@ -47,7 +47,7 @@ def decode_access_token(token: str) -> dict:
 		payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
 		return payload
 	except JWTError:
-		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"error": {"code": "INVALID_TOKEN", "message": "Invalid or expired token"}})
+		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"error": {"code": "UNAUTHORIZED", "message": "Authentication required"}})
 
 # pwd_context is an object created from the class CryptContext
 # Password hashing context configuration.

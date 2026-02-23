@@ -5,8 +5,10 @@ This is the main entry point for the Async Scrum Hub backend API.
 It initializes the FastAPI application, configures middleware, and includes API routers.
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Create FastAPI application instance
 app = FastAPI(
@@ -80,3 +82,6 @@ def api_info():
 from src.api.routes import api_router
 
 app.include_router(api_router, prefix="/api/v1")
+
+os.makedirs("/app/static/avatars", exist_ok=True)
+app.mount("/static", StaticFiles(directory="/app/static"), name="static")
