@@ -392,11 +392,121 @@ function getCurrentUserRecord() {
 // MOCK TOP BAR
 // =============================================================
 
-interface 
+//Interfaces
+interface UpdateUserRequest {
+	name: string;
+	email: string;
+}
 
+interface AvatarRequest {
+	file: File;
+}
+
+interface AvatarResponse {
+	avatar_url: string;
+}
+
+interface InviteMemberRequest {
+	name: string;
+	email: string;
+}
+
+interface InviteMemberResponse {
+	email: string;
+}
+
+
+// Update user information
+export async function updateUser(
+	data: UpdateUserRequest
+) : Promise<User> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	//1. VALIDATION
+	//Check if name isnt empty
+	if (!data.name.trim()) {
+		createApiError("INVALID_INPUT", "Name cant be empty");
+	}
+	//Check if email is valid
+	if (!/\S+@\S+\.\S+/.test(data.email)) {
+		createApiError("INVALID_INPUT", "Email format is invalid");
+	}
+	//Check if email already exists
+	const existingEmail = mockUsers.find((e) => e.email === data.email && e.id != currentUser.id);
+	if (existingEmail) {
+		createApiError("INVALID_INPUT", "This email is already in use");
+	}
+
+	//2. UPDATE DATA
+	currentUser.name = data.name;
+	currentUser.email = data.email;
+
+	//3. RETURN RESPONSE SHAPE
+	return (currentUser);
+}
+
+// Upload Avatar
+export async function uploadAvatar(
+	data: AvatarRequest
+) : Promise<AvatarResponse> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	//1. VALIDATION
+	//Check if user provided a file
+	if (!data.file) {
+		createApiError("INVALID_INPUT", "No file provided");
+	}
+
+	//2. UPLOAD FILE
+	const mockUrl = `mock-avatar-${Date.now()}.jpg`;
+	currentUser.avatar_url = mockUrl;
+
+	//3. RETURN RESPONSE SHAPE
+	return { avatar_url: mockUrl };
+}
+
+//Invite Member to organization
+export async function inviteMember(
+	org_id: string,
+	data: InviteMemberRequest
+) : Promise<InviteMemberResponse> {
+	await delay(500);
+	const currentUser = getCurrentUserRecord();
+
+	const org_info = mockOrganizations
+		.find((c) => c.id === org_id);
+	//	.find((c) => c.join_code);
+
+	//1. VALIDATION
+	//Checl if organization exists
+	if (!org_info?.id) {
+		createApiError("NOT_FOUND", "Organization not found");
+	}
+	//Check user's permission
+	if (currentUser.org_role !== "admin") {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+	//Check if name isnt empty
+	if (!data.name.trim()) {
+		createApiError("INVALID_INPUT", "Name cant be empty");
+	}
+	//Check if email is valid
+	if (!/\S+@\S+\.\S+/.test(data.email)) {
+		createApiError("INVALID_INPUT", "Email format is invalid");
+	}
+	//Check if email already exists in the organization
+	const existingEmail = mockUsers.find((e) => e.email === data.email);
+	if (existingEmail) {
+		createApiError("ALREADY_MEMBER", "User is already a member of this organization");
+	}
+
+	return { email: data.email };
+}
 
 // =============================================================
-// MOCK SIGN UP
+// MOCK TEAM SETUP
 // =============================================================
 
 // Create Organization
@@ -548,6 +658,10 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
 
 	return response;
 }
+
+// =============================================================
+// MOCK SIGNUP
+// =============================================================
 
 // Mock signup function
 export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
@@ -1454,5 +1568,6 @@ export async function removeMember(org_id: string, member_id: string): Promise<{
 11. STANDUP FUNCTION (PENDING)
 12. TICKETS FUNCTIONS (PENDING)
 13. BLOCKERS FUNCTIONS (PENDING)
+14. TOPBAR FUNTIONS (PENDING)
 
 */

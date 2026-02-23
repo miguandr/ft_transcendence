@@ -1,3 +1,12 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+//import type { User } from "../../services/api";
+import {
+	getCurrentUser,
+	updateUser,
+	uploadAvatar,
+	inviteMember
+} from "../../services/api";
 import {
 	Bell,
 	Search,
@@ -9,8 +18,7 @@ import {
 	ChevronDown,
 	Upload,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 
 export function TopBar() {
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,17 +40,17 @@ export function TopBar() {
 	});
 	const [inviteSent, setInviteSent] = useState(false);
 	const [uploadedAvatar, setUploadedAvatar] = useState<string | null>(null);
+	const navigate = useNavigate();
 
+	const fetchUser = async () => {
+		
+	}
 	// Mock: check if user is admin/team creator
 	const isAdmin = true;
 
-	const navigate = useNavigate();
 
-	const handleLogout = () => {
-		setIsDropdownOpen(false);
-		navigate("/welcome");
-	};
 
+	//Figma mock
 	const toggleSection = (section: string) => {
 		if (expandedSection === section) {
 			setExpandedSection(null);
@@ -53,6 +61,7 @@ export function TopBar() {
 		}
 	};
 
+	//Figma mock
 	const handleSaveProfile = () => {
 		setProfileData({
 			...profileData,
@@ -63,6 +72,19 @@ export function TopBar() {
 		setExpandedSection(null);
 	};
 
+	//Figma mock
+	const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onload = (event) => {
+				setUploadedAvatar(event.target?.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	//Figma mock
 	const handleSendInvite = () => {
 		// Mock: send invitation
 		setInviteSent(true);
@@ -73,15 +95,10 @@ export function TopBar() {
 		}, 2000);
 	};
 
-	const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				setUploadedAvatar(event.target?.result as string);
-			};
-			reader.readAsDataURL(file);
-		}
+	//Figma mock
+	const handleLogout = () => {
+		setIsDropdownOpen(false);
+		navigate("/welcome");
 	};
 
 	return (
