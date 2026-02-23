@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { AlertCircle, Edit2, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button, Modal, PageHeader, Avatar} from "../../components/custom"
+import type { User, StandupListItem } from "../../services/api";
 import {
 	createStandup,
 	listStandups,
@@ -9,7 +10,7 @@ import {
 	deleteStandup,
 	getCurrentUser
 } from "../../services/api";
-import type { User, StandupListItem } from "../../services/api";
+
 
 interface Standup {
 	id: string;
@@ -50,7 +51,7 @@ export function AsyncStandup() {
 	const [editingStandup, setEditingStandup] = useState<Standup | null>(null);
 	// Routing states
 	const navigate = useNavigate();
-	//Loading states
+	// Loading states
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPosting, setIsPosting] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
