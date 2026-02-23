@@ -43,15 +43,26 @@ You should see output like:
 ```
 ============================= test session starts ==============================
 platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
-collected 67 items
+collected N items
 
-tests/unit/models/test_standup.py ......................  [ 32%]
-tests/unit/models/test_blocker.py ....................    [ 65%]
-tests/integration/models/test_standup_integration.py ..... [ 85%]
-tests/integration/models/test_blocker_integration.py ..... [100%]
+tests/unit/auth/test_auth.py ...
+tests/unit/config/test_security.py ...
+tests/unit/models/test_standup.py ....
+tests/unit/models/test_blocker.py ....
+tests/unit/models/test_organization.py ....
+tests/unit/models/test_task.py ....
+tests/unit/models/test_ticket.py ....
+tests/unit/models/test_user.py ....
+tests/unit/standups/test_standups.py ..........
+tests/unit/blockers/test_blockers.py ..........
+tests/integration/models/test_standup_integration.py .....
+tests/integration/models/test_blocker_integration.py .....
+...
 
-============================== 67 passed in 2.45s ==============================
+============================== N passed in Xs ==============================
 ```
+
+To see the exact test count: `docker-compose exec backend pytest --collect-only`
 
 ---
 
@@ -62,15 +73,35 @@ backend/tests/
 ├── conftest.py              # Shared test fixtures (database, sample data)
 ├── README.md                # Detailed testing information
 │
-├── unit/                    # Unit tests (fast, no database)
-│   └── models/
-│       ├── test_standup.py           # Tests for Standup model structure
-│       └── test_blocker.py           # Tests for Blocker model structure
+├── unit/                    # Unit tests (fast, SQLite in-memory)
+│   ├── models/              # Model structure tests
+│   │   ├── test_standup.py
+│   │   ├── test_blocker.py
+│   │   ├── test_organization.py
+│   │   ├── test_task.py
+│   │   ├── test_ticket.py
+│   │   └── test_user.py
+│   ├── auth/                # Authentication tests
+│   │   ├── conftest.py
+│   │   └── test_auth.py
+│   ├── config/              # Settings / security tests
+│   │   ├── conftest.py
+│   │   └── test_security.py
+│   ├── standups/            # Standup service + API route tests
+│   │   ├── conftest.py
+│   │   └── test_standups.py
+│   └── blockers/            # Blocker service + API route tests
+│       ├── conftest.py
+│       └── test_blockers.py
 │
 └── integration/             # Integration tests (slower, uses database)
     └── models/
-        ├── test_standup_integration.py    # Tests for Standup CRUD operations
-        └── test_blocker_integration.py    # Tests for Blocker CRUD operations
+        ├── test_standup_integration.py
+        ├── test_blocker_integration.py
+        ├── test_organization_integration.py
+        ├── test_task_integration.py
+        ├── test_ticket_integration.py
+        └── test_user_integration.py
 ```
 
 ### Unit Tests vs Integration Tests
@@ -123,6 +154,11 @@ docker-compose exec backend pytest tests/integration/
 **Only model tests:**
 ```bash
 docker-compose exec backend pytest tests/unit/models/ tests/integration/models/
+```
+
+**Only service + route tests:**
+```bash
+docker-compose exec backend pytest tests/unit/standups/ tests/unit/blockers/
 ```
 
 ### Run Specific Test Files
@@ -605,14 +641,13 @@ docker-compose exec backend pytest tests/unit/models/test_standup.py::TestStandu
 ```
 
 **Test Coverage:**
-- ✅ 67 total tests
-- ✅ 32 unit tests (model structure)
-- ✅ 35 integration tests (database operations)
-- ✅ Models: Standup and Blocker fully covered
+- Unit tests: model structure, auth, config, standup routes, blocker routes
+- Integration tests: CRUD + relationships for all models
+- Run `docker-compose exec backend pytest --collect-only` to see the current total
 
 **Next Steps:**
 1. Run tests after making changes
-2. Add tests for new features
+2. Add tests for new features (e.g. tasks module when implemented)
 3. Keep coverage above 80%
 4. Run tests in CI/CD pipeline
 
