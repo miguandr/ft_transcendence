@@ -45,15 +45,27 @@ docker-compose exec backend pytest --tb=long
 
 ```
 tests/
-├── conftest.py              # Fixtures: test_session, sample_user, etc.
-├── unit/                    # Fast tests, no DB
-│   └── models/
-│       ├── test_standup.py
-│       └── test_blocker.py
+├── conftest.py              # Shared fixtures: test_session, sample_user, etc.
+├── unit/                    # Fast tests, SQLite in-memory
+│   ├── models/              # Model structure tests
+│   │   ├── test_standup.py
+│   │   ├── test_blocker.py
+│   │   ├── test_organization.py
+│   │   ├── test_task.py
+│   │   ├── test_ticket.py
+│   │   └── test_user.py
+│   ├── auth/                # Auth tests (conftest.py + test_auth.py)
+│   ├── config/              # Settings tests (conftest.py + test_security.py)
+│   ├── standups/            # Standup service + route tests
+│   └── blockers/            # Blocker service + route tests
 └── integration/             # Slower tests, use DB
     └── models/
         ├── test_standup_integration.py
-        └── test_blocker_integration.py
+        ├── test_blocker_integration.py
+        ├── test_organization_integration.py
+        ├── test_task_integration.py
+        ├── test_ticket_integration.py
+        └── test_user_integration.py
 ```
 
 ## Available Fixtures
@@ -196,13 +208,16 @@ PYTHONPATH=. pytest
 
 ## Examples
 
-### Test a specific model
+### Test a specific module
 ```bash
-# All Standup tests
+# All Standup tests (models + routes)
 docker-compose exec backend pytest -k standup -v
 
-# All Blocker tests
+# All Blocker tests (models + routes)
 docker-compose exec backend pytest -k blocker -v
+
+# Route tests only
+docker-compose exec backend pytest tests/unit/standups/ tests/unit/blockers/ -v
 ```
 
 ### Test specific functionality
@@ -232,19 +247,15 @@ docker-compose exec backend pytest --cov=src --cov-report=term-missing
 ## Current Test Coverage
 
 ```
-✅ 67 total tests
-   - 32 unit tests
-   - 35 integration tests
+📁 Unit tests (unit/models/)        — model structure for all 6 models
+📁 Unit tests (unit/auth/)          — authentication logic
+📁 Unit tests (unit/config/)        — settings / security config
+📁 Unit tests (unit/standups/)      — standup service + API routes
+📁 Unit tests (unit/blockers/)      — blocker service + API routes
+📁 Integration tests (integration/) — CRUD + relationships for all models
 
-📊 Coverage:
-   - Standup model: 100%
-   - Blocker model: 100%
-   - User/Organization models: Tested via relationships
-
-⚡ Performance:
-   - Unit tests: ~0.2s
-   - Integration tests: ~2.5s
-   - Total: ~3s
+Run to see total count:
+docker-compose exec backend pytest --collect-only
 ```
 
 ## Need Help?

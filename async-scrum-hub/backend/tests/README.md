@@ -7,14 +7,34 @@ This directory contains unit and integration tests for the backend models, servi
 ```
 tests/
 ├── conftest.py              # Shared fixtures and test setup
-├── unit/                    # Unit tests (no database)
-│   └── models/              # Model structure tests
-│       ├── test_standup.py
-│       └── test_blocker.py
+├── unit/                    # Unit tests (SQLite in-memory, no real DB needed)
+│   ├── models/              # Model structure tests
+│   │   ├── test_standup.py
+│   │   ├── test_blocker.py
+│   │   ├── test_organization.py
+│   │   ├── test_task.py
+│   │   ├── test_ticket.py
+│   │   └── test_user.py
+│   ├── auth/                # Authentication tests
+│   │   ├── conftest.py
+│   │   └── test_auth.py
+│   ├── config/              # Configuration / settings tests
+│   │   ├── conftest.py
+│   │   └── test_security.py
+│   ├── standups/            # Standup service + route tests
+│   │   ├── conftest.py
+│   │   └── test_standups.py
+│   └── blockers/            # Blocker service + route tests
+│       ├── conftest.py
+│       └── test_blockers.py
 └── integration/             # Integration tests (with database)
     └── models/              # Model CRUD and relationship tests
         ├── test_standup_integration.py
-        └── test_blocker_integration.py
+        ├── test_blocker_integration.py
+        ├── test_organization_integration.py
+        ├── test_task_integration.py
+        ├── test_ticket_integration.py
+        └── test_user_integration.py
 ```
 
 ## Running Tests
@@ -80,7 +100,8 @@ pytest -s  # Shows print statements
 
 ## Test Fixtures
 
-Common fixtures are defined in `conftest.py`:
+Each module has its own `conftest.py` with fixtures scoped to that module.
+Common fixtures in the top-level `conftest.py`:
 
 - `test_engine` - In-memory SQLite database engine
 - `test_session` - Database session for tests
@@ -88,6 +109,13 @@ Common fixtures are defined in `conftest.py`:
 - `sample_organization` - Pre-created test organization
 - `sample_standup` - Pre-created test standup
 - `sample_blocker` - Pre-created test blocker
+
+Module-specific fixtures (in `unit/standups/conftest.py` and `unit/blockers/conftest.py`):
+
+- `client` - FastAPI test client with DB and auth overrides
+- `db_setup` - Admin user + organization created via raw SQL
+- `developer_user` / `non_developer_user` - Users with specific scrum roles
+- `sample_blocker` / `resolved_blocker` - Blocker instances in different states
 
 ## Writing New Tests
 
