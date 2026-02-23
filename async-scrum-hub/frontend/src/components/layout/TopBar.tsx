@@ -8,7 +8,6 @@ import {
 	ChevronRight,
 	ChevronDown,
 	Upload,
-	X,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,10 +17,10 @@ export function TopBar() {
 	const [expandedSection, setExpandedSection] = useState<string | null>(null);
 	const [isEditingProfile, setIsEditingProfile] = useState(false);
 	const [profileData, setProfileData] = useState({
-		name: "Sarah Chen",
-		email: "sarah@productteam.com",
-		role: "Product Owner",
-		team: "Product Squad",
+		name: "",
+		email: "",
+		role: "",
+		team: "",
 	});
 	const [editFormData, setEditFormData] = useState({
 		name: profileData.name,
