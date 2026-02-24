@@ -19,6 +19,7 @@ const mockUsers: Array<{
 	password: string; // In real backend, this would be hashed!
 	name: string;
 	avatar_url: string | null;
+	org_name: string;
 	organization_id: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
@@ -29,6 +30,7 @@ const mockUsers: Array<{
 		password: "password123", // In real backend, this would be hashed!
 		name: "Miguel Andrade",
 		avatar_url: null,
+		org_name: "Las Empanadas",
 		organization_id: "2",
 		scrum_role: "scrum_master",
 		org_role: "admin",
@@ -39,6 +41,7 @@ const mockUsers: Array<{
 		password: "password123", // In real backend, this would be hashed!
 		name: "Pedro Perez",
 		avatar_url: null,
+		org_name: "Las Arepas",
 		organization_id: "2",
 		scrum_role: "product_owner",
 		org_role: "member",
@@ -49,6 +52,7 @@ const mockUsers: Array<{
 		password: "password123", // In real backend, this would be hashed!
 		name: "Pepa Rodriguez",
 		avatar_url: null,
+		org_name: "Las Cachapas",
 		organization_id: "2",
 		scrum_role: "developer",
 		org_role: "member",
@@ -229,6 +233,7 @@ export interface User {
 	name: string;
 	avatar_url: string | null;
 	organization_id: string | null;
+	org_name: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
 }
@@ -389,7 +394,7 @@ function getCurrentUserRecord() {
 }
 
 // =============================================================
-// MOCK TOP BAR
+// MOCK TOPBAR
 // =============================================================
 
 //Interfaces
@@ -705,6 +710,10 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 		email: newUser.email,
 	};
 }
+
+// =============================================================
+// MOCK USER
+// =============================================================
 
 // Mock getCurrentUser function
 export async function getCurrentUser(): Promise<User> {
