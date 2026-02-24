@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/layout/Sidebar";
-import { TopBar } from "./components/layout/TopBar";
+import { TopBar } from "./components/layout/TopBar/TopBar";
 //import { WelcomeAnimation } from "./features/auth/WelcomeAnimation";
 import { Welcome } from "./features/auth/Welcome";
 import { Login } from "./features/auth/Login";

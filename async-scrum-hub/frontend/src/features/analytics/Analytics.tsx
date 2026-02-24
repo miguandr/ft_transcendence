@@ -105,15 +105,6 @@ export function Analytics() {
 					<p className="text-sm text-emerald-600 mt-1">↑ 5% from last sprint</p>
 					<p className="text-xs text-gray-400 mt-2">Above 80% is healthy</p>
 				</div>
-
-				<div className="bg-white rounded-2xl p-6 border border-gray-100">
-					<p className="text-sm text-gray-500 mb-2">Retro Sentiment</p>
-					<p className="text-3xl text-gray-900">8.4/10</p>
-					<p className="text-sm text-gray-500 mt-1">Based on retro feedback</p>
-					<p className="text-xs text-gray-400 mt-2">
-						Based on anonymous retrospective feedback
-					</p>
-				</div>
 			</div>
 		</div>
 	);
