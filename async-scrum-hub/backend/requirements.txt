@@ -34,6 +34,9 @@ python-dotenv==1.0.1
 # Pillow - Image processing (avatar resize)
 Pillow==11.1.0
 
+# Markdown - Convert Markdown to HTML (legal documents)
+markdown==3.7
+
 # CORS middleware
 # (fastapi already includes starlette which has CORSMiddleware, no extra package needed)
 
