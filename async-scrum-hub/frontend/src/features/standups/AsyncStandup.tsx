@@ -33,7 +33,7 @@ interface Standup {
 }
 
 export function AsyncStandup() {
-	//Modal states
+	//View/UI states
 	const [isCreateStandupOpen, setIsCreateStandupOpen] = useState(false);
 	const [isEditStandupOpen, setIsEditStandupOpen] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -42,16 +42,16 @@ export function AsyncStandup() {
 	const [standupForm, setStandupForm] = useState({
 		today: "",
 	});
-	// Auth states
+	//Auth states
 	const [orgId, setOrgId] = useState<string | null>(null);
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	// Data states
+	//Data states
 	const [standups, setStandups] = useState<Standup[]>([]);
 	//const [standupsList, setStandupsList] = useState<StandupListItem[]>([]);
 	const [editingStandup, setEditingStandup] = useState<Standup | null>(null);
 	// Routing states
 	const navigate = useNavigate();
-	// Loading states
+	//Communication states
 	const [isLoading, setIsLoading] = useState(false);
 	const [isPosting, setIsPosting] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
@@ -60,7 +60,7 @@ export function AsyncStandup() {
 	const fetchStandups = async () => {
 		setIsLoading(true);
 		try {
-			// Step 1: Get user's org_id
+			//Step 1: Get user's org_id
 			const user = await getCurrentUser();
 			setCurrentUser(user);
 			setOrgId(user.organization_id);

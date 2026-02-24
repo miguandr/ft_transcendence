@@ -1,12 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-//import type { User } from "../../services/api";
-import {
-	getCurrentUser,
-	updateUser,
-	uploadAvatar,
-	inviteMember
-} from "../../services/api";
+import { useTopBar } from "./useTopBar"
+import { Button } from "../../custom"
 import {
 	Bell,
 	Search,
@@ -17,108 +10,64 @@ import {
 	ChevronRight,
 	ChevronDown,
 	Upload,
+	Heading3,
 } from "lucide-react";
 
-
 export function TopBar() {
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const [expandedSection, setExpandedSection] = useState<string | null>(null);
-	const [isEditingProfile, setIsEditingProfile] = useState(false);
-	const [profileData, setProfileData] = useState({
-		name: "",
-		email: "",
-		role: "",
-		team: "",
-	});
-	const [editFormData, setEditFormData] = useState({
-		name: profileData.name,
-		email: profileData.email,
-	});
-	const [inviteFormData, setInviteFormData] = useState({
-		name: "",
-		email: "",
-	});
-	const [inviteSent, setInviteSent] = useState(false);
-	const [uploadedAvatar, setUploadedAvatar] = useState<string | null>(null);
-	const navigate = useNavigate();
+	const {
+		// state
+		isDropdownOpen,
+		expandedSection,
+		isEditingProfile,
+		editFormData,
+		inviteFormData,
+		inviteSent,
+		showImageAvatar,
+		showDefaultAvatar,
+		isAdmin,
+		currentUser,
+		errors, // IMPLEMENTE ERRORS AND LOADING STATES IN UI !!!!!!
+		isSaving,
+		isSending,
+		isUploading,
+		formattedScrumRole,
 
-	const fetchUser = async () => {
-		
-	}
-	// Mock: check if user is admin/team creator
-	const isAdmin = true;
+		// setters
+		setIsDropdownOpen,
+		setExpandedSection,
+		setIsEditingProfile,
+		setEditFormData,
+		setInviteFormData,
 
+		// handlers
+		toggleSection,
+		startEditingProfile,
+		handleSaveProfile,
+		handleAvatarUpload,
+		handleSendInvite,
+		handleLogout
 
-
-	//Figma mock
-	const toggleSection = (section: string) => {
-		if (expandedSection === section) {
-			setExpandedSection(null);
-			setIsEditingProfile(false);
-		} else {
-			setExpandedSection(section);
-			setIsEditingProfile(false);
-		}
-	};
-
-	//Figma mock
-	const handleSaveProfile = () => {
-		setProfileData({
-			...profileData,
-			name: editFormData.name,
-			email: editFormData.email,
-		});
-		setIsEditingProfile(false);
-		setExpandedSection(null);
-	};
-
-	//Figma mock
-	const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				setUploadedAvatar(event.target?.result as string);
-			};
-			reader.readAsDataURL(file);
-		}
-	};
-
-	//Figma mock
-	const handleSendInvite = () => {
-		// Mock: send invitation
-		setInviteSent(true);
-		setTimeout(() => {
-			setInviteSent(false);
-			setInviteFormData({ name: "", email: "" });
-			setExpandedSection(null);
-		}, 2000);
-	};
-
-	//Figma mock
-	const handleLogout = () => {
-		setIsDropdownOpen(false);
-		navigate("/welcome");
-	};
+	} = useTopBar();
 
 	return (
 		<header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-6">
 			<div className="flex items-center flex-1 max-w-xl">
 				<div className="relative w-full">
-					<Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+					<h1 className="text-xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
+					{/* <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 					<input
 						type="text"
 						placeholder="Search tasks, updates..."
 						className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-cyan-100"
-					/>
+					/> */}
 				</div>
 			</div>
 
 			<div className="flex items-center gap-4">
-				<button className="relative p-2 hover:bg-gray-50 rounded-xl transition-colors">
+				{/* <button className="relative p-2 hover:bg-gray-50 rounded-xl transition-colors">
 					<Bell className="w-5 h-5 text-gray-600" />
 					<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-400 rounded-full"></span>
-				</button>
+				</button> */}
 
 				<div className="relative pl-4 border-l border-gray-100">
 					<button
@@ -126,19 +75,20 @@ export function TopBar() {
 						className="flex items-center gap-3 hover:opacity-80 transition-opacity"
 					>
 						<div className="text-right">
-							<p className="text-sm text-gray-900">{profileData.name}</p>
-							<p className="text-xs text-gray-500">Product Manager</p>
+							<p className="text-sm text-gray-900">{currentUser?.name}</p>
+							<p className="text-xs text-gray-500">{formattedScrumRole}</p>
 						</div>
-						{uploadedAvatar ? (
+						{showDefaultAvatar ? (
 							<img
-								src={uploadedAvatar}
-								alt={profileData.name}
+								src={showImageAvatar}
+								alt={currentUser?.name}
 								className="w-10 h-10 rounded-full object-cover"
 							/>
 						) : (
+							/* Replace with avatar component */
 							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
 								<span className="text-sm text-cyan-900">
-									{profileData.name
+									{currentUser?.name
 										.split(" ")
 										.map((n) => n[0])
 										.join("")}
@@ -184,7 +134,7 @@ export function TopBar() {
 															Name
 														</p>
 														<p className="text-sm text-gray-900">
-															{profileData.name}
+															{currentUser?.name}
 														</p>
 													</div>
 													<div>
@@ -192,15 +142,7 @@ export function TopBar() {
 															Email
 														</p>
 														<p className="text-sm text-gray-900">
-															{profileData.email}
-														</p>
-													</div>
-													<div>
-														<p className="text-xs text-gray-500">
-															Role
-														</p>
-														<p className="text-sm text-gray-900">
-															{profileData.role}
+															{currentUser?.email}
 														</p>
 													</div>
 													<div>
@@ -208,23 +150,20 @@ export function TopBar() {
 															Team
 														</p>
 														<p className="text-sm text-gray-900">
-															{profileData.team}
+															{currentUser?.org_name}
 														</p>
 													</div>
 													<button
 														onClick={() => {
+															startEditingProfile();
 															setIsEditingProfile(true);
-															setEditFormData({
-																name: profileData.name,
-																email: profileData.email,
-															});
 														}}
 														className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
 													>
 														Edit profile
 													</button>
 												</>
-											) : (
+											) : editFormData ? (
 												<>
 													<div>
 														<label className="block text-xs text-gray-600 mb-1">
@@ -275,7 +214,7 @@ export function TopBar() {
 														</button>
 													</div>
 												</>
-											)}
+											) : null}
 										</div>
 									)}
 								</div>
@@ -300,16 +239,17 @@ export function TopBar() {
 									{expandedSection === "avatar" && (
 										<div className="px-4 pb-4 bg-gray-50 space-y-3">
 											<div className="flex justify-center">
-												{uploadedAvatar ? (
+												{showDefaultAvatar ? (
 													<img
-														src={uploadedAvatar}
-														alt={profileData.name}
+														src={showImageAvatar}
+														alt={currentUser!.name}
 														className="w-20 h-20 rounded-full object-cover"
 													/>
 												) : (
+													/* Replace with avatar component */
 													<div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
 														<span className="text-xl text-cyan-900">
-															{profileData.name
+															{currentUser!.name
 																.split(" ")
 																.map((n) => n[0])
 																.join("")}

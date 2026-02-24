@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
-import { formatOrgRole, formatScrumRole } from "../../utils/formatters";
 import { PageHeader, Avatar, Badge, StatCard, Modal, Button } from "../../components/custom";
 import {
 	AlertCircle,
