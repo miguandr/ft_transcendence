@@ -134,7 +134,6 @@
 | **Get own profile**     | ✅           | Authenticated user only
 | **Update own profile**  | ✅           | Authenticated user only
 | **Upload avatar**       | ✅           | Authenticated user only
-| **Delete avatar**       | ✅           | Authenticated user only
 
 **Endpoints:**
 - `POST /auth/register` - Register
@@ -142,7 +141,6 @@
 - `GET /users/me` - Get current user
 - `PATCH /users/me` - Update current user
 - `POST /users/me/avatar` - Upload avatar
-- `DELETE /users/me/avatar` - Delete avatar
 
 ---
 

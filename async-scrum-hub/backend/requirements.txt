@@ -31,6 +31,9 @@ python-multipart==0.0.12
 # Python-dotenv - Read environment variables from .env file
 python-dotenv==1.0.1
 
+# Pillow - Image processing (avatar resize)
+Pillow==11.1.0
+
 # CORS middleware
 # (fastapi already includes starlette which has CORSMiddleware, no extra package needed)
 

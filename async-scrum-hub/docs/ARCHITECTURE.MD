@@ -169,14 +169,14 @@ async-scrum-hub/
 │   │   │   └── authorize.py                    (done ✅)
 │   │   │
 │   │   ├── auth/                               ✨ Daniela
-│   │   │   ├── routes.py                        use *FastAPI*
-│   │   │   ├── schemas.py                      (IN PROGRESS)
+│   │   │   ├── routes.py                       (done ✅) use *FastAPI*
+│   │   │   ├── schemas.py                      (done ✅)
 │   │   │   └── service.py
 │   │   │
 │   │   ├── users/                              ✨ Daniela
-│   │   │   ├── routes.py                        use *FastAPI*
-│   │   │   ├── schemas.py
-│   │   │   └── service.py
+│   │   │   ├── routes.py                       (done ✅)use *FastAPI*
+│   │   │   ├── schemas.py                      (done ✅)
+│   │   │   └── service.py                      (done ✅)
 │   │   │
 │   │   ├── organizations/                      🚀 Freddy
 │   │   │   ├── routes.py                        use *FastAPI* ✨ Daniela (defines it in API_CONTRACTS.md) + 🚀 Freddy (implementation)
