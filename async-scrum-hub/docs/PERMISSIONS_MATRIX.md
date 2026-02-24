@@ -262,7 +262,7 @@ Organization
 
 | HTTP Status | Error Code                 | Description
 |-------------|----------------------------|------------------------------------
-| 400         | `INVALID_INPUT`            | Invalid request data
+| 422         | `INVALID_INPUT`            | Invalid request data (validation error)
 | 400         | `INVALID_ASSIGNEE`         | Invalid assignee role (must be Developer)
 | 400         | `INVALID_CODE`             | Invalid organization join code
 | 400         | `INVALID_FILE_TYPE`        | Invalid file type for upload

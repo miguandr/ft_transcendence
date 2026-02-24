@@ -1,13 +1,15 @@
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
 
 class UpdateUserRequest(BaseModel):
-	name: str = Field(..., min_length=1)
+	name: str | None = Field(None, min_length=1)
+	email: EmailStr | None = None
 
 class UserResponse(BaseModel):
 	id: UUID
 	email: str
 	name: str
+	org_name: str | None
 	avatar_url: str | None
 	organization_id: UUID | None
 	scrum_role: str | None

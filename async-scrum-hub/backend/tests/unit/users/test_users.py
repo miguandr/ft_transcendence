@@ -33,10 +33,11 @@ class TestUpdateUserRequestSchema:
 		with pytest.raises(Exception):
 			UpdateUserRequest(name="")
 
-	def test_missing_name_is_invalid(self):
-		"""Missing name should fail validation."""
-		with pytest.raises(Exception):
-			UpdateUserRequest()
+	def test_empty_request_is_valid(self):
+		"""Both fields are optional — empty request is valid (partial update)."""
+		req = UpdateUserRequest()
+		assert req.name is None
+		assert req.email is None
 
 
 # ---------------------------------------------------------------------------
@@ -49,20 +50,20 @@ class TestUserUpdate:
 	def test_updates_name(self, db_setup):
 		"""Updates user name and returns updated user."""
 		user, session = db_setup
-		result = service.user_update(session, user, "New Name")
+		result = service.user_update(session, user, "New Name", None)
 		assert result.name == "New Name"
 
 	def test_persists_name_to_db(self, db_setup):
 		"""Updated name is persisted in the database."""
 		user, session = db_setup
-		service.user_update(session, user, "Persisted Name")
+		service.user_update(session, user, "Persisted Name", None)
 		fresh = session.query(type(user)).filter_by(id=user.id).first()
 		assert fresh.name == "Persisted Name"
 
 	def test_returns_user_object(self, db_setup):
 		"""Returns the same user object with updated data."""
 		user, session = db_setup
-		result = service.user_update(session, user, "Updated")
+		result = service.user_update(session, user, "Updated", None)
 		assert result.id == user.id
 		assert result.email == user.email
 
@@ -145,13 +146,14 @@ class TestGetMeRoute:
 		assert data["name"] == user.name
 
 	def test_returns_nullable_fields_as_null(self, client):
-		"""Returns avatar_url, organization_id, scrum_role, org_role as null by default."""
+		"""Returns avatar_url, organization_id, scrum_role, org_role, org_name as null by default."""
 		response = client.get(GET_ME_URL)
 		data = response.json()
 		assert data["avatar_url"] is None
 		assert data["organization_id"] is None
 		assert data["scrum_role"] is None
 		assert data["org_role"] is None
+		assert data["org_name"] is None
 
 	def test_does_not_return_password(self, client):
 		"""Response does not include password_hash."""
@@ -188,10 +190,10 @@ class TestUpdateMeRoute:
 		response = client.patch(UPDATE_ME_URL, json={"name": ""})
 		assert response.status_code == 422
 
-	def test_update_missing_name_returns_422(self, client):
-		"""Missing name field returns 422."""
+	def test_update_empty_body_returns_200(self, client):
+		"""Empty body is valid — both fields are optional (partial update)."""
 		response = client.patch(UPDATE_ME_URL, json={})
-		assert response.status_code == 422
+		assert response.status_code == 200
 
 
 class TestUploadAvatarRoute:

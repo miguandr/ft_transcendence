@@ -25,8 +25,11 @@ PIL_FORMAT = {
 
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
-def user_update(db: Session, user: User, new_name: str) -> User:
-	user.name = new_name
+def user_update(db: Session, user: User, new_name: str | None, new_email: str | None) -> User:
+	if new_name is not None:
+		user.name = new_name
+	if new_email is not None:
+		user.email = new_email
 	db.commit()
 	db.refresh(user)
 	return user
