@@ -140,6 +140,10 @@ class User(Base):
 	)
 	# End of Relationships
 
+	@property
+	def org_name(self) -> str | None:
+		return self.organization.name if self.organization else None
+
 	created_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True),
 		server_default=func.now(),

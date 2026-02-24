@@ -82,11 +82,12 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 - `200 OK` - Request successful
 - `201 Created` - Resource created successfully
 - `204 No Content` – Request successful, no response body
-- `400 Bad Request` - Invalid request data
+- `400 Bad Request` - Invalid request data (business logic errors)
 - `401 Unauthorized` - Authentication required or invalid
 - `403 Forbidden` - Insufficient permissions
 - `404 Not Found` - Resource not found
 - `409 Conflict` - Resource conflict (e.g., duplicate)
+- `422 Unprocessable Entity` - Validation error (missing or invalid fields)
 ---
 
 ## 1. Authentication & Authorization
@@ -119,13 +120,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input (example: validation error)
+`422 Unprocessable Entity` - Invalid input (example: validation error)
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -166,13 +171,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input (example: missing fields)
+`422 Unprocessable Entity` - Invalid input (example: missing fields)
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "Email or password is missing"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 `401 Unauthorized` - Invalid credentials
@@ -205,6 +214,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
+  "org_name": "string",
   "avatar_url": "string | null",
   "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
@@ -239,7 +249,8 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
-  "name": "string"
+	"name": "string (optional)",
+	"email": "string (optional)"   
 }
 ```
 
@@ -249,6 +260,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
+  "org_name": "string",
   "avatar_url": "string | null",
   "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
@@ -258,13 +270,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -379,13 +395,17 @@ file: binary (image file)
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -403,8 +423,8 @@ file: binary (image file)
 ```json
 {
   "error": {
-    "code": "ORG_EXISTS",
-    "message": "An organization with this name already exists."
+	"code": "ORG_EXISTS",
+	"message": "An organization with this name already exists."
   }
 }
 ```
@@ -571,13 +591,17 @@ file: binary (image file)
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -703,8 +727,8 @@ file: binary (image file)
 ```json
 {
   "error": {
-    "code": "INVALID_CODE",
-    "message": "Invalid code."
+	"code": "INVALID_CODE",
+	"message": "Invalid code."
   }
 }
 ```
@@ -770,13 +794,17 @@ file: binary (image file)
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1014,13 +1042,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1098,13 +1130,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1234,13 +1270,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1458,13 +1498,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1610,13 +1654,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1795,13 +1843,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1941,13 +1993,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -2129,13 +2185,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 

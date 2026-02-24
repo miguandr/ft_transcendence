@@ -21,7 +21,7 @@ def update_me(
 	db: Session = Depends(get_db), 
 	current_user: User = Depends(get_current_user)
 ):
-	return service.user_update(db, current_user, body.name)
+	return service.user_update(db, current_user, body.name, body.email)
 
 
 @router.post("/users/me/avatar", response_model=AvatarResponse, status_code=status.HTTP_200_OK)
