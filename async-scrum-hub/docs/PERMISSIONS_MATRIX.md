@@ -270,6 +270,7 @@ Organization
 | 401         | `UNAUTHORIZED`             | Missing or invalid JWT
 | 401         | `INVALID_CREDENTIALS`      | Invalid email or password
 | 403         | `FORBIDDEN`                | Insufficient permissions
+| 403         | `NO_ORGANIZATION`          | User is not part of any organization
 | 404         | `NOT_FOUND`                | Resource not found
 | 409         | `USER_EXISTS`              | User with this email already exists
 | 409         | `ORG_EXISTS`               | Organization with this name already exists
