@@ -1,8 +1,6 @@
 import { useTopBar } from "./useTopBar"
 import { Button } from "../../custom"
 import {
-	Bell,
-	Search,
 	LogOut,
 	User,
 	Image,
@@ -28,9 +26,11 @@ export function TopBar() {
 		currentUser,
 		errors, // IMPLEMENTE ERRORS AND LOADING STATES IN UI !!!!!!
 		isSaving,
-		isSending,
-		isUploading,
+		isInviting,
+		isUploading, // NEEDED!?
 		formattedScrumRole,
+		canSaveProfile,
+		canSendInvite,
 
 		// setters
 		setIsDropdownOpen,
@@ -200,9 +200,10 @@ export function TopBar() {
 													<div className="flex gap-2">
 														<button
 															onClick={handleSaveProfile}
-															className="flex-1 px-3 py-2 text-xs bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+															disabled={isSaving || !canSaveProfile}
+															className="flex-1 px-3 py-2 text-xs bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 														>
-															Save
+															{ isSaving ? "Saving..." : "Save changes" }
 														</button>
 														<button
 															onClick={() =>
@@ -337,18 +338,14 @@ export function TopBar() {
 														</p>
 														<button
 															onClick={handleSendInvite}
-															disabled={
-																!inviteFormData.name ||
-																!inviteFormData.email
-															}
-															className={`w-full px-3 py-2 text-xs rounded-lg transition-colors ${
-																inviteFormData.name &&
-																inviteFormData.email
+															disabled={ isInviting || !canSendInvite}
+															className={`w-full px-3 py-2 text-xs rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed ${
+																canSendInvite
 																	? "bg-cyan-600 text-white hover:bg-cyan-700"
 																	: "bg-gray-200 text-gray-400 cursor-not-allowed"
 															}`}
 														>
-															Send invitation
+															{ isInviting ? "Sending invitation" : "Send invitation" }
 														</button>
 													</>
 												) : (

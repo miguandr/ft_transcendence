@@ -28,15 +28,19 @@ export function useTopBar() {
 	});
 	//Communication states
 	const [isSaving, setIsSaving] = useState(false);
-	const [isSending, setIsSending] = useState(false);
+	const [isInviting, setIsInviting] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	//Routing state
 	const navigate = useNavigate();
 	//Derived states
 	const isAdmin = currentUser?.org_role === "admin";
+	//Derived data
 	const showImageAvatar = previewAvatar || currentUser?.avatar_url || "";
-	const showDefaultAvatar = Boolean(previewAvatar || currentUser?.avatar_url);
 	const formattedScrumRole = formatScrumRole(currentUser?.scrum_role ?? "developer");
+	//Derived UI logic
+	const showDefaultAvatar = Boolean(previewAvatar || currentUser?.avatar_url);
+	const canSaveProfile = Boolean(editFormData?.name.trim() && editFormData.email.trim())
+	const canSendInvite = Boolean(inviteFormData.name.trim() && inviteFormData.email.trim())
 
 	const fetchUser = async () => {
 		setErrors({});
@@ -164,7 +168,7 @@ export function useTopBar() {
 
 		if (!orgId) return;
 
-		setIsSending(true);
+		setIsInviting(true);
 		setErrors({});
 
 		try {
@@ -173,8 +177,12 @@ export function useTopBar() {
 					email: inviteFormData.email,
 				});
 				setInviteSent(true);
-				setInviteFormData({ name: "", email: "" });
-				setExpandedSection(null);
+				setTimeout(() => {
+					setInviteSent(false);
+					setInviteFormData({ name: "", email: "" });
+					setExpandedSection(null);
+				}, 2000);
+
 
 		} catch (error: unknown) {
 			console.error("Failed to send invite:", error);
@@ -195,7 +203,7 @@ export function useTopBar() {
 				setErrors({ invite: "Something went wrong" });
 			}
 		} finally {
-			setIsSending(false);
+			setIsInviting(false);
 		}
 	};
 
@@ -213,15 +221,17 @@ export function useTopBar() {
 		editFormData,
 		inviteFormData,
 		inviteSent,
-		showImageAvatar, //These need to be added and changed in the UI
-		showDefaultAvatar, //These need to be added and changed in the UI
+		showImageAvatar,
+		showDefaultAvatar,
 		isAdmin,
 		currentUser,
 		errors,
 		isSaving,
-		isSending,
+		isInviting,
 		isUploading,
 		formattedScrumRole,
+		canSaveProfile,
+		canSendInvite,
 
 
 		// setters
