@@ -110,7 +110,7 @@ export function AsyncStandup() {
 	const today = now.toISOString().split('T')[0];
 	const yesterdayDate = new Date();
 	yesterdayDate.setDate(now.getDate() - 1);
-	const yesterday = yesterdayDate.toISOString().split('T')[0];
+	//const yesterday = yesterdayDate.toISOString().split('T')[0];
 
 	// Check if logged-in user submitted standup today
 	const hasCreatedStandupToday = standups.some(
