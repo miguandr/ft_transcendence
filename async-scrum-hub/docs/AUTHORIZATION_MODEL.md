@@ -21,19 +21,20 @@ This document focuses exclusively on:
 
 ## 1. Authorization Scope
 
-Authorization is always evaluated within a **specific context**:
+Every endpoint has one of three authorization scopes:
 
-- Organization
-- Resource belonging to an organization
+- **Public** – No JWT required (register, login, legal documents)
+- **Global** – JWT required, no organization membership required (create org, join org, user profile)
+- **Org** – JWT required + organization membership required (all resource endpoints: tickets, tasks, standups, blockers, analytics)
 
-There is **no global authorization scope**.
-All permissions are organization-scoped.
+All resource-level permissions are organization-scoped.
+Public and global endpoints do not involve role or ownership checks.
 
 ---
 
 ## 2. Authorization Prerequisites
 
-Authorization is evaluated **only after**:
+For **org-scoped** endpoints, authorization is evaluated only after:
 
 1. The request is authenticated (valid JWT)
 2. The target resource exists

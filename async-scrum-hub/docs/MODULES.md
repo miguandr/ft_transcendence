@@ -43,18 +43,19 @@ limiting, documentation, and at least 5 endpoints:
 
 # Modules of choice
 
-• Minor (Custom): Drag&Drop
-	◦ Must still demonstrate technical skill and creativity.
-	◦ Should add meaningful value to your project.
-	◦ Requires justification in README.md (similar to Major, but for 1 point).
+• Minor (Custom): Drag & Drop system
+	◦ Implement a complete drag & drop interface for task and resource management.
+	◦ Allow users to move tickets, tasks, and blockers between different states or columns dynamically.
+	◦ Ensure real-time synchronization across connected clients when items are moved.
+	◦ Provide visual feedback (hover states, drop zones, animations) to enhance user experience.
+	◦ Include proper validation and permission checks before allowing state changes.
+	◦ Adds meaningful value by improving usability and supporting collaborative workflow management.
+	◦ Justification provided in README.md explaining its technical implementation and added value.
 
-• Minor (Custom): JWT for authentication
-	◦ Must still demonstrate technical skill and creativity.
-	◦ Should add meaningful value to your project.
-	◦ Requires justification in README.md (similar to Major, but for 1 point).
+• Minor: Use a backend framework (FastAPI).
 
 • Minor (Custom): An organization system
-	◦ Create, edit, and delete organizations.
+	◦ Create organizations.
 	◦ Add users to organizations.
 	◦ Remove users from organizations.
 	◦ View organizations and allow users to perform specific actions within an or-
