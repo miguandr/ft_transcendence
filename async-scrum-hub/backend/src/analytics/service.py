@@ -1,13 +1,11 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException, status
 
 from datetime import datetime, timedelta, timezone, date
-from src.database.models import Task, Ticket, Standup, User
-from src.database.models.enums import TaskStatus, TicketStatus
+from src.database.models import Task, Ticket, Standup, User, Blocker
+from src.database.models.enums import TaskStatus, TicketStatus, BlockerStatus
 from src.analytics.schemas import TaskWeekData, TicketWeekData, StandupParticipation
-
-from src.config.security import hash_password, verify_password, create_access_token
-
 from src.analytics.schemas import AnalyticsResponse
 
 
@@ -44,7 +42,6 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 		tasks_data.append(TaskWeekData(week=label, active=active, resolved=resolved))
 		
 	# --- tickets (bar chart) ---
-	now = datetime.now(timezone.utc)
 	tickets_data = []
 	for i in range(3, -1, -1):
 		week_end = now - timedelta(weeks=i)
@@ -71,11 +68,25 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 	standp_data = StandupParticipation(posted=posted, total=total) 
 
 	# --- Blockers (numeric card) ---
-
+	start_4_weeks_ago = now - timedelta(weeks=4)
+	avg_cycle_time = (
+		db.query(
+			func.avg(
+				func.extract("epoch", Blocker.resolved_at - Blocker.created_at)
+			)
+		).filter(
+			Blocker.organization_id == user.organization_id,
+			Blocker.status == BlockerStatus.RESOLVED,
+			Blocker.resolved_at.isnot(None),
+			Blocker.resolved_at >= start_4_weeks_ago,
+			Blocker.resolved_at < now
+		).scalar()
+	)
+	avg_cycle_time = avg_cycle_time or 0.0
 
 	return AnalyticsResponse(
 		tasks=tasks_data, 
 		tickets=tickets_data,
 		standups=standp_data,
-		blockers_avg_cycle_time=
+		blockers_avg_cycle_time= avg_cycle_time
 	)
