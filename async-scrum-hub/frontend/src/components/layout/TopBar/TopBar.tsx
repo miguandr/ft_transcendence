@@ -1,5 +1,5 @@
 import { useTopBar } from "./useTopBar"
-import { Button } from "../../custom"
+import { Button, Label, Input, Avatar } from "../../custom"
 import {
 	LogOut,
 	User,
@@ -27,7 +27,6 @@ export function TopBar() {
 		errors, // IMPLEMENTE ERRORS AND LOADING STATES IN UI !!!!!!
 		isSaving,
 		isInviting,
-		isUploading, // NEEDED!?
 		formattedScrumRole,
 		canSaveProfile,
 		canSendInvite,
@@ -54,21 +53,11 @@ export function TopBar() {
 			<div className="flex items-center flex-1 max-w-xl">
 				<div className="relative w-full">
 					<h1 className="text-xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
-					{/* <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-					<input
-						type="text"
-						placeholder="Search tasks, updates..."
-						className="w-full pl-10 pr-4 py-2 bg-gray-50 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-cyan-100"
-					/> */}
+					{errors.user && <p className="text-xs text-red-500">{errors.user}</p>}
 				</div>
 			</div>
 
 			<div className="flex items-center gap-4">
-				{/* <button className="relative p-2 hover:bg-gray-50 rounded-xl transition-colors">
-					<Bell className="w-5 h-5 text-gray-600" />
-					<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-400 rounded-full"></span>
-				</button> */}
-
 				<div className="relative pl-4 border-l border-gray-100">
 					<button
 						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -85,14 +74,13 @@ export function TopBar() {
 								className="w-10 h-10 rounded-full object-cover"
 							/>
 						) : (
-							/* Replace with avatar component */
 							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
-								<span className="text-sm text-cyan-900">
-									{currentUser?.name
-										.split(" ")
-										.map((n) => n[0])
-										.join("")}
-								</span>
+								<Avatar
+									avatarUrl={currentUser?.avatar_url}
+									name={currentUser?.name}
+									userId={currentUser?.id}
+									size="md"
+								/>
 							</div>
 						)}
 					</button>
@@ -153,23 +141,25 @@ export function TopBar() {
 															{currentUser?.org_name}
 														</p>
 													</div>
-													<button
+
+													<Button
+														variant="secondary"
 														onClick={() => {
 															startEditingProfile();
 															setIsEditingProfile(true);
 														}}
-														className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+														className="w-full text-xs "
 													>
 														Edit profile
-													</button>
+													</Button>
 												</>
 											) : editFormData ? (
 												<>
 													<div>
-														<label className="block text-xs text-gray-600 mb-1">
+														<Label className="text-xs text-gray-600 mb-1">
 															Name
-														</label>
-														<input
+														</Label>
+														<Input
 															type="text"
 															value={editFormData.name}
 															onChange={(e) =>
@@ -182,10 +172,10 @@ export function TopBar() {
 														/>
 													</div>
 													<div>
-														<label className="block text-xs text-gray-600 mb-1">
+														<Label className="text-xs text-gray-600 mb-1">
 															Email
-														</label>
-														<input
+														</Label>
+														<Input
 															type="email"
 															value={editFormData.email}
 															onChange={(e) =>
@@ -197,6 +187,9 @@ export function TopBar() {
 															className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
 														/>
 													</div>
+													{errors.user && (
+														<p className="text-xs text-red-500">{errors.user}</p>
+													)}
 													<div className="flex gap-2">
 														<button
 															onClick={handleSaveProfile}
@@ -247,19 +240,17 @@ export function TopBar() {
 														className="w-20 h-20 rounded-full object-cover"
 													/>
 												) : (
-													/* Replace with avatar component */
-													<div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
-														<span className="text-xl text-cyan-900">
-															{currentUser!.name
-																.split(" ")
-																.map((n) => n[0])
-																.join("")}
-														</span>
-													</div>
+													//<div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
+													<Avatar
+														avatarUrl={currentUser?.avatar_url}
+														name={currentUser?.name}
+														userId={currentUser?.id}
+														className="w-20 h-20"
+													/>
 												)}
 											</div>
-											<label className="block">
-												<input
+											<Label className="block">
+												<Input
 													type="file"
 													accept="image/png,image/jpeg"
 													onChange={handleAvatarUpload}
@@ -269,9 +260,13 @@ export function TopBar() {
 													<Upload className="w-3 h-3" />
 													<span>Upload image</span>
 												</div>
-											</label>
+											</Label>
+
 											<p className="text-xs text-gray-500 text-center">
 												PNG/JPG up to 5 MB
+												{errors.avatar && (
+													<p className="text-xs text-red-500 text-center">{errors.avatar}</p>
+												)}
 											</p>
 										</div>
 									)}
@@ -333,6 +328,9 @@ export function TopBar() {
 																placeholder="Enter email"
 															/>
 														</div>
+														{errors.invite && (
+															<p className="text-xs text-red-500">{errors.invite}</p>
+														)}
 														<p className="text-xs text-gray-500">
 															Invitation link will be emailed.
 														</p>
