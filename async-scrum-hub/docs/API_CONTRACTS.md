@@ -440,8 +440,10 @@ file: binary (image file)
 **Permissions:**
 - The authenticated user
 
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
 **Rules:**
-- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
 - Only one `scrum_master` and one `product_owner` can exist per organization.
 - Scrum roles are assigned only during organization creation and when joining an organization.
 - Once both scrum roles are assigned, new members can only join as `developer`.
@@ -468,6 +470,16 @@ file: binary (image file)
   "error": {
 	"code": "UNAUTHORIZED",
 	"message": "Authentication required"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
   }
 }
 ```
