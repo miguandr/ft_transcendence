@@ -33,6 +33,8 @@ class TestTaskModel:
             'created_by',
             'organization_id',
             'assignee_id',
+            'created_at',
+            'updated_at',
         ]
 
         for column in required_columns:
@@ -71,6 +73,8 @@ class TestTaskModel:
         assert task.status == TaskStatus.IN_PROGRESS
         assert task.description is None
         assert task.assignee_id is None
+        assert task.created_at is None  # set by DB on insert
+        assert task.updated_at is None  # set by DB on insert
 
 
 class TestTaskColumnTypes:

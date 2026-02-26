@@ -2344,4 +2344,76 @@ Used to render the organization board.
 ```
 ---
 
+## 9. Analytics
+
+### 9.1 Get Organization analytics
+
+**Endpoint:** `GET /organizations/{org_id}/analytics`
+
+**Description:** Returns a the analytics for the organization.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "tasks":[ 							//line chart
+	{ "week": "Week 1", "active": "int", "resolved": "int"},
+	{ "week": "Week 2", "active": "int", "resolved": "int"},
+	{ "week": "Week 3", "active": "int", "resolved": "int"},
+	{ "week": "Week 4", "active": "int", "resolved": "int"}
+  ],
+  "tickets":[							//bar chart
+	{ "week": "Week 1", "completed": "int"},
+	{ "week": "Week 2", "completed": "int"},
+	{ "week": "Week 3", "completed": "int"},
+	{ "week": "Week 4", "completed": "int"}
+  ],
+  "standups": {							//numeric cards
+	"posted": "int",
+	"total": "int" 
+  },
+  "blockers_avg_cycle_time": "float"    //numeric cards
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
+
 **End of Document**
