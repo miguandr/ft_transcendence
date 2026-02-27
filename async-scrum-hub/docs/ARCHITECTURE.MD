@@ -235,7 +235,6 @@ async-scrum-hub/
 │   ├── AUTHORIZATION_MODEL.md
 │   ├── PERMISSIONS_MATRIX.md
 │   ├── MODULES.md
-│   ├── TEAM_TASKS.md
 │   ├── DOCKER_SETUP.md
 │   └── DEVELOPMENT_STANDARDS.md
 │

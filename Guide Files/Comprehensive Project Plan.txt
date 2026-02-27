@@ -272,7 +272,7 @@ Specific Deliverables:
 	•	Global layouts (AppLayout, AuthLayout)
 Dependencies:
 	•	Needs API contracts from Daniela (week 1)
-	•	Integrates with real-time updates from Malu (week 5)
+	•	Integrates with real-time updates from Maria Luiza (week 5)
 
 Owner 2: Daniela - Technical Lead & Backend Architect
 Primary Responsibilities:
@@ -294,7 +294,7 @@ Specific Deliverables:
 Dependencies:
 	•	Must define API contracts in week 1 for frontend
 	•	Reviews Freddy's notification logic
-	•	Supports Malu with WebSocket auth
+	•	Supports Maria Luiza with WebSocket auth
 
 Owner 3: Freddy - Product Owner & Feature Developer
 Primary Responsibilities:
@@ -314,10 +314,10 @@ Specific Deliverables:
 	•	Privacy Policy & ToS pages (content + HTML)
 Dependencies:
 	•	Uses Daniel's auth & permissions
-	•	Coordinates with Malu on real-time task updates
+	•	Coordinates with Maria Luiza on real-time task updates
 	•	Frontend components from You
 
-Owner 4: Malu - Real-Time & Integration Specialist
+Owner 4: Maria Luiza - Real-Time & Integration Specialist
 Primary Responsibilities:
 	•	WebSocket server setup (Socket.io)
 	•	Real-time board updates (task drag-and-drop sync)
@@ -349,11 +349,11 @@ Daniela defines all endpoint specs (method, path, request/response) in Week 1. E
 Component Ownership
 You own all UI components. Others request features, don't build components.
 Backend Logic Split
-Daniela = infrastructure (auth, DB, permissions). Freddy = business logic (sprints, tasks, standups). Malu = real-time layer.
+Daniela = infrastructure (auth, DB, permissions). Freddy = business logic (sprints, tasks, standups). Maria Luiza = real-time layer.
 Database Changes
 All schema changes go through Daniela. Others submit change requests.
 Real-Time Events
-Malu owns all WebSocket event definitions. Others emit events via defined interface.
+Maria Luiza owns all WebSocket event definitions. Others emit events via defined interface.
 
 6. 8-Week Schedule with Milestones
 Week 1: Foundation & Setup ✅
@@ -368,7 +368,7 @@ Team Tasks:
 	•	Miguel: Initialize React + Vite, setup Tailwind, create design tokens file
 	•	Daniela: NestJS scaffolding, Prisma setup, connect to Postgres, create Users/Orgs tables
 	•	Freddy: Define user stories for sprints/standups, create backlog
-	•	Malu: Research Socket.io + NestJS integration, plan real-time architecture
+	•	Maria Luiza: Research Socket.io + NestJS integration, plan real-time architecture
 Integration Checkpoint (Friday):
 	•	Everyone can run docker-compose up and see all services start
 	•	Daniela shares API contract document
@@ -387,7 +387,7 @@ Team Tasks:
 	•	Miguel: Auth pages (Login/Signup with React Hook Form + Zod), AuthContext, ProtectedRoute component, Org dashboard UI
 	•	Daniela: Auth endpoints + JWT middleware, Org CRUD APIs, permission guards
 	•	Freddy: Write acceptance criteria for org features, manual testing
-	•	Malu: Implement file upload endpoint (prepare for later use)
+	•	Maria Luiza: Implement file upload endpoint (prepare for later use)
 Integration Checkpoint:
 	•	Mid-week (Wed): Backend exposes /api/auth/login, /api/auth/register, /api/organizations. Frontend can call them.
 	•	End-of-week (Fri): Demo: User signs up → logs in → sees authenticated home → creates an organization → invites member (email display only, no actual invite yet)
@@ -404,7 +404,7 @@ Team Tasks:
 	•	Miguel: Sprint board layout (Kanban columns), Task card component, Create task modal, Project list page
 	•	Daniela: Projects/Sprints/Tasks API endpoints, nested permission checks (org → project → sprint)
 	•	Freddy: Implement Tasks CRUD logic, sprint status transitions
-	•	Malu: Basic search endpoint (search tasks by title)
+	•	Maria Luiza: Basic search endpoint (search tasks by title)
 Integration Checkpoint:
 	•	Mid-week (Wed): Backend APIs ready, frontend starts consuming
 	•	End-of-week (Fri): Demo: User creates project → creates sprint → adds tasks → moves task from Todo to Doing (REST only, no real-time yet)
@@ -421,7 +421,7 @@ Team Tasks:
 	•	You: Standup entry form, standup feed UI, blocker modal, comment thread UI
 	•	Daniel: Standup API endpoints, enforce 1 standup/day rule
 	•	Freddy: Blockers CRUD, blocker assignment logic, comment API
-	•	Malu: Comments backend (polymorphic entity_type/entity_id), comment retrieval
+	•	Maria Luiza: Comments backend (polymorphic entity_type/entity_id), comment retrieval
 Integration Checkpoint:
 	•	Mid-week (Wed): Standup backend ready, frontend can submit standups
 	•	End-of-week (Fri): Demo: User submits standup → comments on standup → raises blocker → assigns blocker to teammate
@@ -437,7 +437,7 @@ Team Tasks:
 	•	You: Integrate Socket.io client, real-time UI updates (task moves, new standups appear)
 	•	Daniel: WebSocket authentication (JWT handshake)
 	•	Freddy: Emit WebSocket events from REST endpoints (e.g., after creating task)
-	•	Malu: Socket.io server setup, event handlers (task:updated, standup:posted), room management (sprint rooms)
+	•	Maria Luiza: Socket.io server setup, event handlers (task:updated, standup:posted), room management (sprint rooms)
 Integration Checkpoint:
 	•	Mid-week (Wed): WebSocket server accepts connections, basic events working
 	•	End-of-week (Fri): Demo: Two users in same sprint → User A moves task → User B sees update instantly. User C posts standup → appears in feed for User A & B.
@@ -453,7 +453,7 @@ Team Tasks:
 	•	You: Notification dropdown UI, notification bell icon with unread count, file upload UI (drag-and-drop or button)
 	•	Daniel: Notification API endpoints (GET /api/notifications, PATCH /api/notifications/:id/read)
 	•	Freddy: Notification rules (when to create notification record, when to send email), Nodemailer config
-	•	Malu: File upload validation (size, type), file storage logic, file download endpoint
+	•	Maria Luiza: File upload validation (size, type), file storage logic, file download endpoint
 Integration Checkpoint:
 	•	Mid-week (Wed): Notification backend ready, email sending tested
 	•	End-of-week (Fri): Demo: User A assigns blocker to User B → User B sees in-app notification + receives email. User attaches screenshot to blocker comment.
@@ -474,7 +474,7 @@ Team Tasks:
 	•	You: Analytics dashboard UI (Recharts), dark mode implementation, UX polish (loaders, error messages), accessibility fixes
 	•	Daniel: Analytics queries (compute metrics from DB), optimize slow queries
 	•	Freddy: Write Privacy Policy & ToS content, create static pages
-	•	Malu: Advanced search implementation (full-text search using Postgres tsquery or simple ILIKE)
+	•	Maria Luiza: Advanced search implementation (full-text search using Postgres tsquery or simple ILIKE)
 Integration Checkpoint:
 	•	Mid-week (Wed): Analytics API returning correct data, search working
 	•	End-of-week (Fri): Demo: Admin views analytics dashboard → sees charts update with sprint data. User searches "login bug" → finds related task and blocker.
@@ -493,7 +493,7 @@ Team Tasks:
 	•	You: Frontend E2E tests (Playwright - optional), demo script, final UX review
 	•	Daniel: Backend security audit, rate limiting, SQL injection checks, README completion
 	•	Freddy: Manual testing all features, bug tracking & prioritization, evaluation prep
-	•	Malu: Integration testing, WebSocket stress testing (10+ concurrent users), deployment verification
+	•	Maria Luiza: Integration testing, WebSocket stress testing (10+ concurrent users), deployment verification
 Integration Checkpoint:
 	•	Monday: All features code-complete, no new features
 	•	Wednesday: Staging deployment tested, dry-run evaluation with team
@@ -519,7 +519,7 @@ High
 Database Schema Changes
 Medium
 Medium
-✅ Lock core schema by end of Week 2. Use migrations for all changes. Version control schema. Freddy/Malu submit schema change requests to Daniel (not direct edits).
+✅ Lock core schema by end of Week 2. Use migrations for all changes. Version control schema. Freddy/Maria Luiza submit schema change requests to Daniel (not direct edits).
 Team Coordination
 Medium
 High
