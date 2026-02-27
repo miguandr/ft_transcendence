@@ -2330,15 +2330,15 @@ Used to render the organization board.
 - `key` - Document identifier: `privacy` | `terms`
 
 **Notes:**
-- Documents are rendered from Markdown stored in the repository (`legal/privacy.md`, `legal/terms.md`)
-- Content is converted to HTML and returned in the response
+- Documents are stored as Markdown in the repository (`legal/privacy.md`, `legal/terms.md`)
+- Content is returned as raw Markdown plain text; the frontend is responsible for rendering
 
 **Success Response:** `200 OK`
 ```json
 {
   "key": "privacy",
   "title": "Privacy Policy",
-  "content_html": "<h1>Privacy Policy</h1><p>...</p>",
+  "content": "# Privacy Policy\n\n...",
   "updated_at": "timestamp"
 }
 ```
