@@ -19,7 +19,7 @@ const mockUsers: Array<{
 	password: string; // In real backend, this would be hashed!
 	name: string;
 	avatar_url: string | null;
-	org_name: string;
+	org_name: string | null;
 	organization_id: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
@@ -394,6 +394,35 @@ function getCurrentUserRecord() {
 }
 
 // =============================================================
+// TERMS & POLICY
+// =============================================================
+
+interface termsAndPolicyResponse {
+	key: string;
+	tittle: string;
+	content: string;
+	updated_at: string;
+}
+
+export async function getTermsAndPolicy(
+) : Promise<termsAndPolicyResponse> {
+	await delay(200);
+
+	
+}
+
+// **Error Responses:**
+
+// `404 Not Found` - Document not found
+// ```json
+// {
+//   "error": {
+// 	"code": "NOT_FOUND",
+// 	"message": "Legal document not found"
+//   }
+// }
+
+// =============================================================
 // MOCK TOPBAR
 // =============================================================
 
@@ -690,6 +719,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 		email: data.email,
 		password: data.password,
 		name: data.name,
+		org_name: null,
 		organization_id: null,
 		scrum_role: null,
 		org_role: null,
@@ -716,7 +746,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 // =============================================================
 
 // Mock getCurrentUser function
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser() : Promise<User> {
 	await delay(300);
 
 	// Simulate checking the JWT token

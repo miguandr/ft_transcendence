@@ -23,11 +23,11 @@ export function Avatar({
 	const [imageError, setImageError] = useState(false);
 
 	// Priority: provided initials > generated from name > fallback
-	const displayInitials = initials || (name ? generateAvatar(name) : "??");
+	const displayInitials = initials || (name ? generateAvatar(name) : "");
 
 	// Priority: explicit color > userId-based color > default
 	const avatarColor =
-		color || (userId ? assignColorById(userId) : "from-emerald-200 to-green-300");
+		color || (userId ? assignColorById(userId) : "from-gray-100 to-gray-300");
 
 	const sizeStyles = {
 		sm: "w-8 h-8 text-xs",
