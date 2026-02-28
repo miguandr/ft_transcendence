@@ -94,6 +94,8 @@ export function useTopBar() {
 	const handleSaveProfile = async () => {
 		if (!editFormData) return;
 		setIsSaving(true);
+		setErrors({});
+
 		try {
 			const updatedFields = await updateUser({
 				name: editFormData.name,
@@ -123,6 +125,7 @@ export function useTopBar() {
 	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
+		setErrors({});
 
 		//Step 1: instant local preview
 		const reader = new FileReader();
