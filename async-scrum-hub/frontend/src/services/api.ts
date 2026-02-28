@@ -59,7 +59,6 @@ const mockUsers: Array<{
 	},
 ];
 
-// Mock organization
 const mockOrganizations = [
 	{
 		id: "2",
@@ -69,7 +68,6 @@ const mockOrganizations = [
 	},
 ];
 
-// Mock Tickets
 const mockTickets: Array<{
 	id: string;
 	title: string;
@@ -103,7 +101,6 @@ const mockTasks: Array<{
 	},
 ];
 
-// Mock Blockers
 const mockBlockers: Array<{
 	id: string;
 	description: string;
@@ -165,7 +162,6 @@ const mockBlockers: Array<{
 	},
 ];
 
-// Mock Standups
 const mockStandups: Array<{
 	id: string;
 	created_at: string;
@@ -217,6 +213,23 @@ const mockLegalDocuments: Record<string, LegalDocuments> = {
 		content: "# Terms of Service\n\nThis is a placeholder.",
 		updated_at: "2024-01-01T00:00:00Z",
 	},
+};
+
+const mockAnalitycs : AnalitycsData = {
+	tasks: [
+		{ week: "Week 1", active: 10, resolved: 8 },
+		{ week: "Week 2", active: 12, resolved: 14 },
+		{ week: "Week 3", active: 8, resolved: 10 },
+		{ week: "Week 4", active: 5, resolved: 12 },
+	],
+	tickets: [
+		{ week: "Week 1", completed: 4 },
+		{ week: "Week 2", completed: 7 },
+		{ week: "Week 3", completed: 5 },
+		{ week: "Week 4", completed: 9 },
+	],
+	standups: { posted: 115, total: 120 },
+	blockers_avg_cycle_time: 1.5,
 };
 
 // API Response types (matches your API_CONTRACTS.md)
@@ -406,6 +419,50 @@ function getCurrentUserRecord() {
 	}
 
 	return user;
+}
+
+
+// =============================================================
+// ANALITYCS
+// =============================================================
+
+export interface AnalitycsData {
+	tasks: [
+		{ week: "Week 1", active: number, resolved: number },
+		{ week: "Week 2", active: number, resolved: number },
+		{ week: "Week 3", active: number, resolved: number },
+		{ week: "Week 4", active: number, resolved: number },
+	];
+	tickets: [
+		{ week: "Week 1", completed: number },
+		{ week: "Week 2", completed: number },
+		{ week: "Week 3", completed: number },
+		{ week: "Week 4", completed: number },
+	];
+	standups: {
+		posted: number,
+		total: number,
+	};
+	blockers_avg_cycle_time: number;
+}
+
+export async function getAnalitycsData(
+	org_id: string
+) : Promise<AnalitycsData> {
+	await delay(300);
+	const currentUser = getCurrentUserRecord();
+
+	if (!org_id) {
+		createApiError("NOT_FOUND", "Organization not found");
+	}
+	if (!currentUser) {
+		createApiError("UNAUTHORIZED", "Authentication required");
+	}
+	if (org_id !== currentUser.organization_id) {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+
+	return (mockAnalitycs);
 }
 
 // =============================================================
