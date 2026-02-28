@@ -204,6 +204,21 @@ const mockStandups: Array<{
 	}
 ]
 
+const mockLegalDocuments: Record<string, LegalDocuments> = {
+	privacy: {
+		key: "privacy",
+		title: "Privacy Policy",
+		content: "# Privacy Policy\n\nThis is a placeholder.",
+		updated_at: "2024-01-01T00:00:00Z",
+	},
+	terms: {
+		key: "terms",
+		title: "Terms of Service",
+		content: "# Terms of Service\n\nThis is a placeholder.",
+		updated_at: "2024-01-01T00:00:00Z",
+	},
+};
+
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
 	email: string;
@@ -397,30 +412,27 @@ function getCurrentUserRecord() {
 // TERMS & POLICY
 // =============================================================
 
-interface termsAndPolicyResponse {
+export interface LegalDocuments {
 	key: string;
-	tittle: string;
+	title: string;
 	content: string;
 	updated_at: string;
 }
 
-export async function getTermsAndPolicy(
-) : Promise<termsAndPolicyResponse> {
+export async function getLegalDocument(
+	key: "privacy" | "terms"
+) : Promise<LegalDocuments> {
 	await delay(200);
 
-	
+	const document = mockLegalDocuments[key];
+
+	if (!document) {
+		createApiError("NOT_FOUND", "Legal document not found");
+	}
+
+	return (document);
 }
 
-// **Error Responses:**
-
-// `404 Not Found` - Document not found
-// ```json
-// {
-//   "error": {
-// 	"code": "NOT_FOUND",
-// 	"message": "Legal document not found"
-//   }
-// }
 
 // =============================================================
 // MOCK TOPBAR
