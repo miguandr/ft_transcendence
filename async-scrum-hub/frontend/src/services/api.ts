@@ -50,7 +50,7 @@ const mockUsers: Array<{
 		id: "3",
 		email: "pepa@example.com",
 		password: "password123", // In real backend, this would be hashed!
-		name: "Pepa Rodriguez",
+		name: "Pepa Perez",
 		avatar_url: null,
 		org_name: "Las Cachapas",
 		organization_id: "2",
@@ -664,14 +664,19 @@ export async function setUserRole(data: {
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
 	await delay(300);
 
-	return [
-		{
-			id: "user_0",
-			name: "creator",
-			org_role: "admin",
-			scrum_role: "scrum_master", // ← SM is taken!
-		},
-	];
+	if (!org_id) {
+		createApiError("NOT_FOUND", "No members found in this organization");
+	}
+
+	const orgMembers = mockUsers
+		.filter((user) => user.organization_id === org_id && user.org_role !== null && user.scrum_role !== null)
+		.map((user) => ({
+			...user,
+			org_role: user.org_role as "admin" | "member",
+			scrum_role: user.scrum_role as "product_owner" | "developer" | "scrum_master",
+		}));
+
+	return orgMembers;
 }
 
 
