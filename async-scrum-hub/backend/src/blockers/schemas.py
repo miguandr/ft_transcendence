@@ -12,6 +12,13 @@ class TicketBrief(BaseModel):
 
 	model_config = ConfigDict(from_attributes=True)
 
+class BlockerBriefOrg(BaseModel):
+	id: UUID
+	description: str
+	status: str
+	created_at: datetime
+
+	model_config = ConfigDict(from_attributes=True)
 
 class BlockerCreateRequest(BaseModel):
 	description: str = Field(..., min_length=1)
