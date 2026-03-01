@@ -217,10 +217,10 @@ const mockLegalDocuments: Record<string, LegalDocuments> = {
 
 const mockAnalitycs : AnalitycsData = {
 	tasks: [
-		{ week: "Week 1", active: 10, resolved: 8 },
-		{ week: "Week 2", active: 12, resolved: 14 },
-		{ week: "Week 3", active: 8, resolved: 10 },
-		{ week: "Week 4", active: 5, resolved: 12 },
+		{ week: "Week 1", in_progress: 10, completed: 8 },
+		{ week: "Week 2", in_progress: 12, completed: 14 },
+		{ week: "Week 3", in_progress: 8, completed: 10 },
+		{ week: "Week 4", in_progress: 5, completed: 12 },
 	],
 	tickets: [
 		{ week: "Week 1", completed: 4 },
@@ -427,18 +427,17 @@ function getCurrentUserRecord() {
 // =============================================================
 
 export interface AnalitycsData {
-	tasks: [
-		{ week: "Week 1", active: number, resolved: number },
-		{ week: "Week 2", active: number, resolved: number },
-		{ week: "Week 3", active: number, resolved: number },
-		{ week: "Week 4", active: number, resolved: number },
-	];
-	tickets: [
-		{ week: "Week 1", completed: number },
-		{ week: "Week 2", completed: number },
-		{ week: "Week 3", completed: number },
-		{ week: "Week 4", completed: number },
-	];
+	tasks: Array<{
+		week: string,
+		in_progress: number,
+		completed: number
+	}>;
+
+	tickets: Array<{
+		week: string,
+		completed: number,
+	}>;
+
 	standups: {
 		posted: number,
 		total: number,
