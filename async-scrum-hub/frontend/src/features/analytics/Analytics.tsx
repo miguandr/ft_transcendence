@@ -26,8 +26,6 @@ export function Analytics() {
 	//Communication states
 	const [isLoading, setIsLoading] = useState(false);
 
-
-
 	const fetchAnalitycs = async () => {
 		setIsLoading(true);
 		setErrors({});
@@ -62,7 +60,6 @@ export function Analytics() {
 	useEffect(() => {
 		fetchAnalitycs();
 	}, []);
-
 
 	return (
 		<div className="p-8">
