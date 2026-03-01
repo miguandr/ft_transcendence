@@ -68,7 +68,7 @@ export function Blockers() {
 
 		return (isNotCurrentUser && isDeveloper);
 	})
-	
+
 	// Fetch blockers and user at the same time.
 	const fetchBlockers = async () => {
 		setIsLoading(true);
@@ -327,33 +327,6 @@ export function Blockers() {
 												)}
 											</div>
 											)}
-
-									{/*		<div className="mt-4 pt-4 border-t border-rose-100 flex items-center gap-3">
-												{canResolveBlocker(blocker) && (
-													<Button
-														variant="text"
-														onClick={() => setConfirmResolved(blocker.id)}
-														className="text-emerald-600 hover:text-emerald-700 p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
-													>
-														Resolve Blocker
-													</Button>
-												)}
-												{canEditBlocker(blocker) && (
-													<Button
-														variant="text"
-														onClick={() => openEditModal(blocker)}
-														icon={<Edit2 className="w-3 h-3" />}
-													>
-														Edit
-													</Button>
-												)}
-												{!canEditBlocker(blocker) &&
-													!canResolveBlocker(blocker) && (
-														<span className="text-xs text-gray-400">
-															Read-only
-														</span>
-													)}
-											</div>  */}
 										</div>
 									);
 								})}
