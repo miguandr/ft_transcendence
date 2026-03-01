@@ -14,7 +14,6 @@ class Priority(StrEnum):
 	MEDIUM = "medium"
 	HIGH = "high"
 
-
 class OrgRole(StrEnum):
 	admin = "admin"
 	member = "member"
