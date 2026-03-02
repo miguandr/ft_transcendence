@@ -18,19 +18,19 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
  	# --- Section 1: Summary ---   
 	# --- Tasks ---   
 	tasks_in_progress = db.query(Task).filter(
-		Task.organization == user.organization,
+		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.IN_PROGRESS
     ).count()
 	
 	# --- Tickets ---   
 	tickets_completed = db.query(Ticket).filter(
-		Ticket.organization == user.organization,
+		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.COMPLETED		
     ).count()
 	
 	# --- Blockers ---   
 	active_blockers = db.query(Blocker).filter(
-		Blocker.organization == user.organization,
+		Blocker.organization_id == user.organization_id,
 		Blocker.status == BlockerStatus.OPEN	
     ).count()
 	
@@ -43,7 +43,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 
 	# --- Tasks created --- 
 	tasksCreated = db.query(Task).filter(
-		Task.organization == user.organization,
+		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.IN_PROGRESS,
 		Task.created_at < now,
 		Task.created_at > start_1_week_ago		
@@ -61,7 +61,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 
 	# --- Tasks completed --- 
 	tasksCompleted = db.query(Task).filter(
-		Task.organization == user.organization,
+		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.COMPLETED,
 		Task.updated_at < now,
 		Task.updated_at > start_1_week_ago		
@@ -79,7 +79,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 
 	# --- Tickets created --- 
 	ticketsCreated = db.query(Ticket).filter(
-		Ticket.organization == user.organization,
+		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.IN_PROGRESS,
 		Ticket.created_at < now,
 		Ticket.created_at > start_1_week_ago		
@@ -97,7 +97,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 
 	# --- Tickets completed --- 
 	ticketsCompleted = db.query(Ticket).filter(
-		Ticket.organization == user.organization,
+		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.COMPLETED,
 		Ticket.updated_at < now,
 		Ticket.updated_at > start_1_week_ago		
