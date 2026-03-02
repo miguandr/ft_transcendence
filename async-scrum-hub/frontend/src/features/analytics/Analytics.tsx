@@ -146,7 +146,7 @@ export function Analytics() {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-3 w-full h-full">
+					<div className="grid grid-cols-2 w-full h-full">
 						<div className="flex justify-center items center">
 							<div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
 								<p className="text-sm text-gray-500 mb-2">Average Blocker Cycle Time</p>
@@ -157,16 +157,16 @@ export function Analytics() {
 						<div className="flex justify-center items center">
 							<div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
 								<p className="text-sm text-gray-500 mb-2">Daily Standups</p>
-								<p className="text-3xl text-gray-900">{analytics?.standups.posted}</p>
+								<p className="text-3xl text-gray-900">{analytics?.standups.posted}/{analytics?.standups.total}</p>
 							</div>
 						</div>
 
-						<div className="flex justify-center items center">
+						{/* <div className="flex justify-center items center">
 							<div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
 								<p className="text-sm text-gray-500 mb-2">Total Standups this week</p>
 								<p className="text-3xl text-gray-900">{analytics?.standups.total}</p>
 							</div>
-						</div>
+						</div> */}
 					</div>
 				</div>
 			)}

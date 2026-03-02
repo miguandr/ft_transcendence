@@ -53,7 +53,7 @@ export function Login() {
 
 			// Save token to localStorage (browser storage persists until logout)
 			console.log("Login successful!", response);
-			localStorage.setItem("token", response.access_token);
+			//localStorage.setItem("token", response.access_token);
 
 			// Trigger fade-out animation (navigation happens in onAnimationComplete)
 			setIsExiting(true);
