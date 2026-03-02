@@ -21,7 +21,8 @@
 6. [Users](#6-users)
 7. [Legal](#7-legal)
 8. [Analytics](#8-analytics)
-9. [Special Permission Legend](#special-permission-legend)
+9. [Dashboard](#9-dashboard)
+10. [Special Permission Legend](#special-permission-legend)
 10. [Special Rules per Resource](#special-rules-per-resource)
 11. [Common Error Codes](#common-error-codes)
 
@@ -164,6 +165,17 @@
 
 **Endpoints:**
 - `GET /organizations/{org_id}/analytics` - Get analytics
+
+---
+
+## 9. Dashboard
+
+| Action                          | All Roles  | Notes
+|---------------------------------|------------|----------------------------
+| **Get organization dashboard**  | ✅         | Any organization member
+
+**Endpoints:**
+- `GET /organizations/{org_id}/dashboard` - Get dashboard
 
 ---
 
