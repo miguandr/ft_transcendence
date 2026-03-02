@@ -250,7 +250,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
 	"name": "string (optional)",
-	"email": "string (optional)"   
+	"email": "string (optional)"
 }
 ```
 
@@ -433,7 +433,7 @@ file: binary (image file)
 
 **Endpoint:** `PATCH /organizations/{org_id}`
 
-**Description:** Select the rol inside the organization.
+**Description:** Select the role inside the organization.
 
 **Authentication:** Required (JWT)
 
