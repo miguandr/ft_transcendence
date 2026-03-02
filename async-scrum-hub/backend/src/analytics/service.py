@@ -39,7 +39,7 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 			Task.updated_at < week_end,
 		).count()
 
-		tasks_data.append(TaskWeekData(week=label, active=active, resolved=resolved))
+		tasks_data.append(TaskWeekData(week=label, in_progress=active, completed=resolved))
 		
 	# --- tickets (bar chart) ---
 	tickets_data = []
