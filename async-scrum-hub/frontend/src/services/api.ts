@@ -741,30 +741,30 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 // =============================================================
 
 // Login
-export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-	// Simulate network delay (500ms)
-	await delay(500);
+// export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+// 	// Simulate network delay (500ms)
+// 	await delay(500);
 
-	// Find user by email
-	const user = mockUsers.find((u) => u.email === credentials.email);
+// 	// Find user by email
+// 	const user = mockUsers.find((u) => u.email === credentials.email);
 
-	// Check if user exists and password matches
-	if (!user || user.password !== credentials.password) {
-		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
-	}
+// 	// Check if user exists and password matches
+// 	if (!user || user.password !== credentials.password) {
+// 		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
+// 	}
 
-	// Generate fake JWT token
-	const response: LoginResponse = {
-		access_token: `mock-jwt-token-${Date.now()}`,
-		token_type: "bearer",
-	};
+// 	// Generate fake JWT token
+// 	const response: LoginResponse = {
+// 		access_token: `mock-jwt-token-${Date.now()}`,
+// 		token_type: "bearer",
+// 	};
 
-	// Store token in localStorage
-	localStorage.setItem("token", response.access_token);
-	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
+// 	// Store token in localStorage
+// 	localStorage.setItem("token", response.access_token);
+// 	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
 
-	return response;
-}
+// 	return response;
+// }
 
 // =============================================================
 // MOCK SIGNUP
@@ -1463,7 +1463,7 @@ export async function resolveBlocker(blocker_id: string): Promise<void> {
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
 
-/*
+
 // 1. LOGIN
 export async function login(credentials: LoginRequest): Promise<LoginResponse>
 {
@@ -1485,7 +1485,7 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse>
 
 	return data;
 }
-
+/*
 // 2. SIGNUP
 export async function signup(data: SignUpRequest): Promise<SignUpResponse>
 {
