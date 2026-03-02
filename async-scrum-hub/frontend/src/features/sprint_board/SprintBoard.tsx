@@ -8,7 +8,7 @@ type TicketStatus = "todo" | "in_progress" | "completed";
 type TaskStatus = "in-progress" | "completed";
 
 interface Task {
-	id: number;
+	id: string;
 	title: string;
 	description: string;
 	assignee: string;
@@ -16,15 +16,15 @@ interface Task {
 }
 
 interface Blocker {
-	id: number;
+	id: string;
 	description: string;
 	creator: string;
 	status: "open" | "resolved";
-	ticketId: number;
+	ticketId: string;
 }
 
 interface Ticket {
-	id: number;
+	id: string;
 	title: string;
 	description: string;
 	assignee: string;
@@ -76,7 +76,7 @@ export function SprintBoard() {
 	// State for tickets
 	const [tickets, setTickets] = useState<Ticket[]>([
 		{
-			id: 1,
+			id: "1",
 			title: "Design settings page",
 			description: "Create a new settings page with user preferences",
 			assignee: "ML",
@@ -85,7 +85,7 @@ export function SprintBoard() {
 			tasks: [],
 		},
 		{
-			id: 2,
+			id: "2",
 			title: "Write API documentation",
 			description: "Document all REST endpoints",
 			assignee: "JL",
@@ -94,7 +94,7 @@ export function SprintBoard() {
 			tasks: [],
 		},
 		{
-			id: 3,
+			id: "3",
 			title: "Implement OAuth flow",
 			description: "Add OAuth authentication with Google and GitHub",
 			assignee: "AK",
@@ -102,14 +102,14 @@ export function SprintBoard() {
 			status: "in_progress",
 			tasks: [
 				{
-					id: 1,
+					id: "1",
 					title: "Set up OAuth providers",
 					description: "Configure OAuth apps",
 					assignee: "AK",
 					status: "completed",
 				},
 				{
-					id: 2,
+					id: "2",
 					title: "Build login UI",
 					description: "Create OAuth login buttons",
 					assignee: "AK",
@@ -118,7 +118,7 @@ export function SprintBoard() {
 			],
 		},
 		{
-			id: 4,
+			id: "4",
 			title: "Update dashboard charts",
 			description: "Improve chart visuals and add filters",
 			assignee: "SC",
@@ -126,7 +126,7 @@ export function SprintBoard() {
 			status: "in_progress",
 			tasks: [
 				{
-					id: 3,
+					id: "3",
 					title: "Add date range picker",
 					description: "Allow filtering by date",
 					assignee: "SC",
@@ -135,7 +135,7 @@ export function SprintBoard() {
 			],
 		},
 		{
-			id: 6,
+			id: "6",
 			title: "Fix login bug",
 			description: "Resolve timeout issue on mobile",
 			assignee: "JL",
@@ -143,14 +143,14 @@ export function SprintBoard() {
 			status: "completed",
 			tasks: [
 				{
-					id: 4,
+					id: "4",
 					title: "Debug mobile timeout",
 					description: "Find root cause",
 					assignee: "JL",
 					status: "completed",
 				},
 				{
-					id: 5,
+					id: "5",
 					title: "Apply fix",
 					description: "Update timeout logic",
 					assignee: "JL",
@@ -162,31 +162,31 @@ export function SprintBoard() {
 
 	const [blockers, setBlockers] = useState<Blocker[]>([
 		{
-			id: 1,
+			id: "1",
 			description: "Waiting for API keys from client",
 			creator: "AK",
 			status: "open",
-			ticketId: 3,
+			ticketId: "3",
 		},
 		{
-			id: 2,
+			id: "2",
 			description: "Design assets not yet approved",
 			creator: "ML",
 			status: "resolved",
-			ticketId: 1,
+			ticketId: "1",
 		},
 	]);
 
 	// Modal states
 	const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
-	const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+	const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
 	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 	const [isAddBlockerOpen, setIsAddBlockerOpen] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<{
 		type: "ticket" | "task";
-		id: number;
+		id: string;
 	} | null>(null);
 
 	// Form states
@@ -208,9 +208,13 @@ export function SprintBoard() {
 		assignee: "",
 	});
 
+
 	// Drag state
 	const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
-	const [draggedTask, setDraggedTask] = useState<{ task: Task; ticketId: number } | null>(null);
+	const [draggedTask, setDraggedTask] = useState<{ task: Task; ticketId: string } | null>(null);
+
+	//Derive states
+	const selectedTicket = tickets.find(t => t.id === selectedTicketId) || null;
 
 	// Permission helpers
 	const canAddTicket =
@@ -226,6 +230,7 @@ export function SprintBoard() {
 		task.assignee === currentUser.avatar;
 	const canResolveBlocker = (blocker: Blocker) =>
 		blocker.creator === currentUser.avatar || currentUser.role === "Scrum Master";
+
 
 	const priorityColors = {
 		high: "bg-rose-100/50 text-rose-700 border border-rose-200",
@@ -271,7 +276,8 @@ export function SprintBoard() {
 			setTickets(tickets.filter((t) => t.id !== confirmDelete.id));
 			setBlockers(blockers.filter((b) => b.ticketId !== confirmDelete.id));
 			setConfirmDelete(null);
-			setSelectedTicket(null);
+			setSelectedTask(null);
+			setSelectedTicketId(null);
 		}
 	};
 
@@ -341,7 +347,7 @@ export function SprintBoard() {
 		}
 	};
 
-	const handleResolveBlocker = (blockerId: number) => {
+	const handleResolveBlocker = (blockerId: string) => {
 		setBlockers(blockers.map((b) => (b.id === blockerId ? { ...b, status: "resolved" } : b)));
 	};
 
@@ -360,7 +366,7 @@ export function SprintBoard() {
 	};
 
 	// Drag handlers for tasks
-	const handleTaskDragStart = (task: Task, ticketId: number) => {
+	const handleTaskDragStart = (task: Task, ticketId: string) => {
 		const canDrag =
 			currentUser.role === "Product Owner" ||
 			currentUser.role === "Scrum Master" ||
@@ -371,27 +377,27 @@ export function SprintBoard() {
 	};
 
 	const handleTaskDrop = (newStatus: TaskStatus) => {
-		if (draggedTask) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === draggedTask.ticketId
-						? {
-								...t,
-								tasks: t.tasks.map((task) =>
-									task.id === draggedTask.task.id
-										? { ...task, status: newStatus }
-										: task
-								),
-							}
-						: t
-				)
-			);
-			setDraggedTask(null);
-		}
+		if (!draggedTask) return;
+
+		setTickets((prev) =>
+			prev.map((t) =>
+				t.id === draggedTask.ticketId
+					? {
+							...t,
+							tasks: t.tasks.map((task) =>
+								task.id === draggedTask.task.id
+									? { ...task, status: newStatus }
+									: task
+							),
+						}
+					: t
+			)
+		);
+		setDraggedTask(null);
 	};
 
 	const getTicketsByStatus = (status: TicketStatus) => tickets.filter((t) => t.status === status);
-	const getBlockersForTicket = (ticketId: number) =>
+	const getBlockersForTicket = (ticketId: string) =>
 		blockers.filter((b) => b.ticketId === ticketId);
 
 	return (
@@ -456,7 +462,7 @@ export function SprintBoard() {
 											key={ticket.id}
 											draggable={canDragTickets}
 											onDragStart={() => handleTicketDragStart(ticket)}
-											onClick={() => setSelectedTicket(ticket)}
+											onClick={() => setSelectedTicketId(ticket.id)}
 											className={`bg-white rounded-xl p-4 border border-gray-100 border-l-4 ${column.borderColor} hover:shadow-sm transition-shadow cursor-pointer ${
 												canDragTickets
 													? "cursor-grab active:cursor-grabbing"
@@ -646,7 +652,7 @@ export function SprintBoard() {
 				<>
 					<div
 						className="fixed inset-0 bg-black/20 z-40"
-						onClick={() => setSelectedTicket(null)}
+						onClick={() => setSelectedTicketId(null)}
 					/>
 					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
 						<div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -673,7 +679,7 @@ export function SprintBoard() {
 									</div>
 								</div>
 								<button
-									onClick={() => setSelectedTicket(null)}
+									onClick={() => setSelectedTicketId(null)}
 									className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
 								>
 									<X className="w-5 h-5 text-gray-400" />
@@ -933,7 +939,7 @@ export function SprintBoard() {
 								</div>
 
 								<button
-									onClick={() => setSelectedTicket(null)}
+									onClick={() => setSelectedTicketId(null)}
 									className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
 								>
 									Close

@@ -19,7 +19,7 @@ const mockUsers: Array<{
 	password: string; // In real backend, this would be hashed!
 	name: string;
 	avatar_url: string | null;
-	org_name: string;
+	org_name: string | null;
 	organization_id: string | null;
 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
 	org_role: "admin" | "member" | null;
@@ -50,7 +50,7 @@ const mockUsers: Array<{
 		id: "3",
 		email: "pepa@example.com",
 		password: "password123", // In real backend, this would be hashed!
-		name: "Pepa Rodriguez",
+		name: "Pepa Perez",
 		avatar_url: null,
 		org_name: "Las Cachapas",
 		organization_id: "2",
@@ -59,7 +59,6 @@ const mockUsers: Array<{
 	},
 ];
 
-// Mock organization
 const mockOrganizations = [
 	{
 		id: "2",
@@ -69,7 +68,6 @@ const mockOrganizations = [
 	},
 ];
 
-// Mock Tickets
 const mockTickets: Array<{
 	id: string;
 	title: string;
@@ -103,7 +101,6 @@ const mockTasks: Array<{
 	},
 ];
 
-// Mock Blockers
 const mockBlockers: Array<{
 	id: string;
 	description: string;
@@ -165,7 +162,6 @@ const mockBlockers: Array<{
 	},
 ];
 
-// Mock Standups
 const mockStandups: Array<{
 	id: string;
 	created_at: string;
@@ -203,6 +199,38 @@ const mockStandups: Array<{
 		}
 	}
 ]
+
+const mockLegalDocuments: Record<string, LegalDocuments> = {
+	privacy: {
+		key: "privacy",
+		title: "Privacy Policy",
+		content: "# Privacy Policy\n\nThis is a placeholder.",
+		updated_at: "2024-01-01T00:00:00Z",
+	},
+	terms: {
+		key: "terms",
+		title: "Terms of Service",
+		content: "# Terms of Service\n\nThis is a placeholder.",
+		updated_at: "2024-01-01T00:00:00Z",
+	},
+};
+
+const mockAnalitycs : AnalitycsData = {
+	tasks: [
+		{ week: "Week 1", in_progress: 10, completed: 8 },
+		{ week: "Week 2", in_progress: 12, completed: 14 },
+		{ week: "Week 3", in_progress: 8, completed: 10 },
+		{ week: "Week 4", in_progress: 5, completed: 12 },
+	],
+	tickets: [
+		{ week: "Week 1", completed: 4 },
+		{ week: "Week 2", completed: 7 },
+		{ week: "Week 3", completed: 5 },
+		{ week: "Week 4", completed: 9 },
+	],
+	standups: { posted: 115, total: 120 },
+	blockers_avg_cycle_time: 1.5,
+};
 
 // API Response types (matches your API_CONTRACTS.md)
 interface LoginRequest {
@@ -392,6 +420,75 @@ function getCurrentUserRecord() {
 
 	return user;
 }
+
+
+// =============================================================
+// ANALITYCS
+// =============================================================
+
+export interface AnalitycsData {
+	tasks: Array<{
+		week: string,
+		in_progress: number,
+		completed: number
+	}>;
+
+	tickets: Array<{
+		week: string,
+		completed: number,
+	}>;
+
+	standups: {
+		posted: number,
+		total: number,
+	};
+	blockers_avg_cycle_time: number;
+}
+
+export async function getAnalitycsData(
+	org_id: string
+) : Promise<AnalitycsData> {
+	await delay(300);
+	const currentUser = getCurrentUserRecord();
+
+	if (!org_id) {
+		createApiError("NOT_FOUND", "Organization not found");
+	}
+	if (!currentUser) {
+		createApiError("UNAUTHORIZED", "Authentication required");
+	}
+	if (org_id !== currentUser.organization_id) {
+		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+	}
+
+	return (mockAnalitycs);
+}
+
+// =============================================================
+// TERMS & POLICY
+// =============================================================
+
+export interface LegalDocuments {
+	key: string;
+	title: string;
+	content: string;
+	updated_at: string;
+}
+
+export async function getLegalDocument(
+	key: "privacy" | "terms"
+) : Promise<LegalDocuments> {
+	await delay(200);
+
+	const document = mockLegalDocuments[key];
+
+	if (!document) {
+		createApiError("NOT_FOUND", "Legal document not found");
+	}
+
+	return (document);
+}
+
 
 // =============================================================
 // MOCK TOPBAR
@@ -623,14 +720,19 @@ export async function setUserRole(data: {
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
 	await delay(300);
 
-	return [
-		{
-			id: "user_0",
-			name: "creator",
-			org_role: "admin",
-			scrum_role: "scrum_master", // ← SM is taken!
-		},
-	];
+	if (!org_id) {
+		createApiError("NOT_FOUND", "No members found in this organization");
+	}
+
+	const orgMembers = mockUsers
+		.filter((user) => user.organization_id === org_id && user.org_role !== null && user.scrum_role !== null)
+		.map((user) => ({
+			...user,
+			org_role: user.org_role as "admin" | "member",
+			scrum_role: user.scrum_role as "product_owner" | "developer" | "scrum_master",
+		}));
+
+	return orgMembers;
 }
 
 
@@ -690,6 +792,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 		email: data.email,
 		password: data.password,
 		name: data.name,
+		org_name: null,
 		organization_id: null,
 		scrum_role: null,
 		org_role: null,
@@ -716,7 +819,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 // =============================================================
 
 // Mock getCurrentUser function
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser() : Promise<User> {
 	await delay(300);
 
 	// Simulate checking the JWT token

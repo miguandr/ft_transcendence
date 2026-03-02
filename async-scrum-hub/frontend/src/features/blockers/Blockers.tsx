@@ -61,6 +61,13 @@ export function Blockers() {
 	const [isCreating, setIsCreating] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isResolving, setIsResolving] = useState(false);
+	//Derived states
+	const availableAssignees = teamMembers.filter((member) => {
+		const isNotCurrentUser = member.id !== currentUser?.id;
+		const isDeveloper = member.scrum_role === "developer";
+
+		return (isNotCurrentUser && isDeveloper);
+	})
 
 	// Fetch blockers and user at the same time.
 	const fetchBlockers = async () => {
@@ -97,10 +104,12 @@ export function Blockers() {
 	}, []); // Empty array = run once on mount. setState functions are stable and don't need to be dependencies
 
 	const handleCreateBlocker = async () => {
+		if (!orgId) return ;
 		setIsCreating(true);
+
 		try {
 			// Call API to create blocker
-			await createBlocker(orgId!, {
+			await createBlocker(orgId, {
 				description: blockerForm.description,
 				ticket_id: blockerForm.ticket_id || null,
 				assignee_id: blockerForm.assignee_id || null,
@@ -318,33 +327,6 @@ export function Blockers() {
 												)}
 											</div>
 											)}
-
-									{/*		<div className="mt-4 pt-4 border-t border-rose-100 flex items-center gap-3">
-												{canResolveBlocker(blocker) && (
-													<Button
-														variant="text"
-														onClick={() => setConfirmResolved(blocker.id)}
-														className="text-emerald-600 hover:text-emerald-700 p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
-													>
-														Resolve Blocker
-													</Button>
-												)}
-												{canEditBlocker(blocker) && (
-													<Button
-														variant="text"
-														onClick={() => openEditModal(blocker)}
-														icon={<Edit2 className="w-3 h-3" />}
-													>
-														Edit
-													</Button>
-												)}
-												{!canEditBlocker(blocker) &&
-													!canResolveBlocker(blocker) && (
-														<span className="text-xs text-gray-400">
-															Read-only
-														</span>
-													)}
-											</div>  */}
 										</div>
 									);
 								})}
@@ -538,7 +520,7 @@ export function Blockers() {
 							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
 						>
 							<option value="">Select related team member</option>
-							{teamMembers.map((member: OrganizationMember) => (
+							{availableAssignees.map((member: OrganizationMember) => (
 								<option key={member.id} value={member.id}>
 									{member.name}
 								</option>
@@ -629,7 +611,7 @@ export function Blockers() {
 								className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
 							>
 								<option value="">Assign to team member</option>
-								{teamMembers.map((member) => (
+								{availableAssignees.map((member) => (
 									<option key={member.id} value={member.id}>
 										{member.name}
 									</option>

@@ -124,7 +124,7 @@ Less meetings, clearer delivery signals, better accountability.
 
 **Dependencies:**
 - Needs API contracts from Daniela (Week 1)
-- Integrates with real-time from Malu (Week 5)
+- Integrates with real-time from Maria Luiza (Week 5)
 
 ---
 
@@ -172,7 +172,7 @@ Less meetings, clearer delivery signals, better accountability.
 
 ---
 
-### Malu - Real-Time & Integration Specialist
+### Maria Luiza - Real-Time & Integration Specialist
 **What you own:**
 - WebSocket server (Socket.io)
 - Real-time board updates
@@ -396,7 +396,7 @@ Blockers:
 4. **Tag specific person** if urgent:
    - Backend: @Daniela
    - Frontend: @Miguel
-   - Real-time: @Malu
+   - Real-time: @Maria Luiza
    - Product: @Freddy
 
 ---

@@ -20,9 +20,10 @@
 5. [Blockers](#5-blockers)
 6. [Users](#6-users)
 7. [Legal](#7-legal)
-8. [Special Permission Legend](#special-permission-legend)
-9. [Special Rules per Resource](#special-rules-per-resource)
-10. [Common Error Codes](#common-error-codes)
+8. [Analytics](#8-analytics)
+9. [Special Permission Legend](#special-permission-legend)
+10. [Special Rules per Resource](#special-rules-per-resource)
+11. [Common Error Codes](#common-error-codes)
 
 ---
 
@@ -49,8 +50,8 @@
 
 ## 2. Tickets
 
-| Action                     | Organization Admin | Scrum Master         | Product Owner  | Developer
-|----------------------------|--------------------|----------------------|----------------|------------
+| Action                     | Organization Admin | Scrum Master          | Product Owner  | Developer
+|----------------------------|--------------------|-----------------------|----------------|------------
 | **Create ticket**          | ✅                 | ✅                   | ✅             | ❌
 | **List tickets**           | ✅                 | ✅        		   | ✅             | ✅
 | **Get ticket details**     | ✅                 | ✅   			       | ✅             | ✅
@@ -127,7 +128,7 @@
 
 ## 6. Users
 
-| Action	                | All Roles	 | Notes
+| Action	              | All Roles	 | Notes
 |-------------------------|--------------|-----------
 | **Register**            | ✅           | Public endpoint
 | **Login**               | ✅           | Public endpoint
@@ -146,12 +147,23 @@
 
 ## 7. Legal
 
-| Action	                | All Roles	 | Notes
+| Action	              | All Roles	 | Notes
 |-------------------------|--------------|-----------
 | **Get legal document**  | ✅           | Public endpoint
 
 **Endpoints:**
 - `GET /legal/documents/{key}` - Get legal document (key = `privacy` | `terms`)
+
+---
+
+## 8. Analytics
+
+| Action                          | All Roles  | Notes
+|---------------------------------|------------|----------------------------
+| **Get organization analytics**  | ✅         | Any organization member
+
+**Endpoints:**
+- `GET /organizations/{org_id}/analytics` - Get analytics
 
 ---
 
@@ -217,7 +229,7 @@
 ---
 
 ### ✅ Tasks
-- Default status: `in_process`
+- Default status: `in_progress`
 - Only one transition: `in_progress` → `completed`
 - Must belong to a ticket
 
@@ -233,7 +245,7 @@
 ### 🚧 Blockers
 - Cannot be deleted, only resolved
 - Status: open → resolved (irreversible)
-- Optional relation to a task
+- Optional relation to a ticket
 
 ---
 
@@ -245,7 +257,7 @@ Organization
  │   └─ Task
  ├─ Standup
  └─ Blocker
-	 └─ (optional) Task
+	 └─ (optional) Ticket
 ```
 
 ---
@@ -262,18 +274,17 @@ Organization
 
 | HTTP Status | Error Code                 | Description
 |-------------|----------------------------|------------------------------------
-| 422         | `INVALID_INPUT`            | Invalid request data (validation error)
+| 400         | `INVALID_INPUT`            | Invalid request data (validation error)
 | 400         | `INVALID_ASSIGNEE`         | Invalid assignee role (must be Developer)
-| 400         | `INVALID_CODE`             | Invalid organization join code
 | 400         | `INVALID_FILE_TYPE`        | Invalid file type for upload
 | 400         | `FILE_TOO_LARGE`           | File exceeds maximum size limit
 | 401         | `UNAUTHORIZED`             | Missing or invalid JWT
+| 401         | `INVALID_TOKEN`            | JWT token has invalid or missing subject claim
 | 401         | `INVALID_CREDENTIALS`      | Invalid email or password
 | 403         | `FORBIDDEN`                | Insufficient permissions
+| 403         | `NO_ORGANIZATION`          | User is not part of any organization
 | 404         | `NOT_FOUND`                | Resource not found
 | 409         | `USER_EXISTS`              | User with this email already exists
-| 409         | `ORG_EXISTS`               | Organization with this name already exists
-| 409         | `ALREADY_MEMBER`           | User is already a member of the organization
 | 409         | `STANDUP_ALREADY_EXISTS`   | User already created a standup today
 | 409         | `EDIT_WINDOW_EXPIRED`      | Standup can only be edited on creation day
 | 409         | `BLOCKER_ALREADY_RESOLVED` | Blocker has already been resolved

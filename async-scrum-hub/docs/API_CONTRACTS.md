@@ -440,8 +440,10 @@ file: binary (image file)
 **Permissions:**
 - The authenticated user
 
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
 **Rules:**
-- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
 - Only one `scrum_master` and one `product_owner` can exist per organization.
 - Scrum roles are assigned only during organization creation and when joining an organization.
 - Once both scrum roles are assigned, new members can only join as `developer`.
@@ -468,6 +470,16 @@ file: binary (image file)
   "error": {
 	"code": "UNAUTHORIZED",
 	"message": "Authentication required"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
   }
 }
 ```
@@ -2318,15 +2330,15 @@ Used to render the organization board.
 - `key` - Document identifier: `privacy` | `terms`
 
 **Notes:**
-- Documents are rendered from Markdown stored in the repository (`legal/privacy.md`, `legal/terms.md`)
-- Content is converted to HTML and returned in the response
+- Documents are stored as Markdown in the repository (`legal/privacy.md`, `legal/terms.md`)
+- Content is returned as raw Markdown plain text; the frontend is responsible for rendering
 
 **Success Response:** `200 OK`
 ```json
 {
   "key": "privacy",
   "title": "Privacy Policy",
-  "content_html": "<h1>Privacy Policy</h1><p>...</p>",
+  "content": "# Privacy Policy\n\n...",
   "updated_at": "timestamp"
 }
 ```
@@ -2339,6 +2351,78 @@ Used to render the organization board.
   "error": {
 	"code": "NOT_FOUND",
 	"message": "Legal document not found"
+  }
+}
+```
+---
+
+## 9. Analytics
+
+### 9.1 Get Organization analytics
+
+**Endpoint:** `GET /organizations/{org_id}/analytics`
+
+**Description:** Returns a the analytics for the organization.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "tasks":[ 							//line chart
+	{ "week": "Week 1", "active": "int", "resolved": "int"},
+	{ "week": "Week 2", "active": "int", "resolved": "int"},
+	{ "week": "Week 3", "active": "int", "resolved": "int"},
+	{ "week": "Week 4", "active": "int", "resolved": "int"}
+  ],
+  "tickets":[							//bar chart
+	{ "week": "Week 1", "completed": "int"},
+	{ "week": "Week 2", "completed": "int"},
+	{ "week": "Week 3", "completed": "int"},
+	{ "week": "Week 4", "completed": "int"}
+  ],
+  "standups": {							//numeric cards
+	"posted": "int",
+	"total": "int" 
+  },
+  "blockers_avg_cycle_time": "float"    //numeric cards
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
   }
 }
 ```

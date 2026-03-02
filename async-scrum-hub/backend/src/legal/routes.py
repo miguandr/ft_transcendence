@@ -1,5 +1,4 @@
 import os
-import markdown
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status
 
@@ -34,13 +33,12 @@ def get_legal_document(key: str):
 	with open(filepath, "r", encoding="utf-8") as f:
 		raw = f.read()
 
-	content_html = markdown.markdown(raw)
 	mtime = os.path.getmtime(filepath)
 	updated_at = datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat()
 
 	return LegalDocumentResponse(
 		key=key,
 		title=DOCUMENTS[key],
-		content_html=content_html,
+		content=raw,
 		updated_at=updated_at,
 	)

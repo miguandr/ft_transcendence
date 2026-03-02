@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 export function Login() {
 	const navigate = useNavigate();
 
-	const [email, setEmail] = useState(""); // Stores email
+	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState(""); // Stores password
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -41,25 +41,23 @@ export function Login() {
 
 		// Validate form
 		if (!validateForm()) {
-			return; //Stops here if validation fails
+			return;
 		}
 
 		// Start loading
 		setIsLoading(true);
-		setErrors({}); // clear any previous errors
+		setErrors({});
 
 		try {
-			// Call API
-			const response = await login({ email, password }); // await is non-blocking waiting
+			const response = await login({ email, password });
 
-			console.log("Login successful!", response);
 			// Save token to localStorage (browser storage persists until logout)
+			console.log("Login successful!", response);
 			localStorage.setItem("token", response.access_token);
 
 			// Trigger fade-out animation (navigation happens in onAnimationComplete)
 			setIsExiting(true);
 		} catch (error: unknown) {
-			// Handle API Errors
 			console.error("Login failed:", error);
 
 			// Type assertion for API error format
@@ -67,23 +65,17 @@ export function Login() {
 			const apiError = error as APIError;
 
 			if (apiError?.error?.code === "INVALID_CREDENTIALS") {
-				// Only runs if error.error.code exists AND equals "INVALID_CREDENTIALS"
 				setErrors({ email: "Email or password is incorrect" });
 			} else if (apiError?.error?.code === "INVALID_INPUT") {
-				// Only runs if error.error.code exists AND equals "UNAUTHORIZED"
 				setErrors({ email: "Email or password is missing" });
 			} else if (apiError?.error?.message) {
-				// Only runs if error.error.message exists (Use the API's error message)
 				setErrors({ email: apiError.error.message });
 			} else if (error instanceof Error) {
-				// Handles standard JavaScript Error objects
 				setErrors({ email: error.message });
 			} else {
-				// Handles completely unknown errors
 				setErrors({ email: "An unexpected error occurred." });
 			}
 		} finally {
-			// Stop loading (runs weather success or failure)
 			setIsLoading(false);
 		}
 	};
