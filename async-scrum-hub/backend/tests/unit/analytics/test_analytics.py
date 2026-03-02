@@ -34,10 +34,10 @@ ANALYTICS_URL = "/organizations/{org_id}/analytics"
 class TestAnalyticsSchemas:
 
 	def test_task_week_data(self):
-		data = TaskWeekData(week="Week 1", active=3, resolved=5)
+		data = TaskWeekData(week="Week 1", in_progress=3, completed=5)
 		assert data.week == "Week 1"
-		assert data.active == 3
-		assert data.resolved == 5
+		assert data.in_progress == 3
+		assert data.completed == 5
 
 	def test_ticket_week_data(self):
 		data = TicketWeekData(week="Week 2", completed=7)
@@ -51,7 +51,7 @@ class TestAnalyticsSchemas:
 
 	def test_analytics_response(self):
 		response = AnalyticsResponse(
-			tasks=[TaskWeekData(week="Week 1", active=1, resolved=2)],
+			tasks=[TaskWeekData(week="Week 1", in_progress=1, completed=2)],
 			tickets=[TicketWeekData(week="Week 1", completed=3)],
 			standups=StandupParticipation(posted=2, total=4),
 			blockers_avg_cycle_time=10.5,
@@ -145,7 +145,7 @@ class TestGetAnalyticsService:
 		session.commit()
 		result = service.get_analytics(session, user)
 		week4 = next(w for w in result.tasks if w.week == "Week 4")
-		assert week4.active == 1
+		assert week4.in_progress == 1
 
 	def test_resolved_task_counted_in_current_week(self, db_setup):
 		"""COMPLETED task updated this week appears in Week 4 resolved count."""
@@ -162,7 +162,7 @@ class TestGetAnalyticsService:
 		session.commit()
 		result = service.get_analytics(session, user)
 		week4 = next(w for w in result.tasks if w.week == "Week 4")
-		assert week4.resolved == 1
+		assert week4.completed == 1
 
 	def test_completed_ticket_counted_in_current_week(self, db_setup):
 		"""COMPLETED ticket created this week appears in Week 4 completed count."""

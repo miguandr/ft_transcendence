@@ -3,8 +3,8 @@ from pydantic import BaseModel
 #Tasks --> Line chart
 class TaskWeekData(BaseModel):
 	week: str
-	active: int  
-	resolved: int
+	in_progress: int  
+	completed: int
 
 #Tickets --> bar chart
 class TicketWeekData(BaseModel):

@@ -2428,4 +2428,75 @@ Used to render the organization board.
 ```
 ---
 
+## 10. Dashboard
+
+### 10.1 Get Organization Dashboard
+
+**Endpoint:** `GET /organizations/{org_id}/dashboard`
+
+**Description:** Returns summary counts for the value cards and a feed of the 6 most recent activity events (tickets/tasks created or completed) from the last 7 days.
+
+**Notes:**
+- `recent_updates` only includes events from the last 7 days.
+- A completed item uses `updated_at` as its timestamp; a created item uses `created_at`.
+- `timestamp` is returned as a UTC datetime string — the frontend is responsible for formatting it as a relative time (e.g. "48 min ago", "2 days ago").
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "summary": {
+    "tasks_in_progress": "int",
+    "tickets_completed": "int",
+    "active_blockers": "int"
+  },
+  "recent_updates": [
+    {
+      "type": "task | ticket",
+      "event": "created | completed",
+      "title": "string",
+      "timestamp": "ISO 8601 datetime (UTC)"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - User is not part of any organization
+```json
+{
+  "error": {
+	"code": "NO_ORGANIZATION",
+	"message": "User is not part of any organization."
+  }
+}
+```
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
 **End of Document**
