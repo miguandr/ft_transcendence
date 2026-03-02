@@ -8,7 +8,6 @@ import {
 	ChevronRight,
 	ChevronDown,
 	Upload,
-	Heading3,
 } from "lucide-react";
 
 export function TopBar() {
