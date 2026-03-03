@@ -84,7 +84,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 - `204 No Content` – Request successful, no response body
 - `400 Bad Request` - Invalid request data (business logic errors)
 - `401 Unauthorized` - Authentication required or invalid
-- `403 Forbidden` - Insufficient permissions
+- `403 Forbidden` - Insufficient permissions or prerequisite setup not completed
 - `404 Not Found` - Resource not found
 - `409 Conflict` - Resource conflict (e.g., duplicate)
 - `422 Unprocessable Entity` - Validation error (missing or invalid fields)
@@ -190,6 +190,15 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "error": {
 	"code": "INVALID_CREDENTIALS",
 	"message": "Email or password is incorrect"
+  }
+}
+```
+`403 Forbidden` - Team setup not completed
+```json
+{
+  "error": {
+	"code": "TEAM_SETUP_NOT_DONE",
+	"message": "Team setup is not done"
   }
 }
 ```
