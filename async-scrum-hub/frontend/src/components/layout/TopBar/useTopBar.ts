@@ -5,7 +5,7 @@ import { formatScrumRole } from "../../../utils/formatters";
 import type { User } from "../../../services/api";
 type APIError = {
 	error?: { code?: string; message?: string };
-	detail?: Array<{ msg: string}>;
+	detail?: Array<{ msg: string }>;
 };
 
 export function useTopBar() {
@@ -15,7 +15,7 @@ export function useTopBar() {
 	const [inviteSent, setInviteSent] = useState(false);
 	//Auth states
 	const [orgId, setOrgId] = useState<string | null>(null);
-	const [errors, setErrors] = useState<{ invite?: string, avatar?: string, user?: string }>({});
+	const [errors, setErrors] = useState<{ invite?: string; avatar?: string; user?: string }>({});
 	//Data states
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	//Form states
@@ -36,11 +36,13 @@ export function useTopBar() {
 	const isAdmin = currentUser?.org_role === "admin";
 	//Derived data
 	const showImageAvatar = previewAvatar || currentUser?.avatar_url || "";
-	const formattedScrumRole = formatScrumRole(currentUser?.scrum_role ?? "developer");
+	const formattedScrumRole = currentUser?.scrum_role
+		? formatScrumRole(currentUser.scrum_role)
+		: "";
 	//Derived UI logic
 	const showDefaultAvatar = Boolean(previewAvatar || currentUser?.avatar_url);
-	const canSaveProfile = Boolean(editFormData?.name.trim() && editFormData.email.trim())
-	const canSendInvite = Boolean(inviteFormData.name.trim() && inviteFormData.email.trim())
+	const canSaveProfile = Boolean(editFormData?.name.trim() && editFormData.email.trim());
+	const canSendInvite = Boolean(inviteFormData.name.trim() && inviteFormData.email.trim());
 
 	const fetchUser = async () => {
 		setErrors({});
@@ -49,7 +51,6 @@ export function useTopBar() {
 			const user = await getCurrentUser();
 			setCurrentUser(user);
 			setOrgId(user.organization_id);
-
 		} catch (error: unknown) {
 			console.error("API call failed:", error);
 
@@ -68,7 +69,6 @@ export function useTopBar() {
 		fetchUser();
 	}, []);
 
-
 	//Figma mock
 	const toggleSection = (section: string) => {
 		if (expandedSection === section) {
@@ -86,15 +86,16 @@ export function useTopBar() {
 			// "Snapshot" the truth into the draft ONLY when the user clicks Edit
 			setEditFormData({
 				name: currentUser.name,
-				email: currentUser.email
+				email: currentUser.email,
 			});
 		}
 	};
 
-
 	const handleSaveProfile = async () => {
 		if (!editFormData) return;
 		setIsSaving(true);
+		setErrors({});
+
 		try {
 			const updatedFields = await updateUser({
 				name: editFormData.name,
@@ -102,7 +103,7 @@ export function useTopBar() {
 			});
 
 			//Replaces the user profile with the new information
-			setCurrentUser(prev => prev ? { ...prev, ...updatedFields } : prev);
+			setCurrentUser((prev) => (prev ? { ...prev, ...updatedFields } : prev));
 			setIsEditingProfile(false);
 			setExpandedSection(null);
 		} catch (error) {
@@ -110,21 +111,21 @@ export function useTopBar() {
 
 			const apiError = error as APIError;
 			if (apiError.error?.code === "INVALID_INPUT") {
-				setErrors({ invite: "Email is incorrect" });
+				setErrors({ user: "Email is incorrect" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
-				setErrors({ invite: "Authentication required" });
+				setErrors({ user: "Authentication required" });
 			} else {
-				setErrors({ invite: "Something went wrong" });
+				setErrors({ user: "Something went wrong" });
 			}
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
-
 	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
+		setErrors({});
 
 		//Step 1: instant local preview
 		const reader = new FileReader();
@@ -139,10 +140,9 @@ export function useTopBar() {
 			const response = await uploadAvatar({ file });
 
 			//Upadate the SSOT (currentUser)
-			setCurrentUser(prev => prev ? { ...prev, avatar_url: response.avatar_url } : prev);
+			setCurrentUser((prev) => (prev ? { ...prev, avatar_url: response.avatar_url } : prev));
 			//Clear temporary preview
 			setPreviewAvatar(null);
-
 		} catch (error) {
 			console.error("Failed to upload avatar:", error);
 
@@ -163,27 +163,23 @@ export function useTopBar() {
 		}
 	};
 
-
 	const handleSendInvite = async () => {
-
 		if (!orgId) return;
 
 		setIsInviting(true);
 		setErrors({});
 
 		try {
-				await inviteMember(orgId, {
-					name: inviteFormData.name,
-					email: inviteFormData.email,
-				});
-				setInviteSent(true);
-				setTimeout(() => {
-					setInviteSent(false);
-					setInviteFormData({ name: "", email: "" });
-					setExpandedSection(null);
-				}, 2000);
-
-
+			await inviteMember(orgId, {
+				name: inviteFormData.name,
+				email: inviteFormData.email,
+			});
+			setInviteSent(true);
+			setTimeout(() => {
+				setInviteSent(false);
+				setInviteFormData({ name: "", email: "" });
+				setExpandedSection(null);
+			}, 2000);
 		} catch (error: unknown) {
 			console.error("Failed to send invite:", error);
 
@@ -196,9 +192,9 @@ export function useTopBar() {
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ invite: "Only admin can perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
-				setErrors({ invite: "Organization not found"});
+				setErrors({ invite: "Organization not found" });
 			} else if (apiError.error?.code === "ALREADY_MEMBER") {
-				setErrors({ invite: "User is already a member of the team"});
+				setErrors({ invite: "User is already a member of the team" });
 			} else {
 				setErrors({ invite: "Something went wrong" });
 			}
@@ -233,7 +229,6 @@ export function useTopBar() {
 		canSaveProfile,
 		canSendInvite,
 
-
 		// setters
 		setIsDropdownOpen,
 		setExpandedSection,
@@ -247,6 +242,6 @@ export function useTopBar() {
 		handleSaveProfile,
 		handleAvatarUpload,
 		handleSendInvite,
-		handleLogout
-	}
+		handleLogout,
+	};
 }

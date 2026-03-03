@@ -15,7 +15,7 @@ type Role = "scrum_master" | "product_owner" | "developer" | null;
 export function TeamSetup() {
 	const navigate = useNavigate();
 
-	// ===== STATE DECLARATIONS =====
+	//States
 	const [teamMode, setTeamMode] = useState<TeamMode>("join");
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
@@ -37,45 +37,39 @@ export function TeamSetup() {
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
 	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-	// ===== FUNCTION DEFINITIONS =====
-	//When user enters a team code and clicks "Check code"
+
 	const handleCheckCode = async (e: React.FormEvent) => {
 		e.preventDefault(); // Prevents page refresh when form submits
-		setErrors({}); // Clear previous errors
+		setErrors({});
 
-		// Validation: checks if team-code is empty
 		if (!teamCode.trim()) {
 			setErrors({ join: "Team code is required" });
 			return;
 		}
 
-		// Call API
 		setIsLoading(true); // Show loading spinner
 
 		type APIError = { error?: { code?: string; message?: string } };
 
 		try {
-			// Step 1: Validate code and get org info
 			const response = await checkJoinCode(teamCode);
 
-			//Step 2: Get members to see what roles are free/taken
 			const members = await getOrganizationMembers(response.id);
-
-			//Step 3: Extract taken roles
 			const taken = members
-				.filter((m) => m.scrum_role === "scrum_master" || m.scrum_role === "product_owner") // m(each member of the array) =>(return). Keep members with roles assigned
-				.map((m) => m.scrum_role) as string[]; // tells TypeScript "trust me, these arent null".
+				.filter((m) => m.scrum_role === "scrum_master" || m.scrum_role === "product_owner")
+				.map((m) => m.scrum_role) as string[];
 
-			//Step 4: Update state
-			setOrgId(response.id); // Save org ID for later (when joining)
+			setOrgId(response.id);
 			setTakenRoles(taken);
 			setConfirmedTeam({
 				name: response.name,
 				members: response.members_count,
 			});
 			setTeamConfirmed(true);
+
 		} catch (error: unknown) {
-			// Handle API errors with type guard
+			console.error("Failed to check code:", error);
+
 			const apiError = error as APIError;
 			if (apiError?.error?.code === "INVALID_CODE") {
 				setErrors({ join: "Invalid team code" });
@@ -87,6 +81,7 @@ export function TeamSetup() {
 			} else {
 				setErrors({ join: "Something went wrong" });
 			}
+
 		} finally {
 			setIsLoading(false);
 		}
@@ -96,7 +91,7 @@ export function TeamSetup() {
 		e: React.FormEvent // Accept form event parameter
 	) => {
 		e.preventDefault(); // Prevent page refresh
-		setErrors({}); // Clear previous errors
+		setErrors({});
 
 		if (!teamName.trim()) {
 			setErrors({ create: "Team name is required" });
@@ -111,15 +106,13 @@ export function TeamSetup() {
 			return;
 		}
 
-		setIsLoading(true); // Show loading spinner
+		setIsLoading(true);
 
 		type APIError = { error?: { code?: string; message?: string } };
 
 		try {
-			// Step 1: Get org info
 			const response = await createOrganization({ name: teamName });
 
-			//Step 2: Update state
 			setOrgId(response.id);
 			setConfirmedTeam({
 				name: teamName,
@@ -127,7 +120,10 @@ export function TeamSetup() {
 				members: 1,
 			});
 			setTeamConfirmed(true);
+
 		} catch (error: unknown) {
+			console.error("Failed to create team:", error);
+
 			// Handle API errors with type guard
 			const apiError = error as APIError;
 			if (apiError?.error?.code === "INVALID_INPUT") {
@@ -141,6 +137,7 @@ export function TeamSetup() {
 			} else {
 				setErrors({ create: "Something went wrong." });
 			}
+
 		} finally {
 			setIsLoading(false);
 		}
@@ -155,19 +152,18 @@ export function TeamSetup() {
 	};
 
 	const handleContinue = async () => {
-		setErrors({}); // Clear previous errors
-		// Step 1: Validation
+		setErrors({});
+
 		if (!teamConfirmed || !selectedRole || !orgId) {
 			return;
 		}
 
-		// Step 2: Loading state
 		setIsLoading(true);
 
 		type APIError = { error?: { code?: string; message?: string } };
 
 		try {
-			// Step 3: Check which mode (create or join)
+			// Check which mode (create or join)
 			if (teamMode === "create") {
 				await setUserRole({
 					organization_id: orgId as string,
@@ -179,24 +175,24 @@ export function TeamSetup() {
 					scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer",
 				});
 			}
-
-			// Step 4: Success! Navigate to dashboard
 			navigate("/dashboard");
+
 		} catch (error: unknown) {
-			// Step 5: Handle errors with type guard
+			console.error("Failed to continue:", error);
+
 			const apiError = error as APIError;
 			if (apiError?.error?.message) {
 				setErrors({ continue: apiError.error.message });
 			} else {
 				setErrors({ continue: "Something went wrong" });
 			}
+
 		} finally {
-			// Step 6: Clear loading state
 			setIsLoading(false);
 		}
 	};
 
-	// ===== DATA DEFINITIONS =====
+	// Data definitions
 	const roles = [
 		{
 			id: "scrum_master",

@@ -12,7 +12,6 @@ export function SignUp() {
 		confirmPassword: "",
 	});
 	const [errors, setErrors] = useState<{
-		// error(getter/read) setErrors(setter/write)
 		name?: string;
 		email?: string;
 		password?: string;
@@ -63,14 +62,12 @@ export function SignUp() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		//Validate form
 		if (!validateForm()) {
 			return;
 		}
 
-		//Start loading
 		setIsLoading(true);
-		setErrors({}); // clear any previous errors
+		setErrors({});
 
 		type APIError = {
 			error?: {
@@ -80,7 +77,6 @@ export function SignUp() {
 		};
 
 		try {
-			//Call API (only sends name, email and password (not confirmation password) to database via API.
 			const response = await signup({
 				name: formData.name,
 				email: formData.email,
@@ -89,29 +85,22 @@ export function SignUp() {
 
 			console.log("Sign up successful!", response);
 
-			//Navigate to role selection if sign up was successful
 			navigate("/team-setup");
 		} catch (error: unknown) {
 			//Handle API errors with type guard
 			console.error("Sign up failed:", error);
 
 			const apiError = error as APIError;
-			//Check for our API error format using optional chaining
 			if (apiError?.error?.code === "USER_EXISTS") {
-				// Only runs if error.error.code exists AND equals "USER_EXISTS"
 				setErrors({ email: "An account with this email already exists" });
 			} else if (apiError?.error?.code === "INVALID_INPUT") {
-				// Only runs if error.error.code exists AND equals "INVALID_INPUT"
 				setErrors({ email: "Email format is invalid" });
 			} else if (apiError?.error?.message) {
-				// Only runs if error.error.message exists (Use the API's error message)
 				setErrors({ email: apiError.error.message });
 			} else {
-				// Handles completely unknown errors
 				setErrors({ email: "An unexpected error occurred." });
 			}
 		} finally {
-			// Stop loading (runs whether success or failure)
 			setIsLoading(false);
 		}
 	};

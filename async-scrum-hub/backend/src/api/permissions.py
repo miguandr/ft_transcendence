@@ -49,6 +49,14 @@ PERMISSIONS = {
 		"owner_allowed": False,
 		"assignee_allowed": False,
 	},
+	#--Legal--
+	"legal:document:get":
+	{
+		"scope": "public",
+		"roles": [],
+		"owner_allowed": False,
+		"assignee_allowed": False,
+	},
 	#--Organizations--
 	"organizations:create":
 	{
@@ -245,5 +253,13 @@ PERMISSIONS = {
 		"roles": ["scrum_master", "product_owner"],
 		"owner_allowed": True,
 		"assignee_allowed": True,
-	}
+	},
+	#--Dashboard--
+	"organizations:dashboard:get":
+	{
+		"scope": "org",
+		"roles": ["scrum_master", "product_owner", "developer"],
+		"owner_allowed": False,
+		"assignee_allowed": False,
+	},
 }
