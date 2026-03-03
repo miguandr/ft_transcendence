@@ -9,7 +9,7 @@ import { Login } from "./features/auth/Login";
 import { SignUp } from "./features/auth/SignUp";
 import { TeamSetup } from "./features/auth/TeamSetup";
 import { Dashboard } from "./features/dashboard/Dashboard";
-//import { SprintBoard } from "./features/sprint_board/SprintBoard";
+import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
 //import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
@@ -51,7 +51,7 @@ function AppLayout() {
 					<main className="flex-1 overflow-y-auto">
 						<Routes>
 							<Route path="/dashboard" element={<Dashboard />} />
-							{/* <Route path="/board" element={<SprintBoard />} /> */}
+							<Route path="/board" element={<SprintBoard />} />
 							<Route path="/standup" element={<AsyncStandup />} />
 							<Route path="/blockers" element={<Blockers />} />
 							<Route path="/analytics" element={<Analytics />} />

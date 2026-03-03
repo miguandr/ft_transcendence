@@ -60,3 +60,21 @@ export interface UserRef {
 	name: string;
 	avatar_url : string | null;
 }
+
+export interface User {
+	id: string;
+	email: string;
+	name: string;
+	avatar_url: string | null;
+	organization_id: string | null;
+	org_name: string | null;
+	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+	org_role: "admin" | "member" | null;
+}
+
+export interface OrgMember {
+	id: string;
+	name: string;
+	avatar_url: string | null;
+	scrum_role: UserRole | null;
+}

@@ -1,12 +1,62 @@
 import { Plus, X, AlertCircle, GripVertical, Trash2, Edit2, CheckCircle } from "lucide-react";
-
 import { PRIORITY_COLORS, BOARD_COLUMNS, PRIORITY_OPTIONS } from "./constants/sprint.constants";
 import { Priority, TicketStatus, TaskStatus, UserRole, BlockerStatus } from "./types/sprint.types";
-import type { Ticket, ListTicketsBoard, Task, TaskSummary, Blocker } from "./types/sprint.types"
+import { useSprintBoard } from "./hooks/useSprintBoard";
+import type { Ticket, ListTicketsBoard, Task, TaskSummary, Blocker } from "./types/sprint.types";
+import { ConfirmDeleteDialogue } from "./components/ConfirmDeleteDialogue";
+import { CreateBlockerModal } from "./components/modals/CreateBlockerModal"
+import { TaskDetailModal } from "./components/modals/TaskDetailModal";
 
 export function SprintBoard() {
+	const {
+		// States
+		isAddTicketOpen,
+		ticketForm,
+		isEditTicketOpen,
+		isCreateTaskOpen,
+		isAddBlockerOpen,
+		selectedTicket,
+		currentUser,
+		selectedTask,
+		blockerForm,
+		confirmDelete,
 
+		// Setters
+		setIsAddTicketOpen,
+		setSelectedTicketId,
+		setTicketForm,
+		setIsCreateTaskOpen,
+		setSelectedTask,
+		setIsAddBlockerOpen,
+		setIsEditTicketOpen,
+		setConfirmDelete,
+		setTaskForm,
+		setBlockerForm,
 
+		// Getters
+		getTicketsByStatus,
+		getBlockersForTicket,
+
+		// Handlers
+		handleTicketDrop,
+		handleTicketDragStart,
+		handleCreateTicket,
+		handleTaskDrop,
+		handleResolveBlocker,
+		handleUpdateTicketPriority,
+		handleCreateTask,
+		handleAddBlocker,
+		handleDeleteTicket,
+		handleDeleteTask,
+
+		// Permissions
+		canResolveBlocker,
+		canEditTask,
+		canEditTicket,
+		canDeleteTicket,
+		canAddTicket,
+		canDragTickets,
+	} = useSprintBoard();
 
 	return (
 		<div className="p-8">
@@ -719,258 +769,34 @@ export function SprintBoard() {
 
 			{/* Task Detail Modal */}
 			{selectedTask && selectedTicket && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/20 z-40"
-						onClick={() => setSelectedTask(null)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-							<div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
-								<div>
-									<h3 className="text-lg text-gray-900 mb-2">
-										{selectedTask.title}
-									</h3>
-									<span
-										className={`text-xs px-2 py-1 rounded-lg ${
-											selectedTask.status === "completed"
-												? "bg-emerald-100 text-emerald-700"
-												: "bg-gray-100 text-gray-700"
-										}`}
-									>
-										{selectedTask.status === "completed"
-											? "Completed"
-											: "In Progress"}
-									</span>
-								</div>
-								<button
-									onClick={() => setSelectedTask(null)}
-									className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
-								>
-									<X className="w-5 h-5 text-gray-400" />
-								</button>
-							</div>
-
-							<div className="px-6 py-5 space-y-4">
-								<div>
-									<h4 className="text-sm text-gray-700 mb-2">Description</h4>
-									<p className="text-sm text-gray-600">
-										{selectedTask.description || "No description provided"}
-									</p>
-								</div>
-
-								<div>
-									<h4 className="text-sm text-gray-700 mb-2">Assignee</h4>
-									<div className="flex items-center gap-2">
-										{teamMembers.find(
-											(m) => m.avatar === selectedTask.assignee
-										) && (
-											<>
-												<div
-													className={`w-8 h-8 rounded-full bg-gradient-to-br ${
-														teamMembers.find(
-															(m) =>
-																m.avatar === selectedTask.assignee
-														)?.color
-													} flex items-center justify-center`}
-												>
-													<span className="text-sm text-gray-900">
-														{selectedTask.assignee}
-													</span>
-												</div>
-												<span className="text-sm text-gray-700">
-													{
-														teamMembers.find(
-															(m) =>
-																m.avatar === selectedTask.assignee
-														)?.name
-													}
-												</span>
-											</>
-										)}
-									</div>
-								</div>
-							</div>
-
-							<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-								{canEditTask(selectedTask) ? (
-									<button
-										onClick={() =>
-											setConfirmDelete({ type: "task", id: selectedTask.id })
-										}
-										className="flex items-center gap-2 px-3 py-1.5 text-xs text-rose-700 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors"
-									>
-										<Trash2 className="w-3 h-3" />
-										Delete Task
-									</button>
-								) : (
-									<div className="relative group">
-										<button
-											disabled
-											className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed"
-										>
-											<Trash2 className="w-3 h-3" />
-											Delete Task
-										</button>
-										<div className="absolute left-0 top-full mt-1 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-											Only assignee, PO, or SM can delete this task
-										</div>
-									</div>
-								)}
-
-								<button
-									onClick={() => setSelectedTask(null)}
-									className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
-								>
-									Close
-								</button>
-							</div>
-						</div>
-					</div>
-				</>
+				<TaskDetailModal
+					onClose={() => setSelectedTask(null)}
+					onDelete={() => setConfirmDelete({ type: "task", id: selectedTask.id })}
+					task={selectedTask}
+					teamMembers={[]}
+					canDelete={canEditTask(selectedTask)}
+				/>
 			)}
 
 			{/* Add Blocker Modal */}
 			{isAddBlockerOpen && selectedTicket && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/20 z-40"
-						onClick={() => setIsAddBlockerOpen(false)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-							<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-								<h3 className="text-lg text-gray-900">Add Blocker</h3>
-								<button
-									onClick={() => setIsAddBlockerOpen(false)}
-									className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
-								>
-									<X className="w-5 h-5 text-gray-400" />
-								</button>
-							</div>
-
-							<div className="px-6 py-5 space-y-4">
-								<div>
-									<label className="block text-sm text-gray-700 mb-1.5">
-										Description <span className="text-rose-500">*</span>
-									</label>
-									<textarea
-										value={blockerForm.description}
-										onChange={(e) =>
-											setBlockerForm({
-												...blockerForm,
-												description: e.target.value,
-											})
-										}
-										placeholder="Describe what's blocking progress"
-										rows={4}
-										className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors resize-none"
-									/>
-								</div>
-
-								<div>
-									<label className="block text-sm text-gray-700 mb-1.5">
-										Associated Ticket
-									</label>
-									<input
-										type="text"
-										value={selectedTicket.title}
-										disabled
-										className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-600"
-									/>
-								</div>
-
-								{currentUser.role === "scrum_master" && (
-									<div>
-										<label className="block text-sm text-gray-700 mb-1.5">
-											Assignee (optional)
-										</label>
-										<select
-											value={blockerForm.assignee}
-											onChange={(e) =>
-												setBlockerForm({
-													...blockerForm,
-													assignee: e.target.value,
-												})
-											}
-											className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-										>
-											<option value="">Assign to team member</option>
-											{teamMembers.map((member) => (
-												<option key={member.id} value={member.avatar}>
-													{member.name}
-												</option>
-											))}
-										</select>
-									</div>
-								)}
-							</div>
-
-							<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-								<button
-									onClick={() => setIsAddBlockerOpen(false)}
-									className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleAddBlocker}
-									disabled={!blockerForm.description.trim()}
-									className="px-4 py-2 text-sm text-white bg-cyan-500 hover:bg-cyan-600 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									Add blocker
-								</button>
-							</div>
-						</div>
-					</div>
-				</>
+				<CreateBlockerModal
+				onClose={() => setIsAddBlockerOpen(false)}
+				ticket={selectedTicket}
+				form={blockerForm}
+				teamMembers={[]}
+				setForm={setBlockerForm}
+				onSubmit={handleAddBlocker}
+				/>
 			)}
 
 			{/* Confirmation Dialog */}
-			{/* {confirmDelete && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/40 z-50"
-						onClick={() => setConfirmDelete(null)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-							<div className="px-6 py-5">
-								<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
-									<AlertCircle className="w-6 h-6 text-rose-600" />
-								</div>
-								<h3 className="text-lg text-gray-900 text-center mb-2">
-									Delete {confirmDelete.type === "ticket" ? "Ticket" : "Task"}?
-								</h3>
-								<p className="text-sm text-gray-500 text-center">
-									This action cannot be undone.
-									{confirmDelete.type === "ticket" &&
-										" All tasks and blockers associated with this ticket will also be deleted."}
-								</p>
-							</div>
-
-							<div className="flex items-center gap-3 px-6 py-4 border-t border-gray-100">
-								<button
-									onClick={() => setConfirmDelete(null)}
-									className="flex-1 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={
-										confirmDelete.type === "ticket"
-											? handleDeleteTicket
-											: handleDeleteTask
-									}
-									className="flex-1 px-4 py-2 text-sm text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors"
-								>
-									Delete
-								</button>
-							</div>
-						</div>
-					</div>
-				</>
-			)} */}
+			<ConfirmDeleteDialogue
+				confirmDelete={confirmDelete}
+				onCancel={() => setConfirmDelete(null)}
+				onDeleteTicket={handleDeleteTicket}
+				onDeleteTask={handleDeleteTask}
+			/>
 		</div>
 	);
 }
