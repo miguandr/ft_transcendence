@@ -2,6 +2,15 @@
 // Later, replace with real fetch calls to http://localhost:8000/api/v1
 
 const API_URL = "http://localhost:8000/api/v1";
+
+// const rawApiUrl = import.meta.env.VITE_API_URL;
+// if (!rawApiUrl) {
+// 	throw new Error(
+// 		"Missing VITE_API_URL. Set it in frontend/.env or frontend/.env.local (see frontend/.env.example)."
+// 	);
+// }
+// const API_URL = rawApiUrl.replace(/\/+$/, "");
+
 const CURRENT_USER_ID_KEY = "current_user_id";
 
 // Simulate network delay
@@ -388,12 +397,7 @@ interface UpdateBlockerResponse {
 	resolved_at: string | null;
 }
 
-interface ApiError {
-	error: {
-		code: string;
-		message: string;
-	};
-}
+
 
 // =============================================================
 // HELPER FUNCTIONS
@@ -717,6 +721,7 @@ export async function setUserRole(data: {
 	return { success: true };
 }
 
+
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
 	await delay(300);
 
@@ -741,30 +746,30 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 // =============================================================
 
 // Login
-// export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-// 	// Simulate network delay (500ms)
-// 	await delay(500);
+export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+	// Simulate network delay (500ms)
+	await delay(500);
 
-// 	// Find user by email
-// 	const user = mockUsers.find((u) => u.email === credentials.email);
+	// Find user by email
+	const user = mockUsers.find((u) => u.email === credentials.email);
 
-// 	// Check if user exists and password matches
-// 	if (!user || user.password !== credentials.password) {
-// 		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
-// 	}
+	// Check if user exists and password matches
+	if (!user || user.password !== credentials.password) {
+		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
+	}
 
-// 	// Generate fake JWT token
-// 	const response: LoginResponse = {
-// 		access_token: `mock-jwt-token-${Date.now()}`,
-// 		token_type: "bearer",
-// 	};
+	// Generate fake JWT token
+	const response: LoginResponse = {
+		access_token: `mock-jwt-token-${Date.now()}`,
+		token_type: "bearer",
+	};
 
-// 	// Store token in localStorage
-// 	localStorage.setItem("token", response.access_token);
-// 	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
+	// Store token in localStorage
+	localStorage.setItem("token", response.access_token);
+	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
 
-// 	return response;
-// }
+	return response;
+}
 
 // =============================================================
 // MOCK SIGNUP
@@ -818,7 +823,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 // MOCK USER
 // =============================================================
 
-// Mock getCurrentUser function
+//Mock getCurrentUser function
 export async function getCurrentUser() : Promise<User> {
 	await delay(300);
 
@@ -1463,7 +1468,7 @@ export async function resolveBlocker(blocker_id: string): Promise<void> {
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
 
-
+/*
 // 1. LOGIN
 export async function login(credentials: LoginRequest): Promise<LoginResponse>
 {
@@ -1485,7 +1490,7 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse>
 
 	return data;
 }
-/*
+
 // 2. SIGNUP
 export async function signup(data: SignUpRequest): Promise<SignUpResponse>
 {
@@ -1552,6 +1557,7 @@ export async function setUserRole(data: {
 	scrum_role: "scrum_master" | "product_owner"
 }): Promise<{ success: boolean }>
 {
+	const token = localStorage.getItem("token");
 // This endpoint updates the current user's scrum role
 	const response = await fetch(`${API_URL}/users/me`, {
 		method: 'PATCH',
@@ -1634,7 +1640,7 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 	return response.json();
 }
 
-
+/*
 // 9. GET ORGANIZATION MEMBERS FULL INFO
 export async function getCurrentUserInfo(org_id: string): Promise<OrganizationMemberWithActivity[]>
 {
@@ -1681,5 +1687,5 @@ export async function removeMember(org_id: string, member_id: string): Promise<{
 12. TICKETS FUNCTIONS (PENDING)
 13. BLOCKERS FUNCTIONS (PENDING)
 14. TOPBAR FUNTIONS (PENDING)
-
+15. ANALYTICS FUNCTIONS (PENDING)
 */
