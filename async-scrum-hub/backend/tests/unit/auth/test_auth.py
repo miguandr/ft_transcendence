@@ -9,9 +9,11 @@ to run:
 docker-compose exec backend pytest tests/unit/auth/test_auth.py -v --tb=long
 """
 
+import uuid
 import pytest
 from jose import jwt
 from src.config.security import JWT_SECRET_KEY, JWT_ALGORITHM
+from src.database.models.user import User
 
 
 REGISTER_URL = "/auth/register"
@@ -83,30 +85,41 @@ class TestLogin:
         """Helper: register a user before testing login."""
         client.post(REGISTER_URL, json=VALID_USER)
 
-    def test_login_success(self, client):
+    def test_login_success(self, client, db_session):
         """Successful login returns 200 with access_token and token_type."""
         self._register_user(client)
+        user = db_session.query(User).filter(User.email == VALID_USER["email"]).first()
+        user.organization_id = uuid.uuid4()
+        db_session.commit()
         response = client.post(LOGIN_URL, json={"email": VALID_USER["email"], "password": VALID_USER["password"]})
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data
         assert data["token_type"] == "bearer"
 
-    def test_login_returns_valid_jwt(self, client):
+    def test_login_returns_valid_jwt(self, client, db_session):
         """The returned token should be a valid JWT with the user's id as sub."""
-        self._register_user(client)
-        # Get the user id from register
         reg_response = client.post(REGISTER_URL, json={
             "email": "jwt@test.com",
             "name": "JWT User",
             "password": "securepassword123",
         })
         user_id = reg_response.json()["id"]
+        user = db_session.query(User).filter(User.email == "jwt@test.com").first()
+        user.organization_id = uuid.uuid4()
+        db_session.commit()
 
         login_response = client.post(LOGIN_URL, json={"email": "jwt@test.com", "password": "securepassword123"})
         token = login_response.json()["access_token"]
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         assert payload["sub"] == user_id
+
+    def test_login_team_setup_not_done(self, client):
+        """User with valid credentials but no organization returns 403."""
+        self._register_user(client)
+        response = client.post(LOGIN_URL, json={"email": VALID_USER["email"], "password": VALID_USER["password"]})
+        assert response.status_code == 403
+        assert response.json()["detail"]["error"]["code"] == "TEAM_SETUP_NOT_DONE"
 
     def test_login_wrong_password(self, client):
         """Wrong password returns 401."""

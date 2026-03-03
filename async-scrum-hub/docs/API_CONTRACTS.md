@@ -1843,7 +1843,8 @@ Used to render the organization board.
 					"id":  "uuid",
 					"title": "string",
 				}
-		}],
+			}
+		],
 		"created_by": {
 			"id": "uuid (owner)",
 			"name": "string",
