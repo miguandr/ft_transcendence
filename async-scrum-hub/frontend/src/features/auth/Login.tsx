@@ -3,15 +3,21 @@ import { useState } from "react";
 import { login } from "../../services/api";
 import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
 import { motion } from "framer-motion";
+import { useAuth } from "../../routes/useAuth";
+import type { APIError } from "../../utils/shared.types";
+
 
 export function Login() {
 	const navigate = useNavigate();
+	const { refreshUser } = useAuth();
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState(""); // Stores password
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [isExiting, setIsExiting] = useState(false); // Track fade-out animation
+	const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
 
 	const validateForm = (): boolean => {
 		const newErrors: { email?: string; password?: string } = {};
@@ -50,28 +56,34 @@ export function Login() {
 
 		try {
 			const response = await login({ email, password });
-
-			// Save token to localStorage (browser storage persists until logout)
 			console.log("Login successful!", response);
-			//localStorage.setItem("token", response.access_token);
+
+			const currentUser = await refreshUser();
+			if (!currentUser) {
+				setErrors({ email: "Unable to load user data after login." });
+				return;
+			}
+			//localStorage.setItem("token", response.access_token); DELETE LATER
 
 			// Trigger fade-out animation (navigation happens in onAnimationComplete)
+			setRedirectTo(currentUser.organization_id ? "/dashboard" : "/team-setup");
 			setIsExiting(true);
 		} catch (error: unknown) {
 			console.error("Login failed:", error);
 
 			// Type assertion for API error format
-			type APIError = { error?: { code?: string; message?: string } };
 			const apiError = error as APIError;
+			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
+			const errorMessage = apiError?.detail?.error?.message ?? apiError?.error?.message;
 
-			if (apiError?.error?.code === "INVALID_CREDENTIALS") {
+			if (error instanceof TypeError && error.message === "Failed to fetch") {
+				setErrors({ email: "Unable to connect to the server. Check that the backend is running." });
+			} else if (errorCode === "INVALID_CREDENTIALS") {
 				setErrors({ email: "Email or password is incorrect" });
-			} else if (apiError?.error?.code === "INVALID_INPUT") {
+			} else if (errorCode === "INVALID_INPUT") {
 				setErrors({ email: "Email or password is missing" });
-			} else if (apiError?.error?.message) {
-				setErrors({ email: apiError.error.message });
-			} else if (error instanceof Error) {
-				setErrors({ email: error.message });
+			} else if (errorMessage) {
+				setErrors({ email: errorMessage });
 			} else {
 				setErrors({ email: "An unexpected error occurred." });
 			}
@@ -88,8 +100,8 @@ export function Login() {
 				animate={{ opacity: isExiting ? 0 : 1 }}
 				transition={{ duration: 0.4, ease: "easeOut" }}
 				onAnimationComplete={() => {
-					if (isExiting) {
-						navigate("/dashboard");
+					if (isExiting && redirectTo) {
+						navigate(redirectTo);
 					}
 				}}
 			>
