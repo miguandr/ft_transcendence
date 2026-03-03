@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status, Depends
+from fastapi import HTTPException, status
 
 from src.database.models import User
-from src.api.deps import get_current_user
 from src.config.security import hash_password, verify_password, create_access_token
 from src.auth.schemas import LoginResponse
 
