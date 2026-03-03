@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from src.database.models.enums import TicketStatus, Priority
 from src.users.schemas import UserBriefTicket
+from src.schemas.common import UserBrief
 
 class TicketBriefOrg(BaseModel):
 	id: UUID
@@ -32,7 +33,7 @@ class CreateTicketResponse(BaseModel):
 	description: Optional[str]
 	status: TicketStatus
 	priority: Priority
-	created_by: UUID
+	created_by: UserBrief
 	assignee_id: Optional[UUID]
 	organization_id: UUID
 	created_at: datetime
@@ -42,7 +43,7 @@ class CreateTicketResponse(BaseModel):
 
 #class ListTicketsResponse(BaseModel):
 #    tickets: list[TicketBriefList]
-	
+
 class TicketDetailResponse(CreateTicketResponse):
 	pass
 
