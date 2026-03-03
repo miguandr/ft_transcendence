@@ -1,4 +1,3 @@
-
 ## 3. Organizations
 
 ### 3.1 Create Organization
@@ -385,4 +384,3 @@
 }
 ```
 ---
-
