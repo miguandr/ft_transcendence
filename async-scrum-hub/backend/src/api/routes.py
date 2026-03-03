@@ -9,6 +9,8 @@ from src.organizations import routes as org_routes
 from src.tickets import routes as ticket_routes
 from src.tasks import routes as task_routes
 
+from src.analytics import routes as analytics_routes
+from src.dashboard import routes as dashboard_routes
 
 api_router = APIRouter()
 
@@ -20,3 +22,6 @@ api_router.include_router(legal_routes.router, tags=["legal"])
 api_router.include_router(org_routes.router, tags=["organizations"])
 api_router.include_router(ticket_routes.router, tags=["tickets"])
 api_router.include_router(task_routes.router, tags=["tasks"])
+api_router.include_router(analytics_routes.router, tags=["analytics"])
+api_router.include_router(dashboard_routes.router, tags=["dashboard"])
+

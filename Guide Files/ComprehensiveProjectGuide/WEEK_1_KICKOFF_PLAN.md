@@ -4,7 +4,7 @@
 **Sprint Goal:** Dev environment ready, architecture locked, team can work independently
 
 **Timeline:** 7 days (Mon-Sun)
-**Team:** 4 developers (You, Daniel, Freddy, Malu)
+**Team:** 4 developers (You, Daniel, Freddy, Maria Luiza)
 **Mode:** 100% Remote - Async standups + 1 sync call Wednesday
 
 ---
@@ -181,7 +181,7 @@ git checkout -b feat/<your-area>
 # Migual: feat/design-system-setup
 # Daniela: feat/backend-scaffolding
 # Freddy: feat/user-stories
-# Malu: feat/websocket-research
+# Maria Luiza: feat/websocket-research
 ```
 
 #### Afternoon (Parallel Work - Independent)
@@ -393,7 +393,7 @@ Validation:
 - [ ] Commit: `git commit -m "docs: add user stories and acceptance criteria"`
 - [ ] Push: `git push origin feat/user-stories`
 
-**Malu's Tasks (WebSocket Research & Docker Setup):**
+**Maria Luiza's Tasks (WebSocket Research & Docker Setup):**
 
 Create `docker-compose.yml`:
 ```yaml
@@ -511,7 +511,7 @@ SMTP_PASS=your-app-password
 
 Create research document `docs/WEBSOCKET_ARCHITECTURE.md`:
 ```markdown
-# WebSocket Architecture Research - Malu
+# WebSocket Architecture Research - Maria Luiza
 
 ## Socket.io with NestJS
 - Gateway decorator pattern
@@ -538,7 +538,7 @@ Week 6: Advanced (presence, typing indicators)
 #### End of Monday Checklist:
 - [ ] Daniela: Backend runs locally (`npm run dev`)
 - [ ] Miguel: Frontend runs locally (`npm run dev`)
-- [ ] Malu: Docker Compose drafted
+- [ ] Maria Luiza: Docker Compose drafted
 - [ ] Freddy: User stories documented
 - [ ] Everyone: Pushed to feature branch
 
@@ -1220,7 +1220,7 @@ Run seed:
 npx prisma db seed
 ```
 
-**Malu: Test Docker Setup**
+**Maria Luiza: Test Docker Setup**
 ```bash
 # From repo root
 docker-compose up --build
@@ -1261,7 +1261,7 @@ git push origin dev
    - Daniela: Show backend running, database schema, API contracts
    - Miguel: Show frontend running, design tokens, Tailwind config
    - Freddy: Walk through user stories, acceptance criteria
-   - Malu: Show Docker Compose, all services running
+   - Maria Luiza: Show Docker Compose, all services running
 
 2. **Integration Check (15 min)**
    - Test: Frontend can call backend health endpoint
@@ -1284,7 +1284,7 @@ git push origin dev
 - [ ] Daniela: Implement POST /api/auth/register endpoint
 - [ ] You: Create Login form component
 - [ ] Freddy: Test registration flow manually
-- [ ] Malu: Add WebSocket placeholder endpoint
+- [ ] Maria Luiza: Add WebSocket placeholder endpoint
 
 ---
 
@@ -1308,7 +1308,7 @@ git push origin dev
 - [ ] Implement GET /api/organizations (filtered by user membership)
 - [ ] Add permission checks (must be logged in)
 
-**Malu: File Upload Prep**
+**Maria Luiza: File Upload Prep**
 - [ ] Create uploads/ folder in backend
 - [ ] Setup Multer middleware
 - [ ] Create POST /api/files endpoint (basic version)
@@ -1347,7 +1347,7 @@ git push origin dev
 - Show seed data matches stories
 - Show organizations endpoint working
 
-**Malu's Demo:**
+**Maria Luiza's Demo:**
 - Show Docker Compose starting all services
 - Show WebSocket research doc
 - Show file upload endpoint basics
@@ -1510,7 +1510,7 @@ By end of Week 1, you should be able to:
 4. **Tag specific person** if urgent:
    - Backend: @Daniela
    - Frontend: @Miguel
-   - Real-time: @Malu
+   - Real-time: @Maria Luiza
    - Product: @Freddy
 
 ---

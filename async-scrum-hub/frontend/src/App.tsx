@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { Sidebar } from "./components/layout/Sidebar";
+import { Sidebar } from "./components/layout/SideBar/Sidebar";
 import { TopBar } from "./components/layout/TopBar/TopBar";
 //import { WelcomeAnimation } from "./features/auth/WelcomeAnimation";
 import { Welcome } from "./features/auth/Welcome";
@@ -9,7 +9,7 @@ import { TeamSetup } from "./features/auth/TeamSetup";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
-import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
+//import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
 import { Analytics } from "./features/analytics/Analytics";
 import { Info } from "./features/info/Info";
@@ -42,7 +42,6 @@ function AppLayout() {
 						<Route path="/dashboard" element={<Dashboard />} />
 						<Route path="/board" element={<SprintBoard />} />
 						<Route path="/standup" element={<AsyncStandup />} />
-						<Route path="/standup-empty" element={<AsyncStandupEmpty />} />
 						<Route path="/blockers" element={<Blockers />} />
 						<Route path="/analytics" element={<Analytics />} />
 						<Route path="/info" element={<Info />} />
