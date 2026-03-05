@@ -31,7 +31,7 @@ export function CreateBlockerModal({
 			>
 				<div className="space-y-4">
 						<div>
-							<Label className="mb-1.5">
+							<Label>
 								Description <span className="text-rose-500">*</span>
 							</Label>
 							<textarea
@@ -48,7 +48,7 @@ export function CreateBlockerModal({
 							/>
 						</div>
 						<div>
-							<Label className="mb-1.5">
+							<Label>
 								Associated Ticket
 							</Label>
 							<Input

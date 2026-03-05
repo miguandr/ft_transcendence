@@ -17,6 +17,18 @@ export interface Ticket {
 	organization_id: string;
 	created_at: string;
 	updated_at: string;
+	tasks: {
+		id: string;
+		title: string;
+		status: TaskStatus;
+		ticket_is: string;
+	}
+	blockers: {
+		id: string;
+		description: string;
+		status: BlockerStatus;
+		created_at: string;
+	}
 }
 
 export interface ListTicketsBoard
