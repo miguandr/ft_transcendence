@@ -22,12 +22,12 @@ import type {
 export function useSprintBoard() {
 
 	// View/UI states
-	const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
+	const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
 	const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
 	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
-	const [isAddBlockerOpen, setIsAddBlockerOpen] = useState(false);
+	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<{
 		type: "ticket" | "task";
 		id: string;
@@ -70,9 +70,8 @@ export function useSprintBoard() {
 		? formatScrumRole(currentUser.scrum_role)
 		: "";
 	// Derived UI logic (permissions)
-	const canAddTicket =
+	const canCreateTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-
 	const canDragTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
 	const canEditTicketPriority =
@@ -105,7 +104,7 @@ export function useSprintBoard() {
 			tasks: [],
 		};
 		setTickets([...tickets, newTicket]);
-		setIsAddTicketOpen(false);
+		setIsCreateTicketOpen(false);
 		setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
 	};
 
@@ -164,7 +163,7 @@ export function useSprintBoard() {
 		}
 	};
 
-	const handleAddBlocker = () => {
+	const handleCreateBlocker = () => {
 		if (selectedTicket) {
 			const newBlocker: Blocker = {
 				id: Date.now(),
@@ -174,7 +173,7 @@ export function useSprintBoard() {
 				ticketId: selectedTicket.id,
 			};
 			setBlockers([...blockers, newBlocker]);
-			setIsAddBlockerOpen(false);
+			setIsCreateBlockerOpen(false);
 			setBlockerForm({ description: "", assignee: "" });
 		}
 	};
@@ -185,13 +184,13 @@ export function useSprintBoard() {
 
 	// Drag handlers for tickets
 	const handleTicketDragStart = (ticket: Ticket) => {
-		if (canDragTickets) {
+		if (canDragTicket) {
 			setDraggedTicket(ticket);
 		}
 	};
 
 	const handleTicketDrop = (status: TicketStatus) => {
-		if (draggedTicket && canDragTickets) {
+		if (draggedTicket && canDragTicket) {
 			setTickets(tickets.map((t) => (t.id === draggedTicket.id ? { ...t, status } : t)));
 			setDraggedTicket(null);
 		}
@@ -235,11 +234,11 @@ export function useSprintBoard() {
 
 	return {
 		// States
-		isAddTicketOpen,
+		isCreateTicketOpen,
 		ticketForm,
 		isEditTicketOpen,
 		isCreateTaskOpen,
-		isAddBlockerOpen,
+		isCreateBlockerOpen,
 		selectedTicket,
 		currentUser,
 		selectedTask,
@@ -248,12 +247,12 @@ export function useSprintBoard() {
 		taskForm,
 
 		// Setters
-		setIsAddTicketOpen,
+		setIsCreateTicketOpen,
 		setSelectedTicketId,
 		setTicketForm,
 		setIsCreateTaskOpen,
 		setSelectedTask,
-		setIsAddBlockerOpen,
+		setIsCreateBlockerOpen,
 		setIsEditTicketOpen,
 		setConfirmDelete,
 		setTaskForm,
@@ -271,7 +270,7 @@ export function useSprintBoard() {
 		handleResolveBlocker,
 		handleEditTicket,
 		handleCreateTask,
-		handleAddBlocker,
+		handleCreateBlocker,
 		handleDeleteTicket,
 		handleDeleteTask,
 		handleTaskDragStart,
@@ -282,7 +281,7 @@ export function useSprintBoard() {
 		canEditTicketPriority,
 		canEditTicket,
 		canDeleteTicket,
-		canAddTicket,
+		canCreateTicket,
 		canDragTicket,
 		canDragTask,
 

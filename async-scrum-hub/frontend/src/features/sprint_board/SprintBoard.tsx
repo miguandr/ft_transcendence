@@ -1,8 +1,6 @@
 import { Plus, X, AlertCircle, GripVertical, Trash2, Edit2, CheckCircle } from "lucide-react";
 import { PRIORITY_COLORS, BOARD_COLUMNS, PRIORITY_OPTIONS } from "./constants/sprint.constants";
-import { Priority, TicketStatus, TaskStatus, UserRole, BlockerStatus } from "./types/sprint.types";
 import { useSprintBoard } from "./hooks/useSprintBoard";
-import type { Ticket, ListTicketsBoard, Task, TaskSummary, Blocker } from "./types/sprint.types";
 import { ConfirmDeleteDialogue } from "./components/ConfirmDeleteDialogue";
 import { CreateBlockerModal } from "./components/modals/CreateBlockerModal"
 import { TaskDetailModal } from "./components/modals/TaskDetailModal";
@@ -13,11 +11,11 @@ import { TicketDetailModal } from "./components/modals/TicketDetailModal";
 export function SprintBoard() {
 	const {
 		// States
-		isAddTicketOpen,
+		isCreateTicketOpen,
 		ticketForm,
 		isEditTicketOpen,
 		isCreateTaskOpen,
-		isAddBlockerOpen,
+		isCreateBlockerOpen,
 		selectedTicket,
 		currentUser,
 		selectedTask,
@@ -26,12 +24,12 @@ export function SprintBoard() {
 		taskForm,
 
 		// Setters
-		setIsAddTicketOpen,
+		setIsCreateTicketOpen,
 		setSelectedTicketId,
 		setTicketForm,
 		setIsCreateTaskOpen,
 		setSelectedTask,
-		setIsAddBlockerOpen,
+		setIsCreateBlockerOpen,
 		setIsEditTicketOpen,
 		setConfirmDelete,
 		setTaskForm,
@@ -46,21 +44,19 @@ export function SprintBoard() {
 		handleTicketDragStart,
 		handleCreateTicket,
 		handleTaskDrop,
-		handleResolveBlocker,
 		handleEditTicket,
 		handleCreateTask,
-		handleAddBlocker,
+		handleCreateBlocker,
 		handleDeleteTicket,
 		handleDeleteTask,
 		handleTaskDragStart,
 
 		// Permissions
-		canResolveBlocker,
 		canEditTask,
 		canEditTicketPriority,
 		canEditTicket,
 		canDeleteTicket,
-		canAddTicket,
+		canCreateTicket,
 		canDragTicket,
 		canDragTask,
 	} = useSprintBoard();
@@ -73,13 +69,13 @@ export function SprintBoard() {
 					<p className="text-sm text-gray-500">Visualize your team's workflow</p>
 				</div>
 				<div className="flex flex-col items-end gap-1">
-					{canAddTicket ? (
+					{canCreateTicket ? (
 						<button
-							onClick={() => setIsAddTicketOpen(true)}
+							onClick={() => setIsCreateTicketOpen(true)}
 							className="flex items-center gap-2 px-4 py-2 text-sm text-cyan-700 bg-white border border-cyan-200 rounded-xl hover:bg-cyan-50 transition-colors"
 						>
 							<Plus className="w-4 h-4" />
-							Add Ticket
+							Create Ticket
 						</button>
 					) : (
 						<div className="relative group">
@@ -88,10 +84,10 @@ export function SprintBoard() {
 								className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed"
 							>
 								<Plus className="w-4 h-4" />
-								Add Ticket
+								Create Ticket
 							</button>
 							<div className="absolute right-0 top-full mt-1 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-								Only Product Owner or Scrum Master can add tickets
+								Only Product Owner or Scrum Master can create tickets
 							</div>
 						</div>
 					)}
@@ -181,24 +177,24 @@ export function SprintBoard() {
 				})}
 			</div>
 
-			{/* Add Ticket Modal */}
-			{isAddTicketOpen && (
+			{/* Create Ticket Modal */}
+			{isCreateTicketOpen && (
 				<>
 					<div
 						className="fixed inset-0 bg-black/20 z-40"
-						onClick={() => setIsAddTicketOpen(false)}
+						onClick={() => setIsCreateTicketOpen(false)}
 					/>
 					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
 						<div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
 							<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
 								<div>
-									<h3 className="text-lg text-gray-900">Add Ticket</h3>
+									<h3 className="text-lg text-gray-900">Create Ticket</h3>
 									<p className="text-xs text-gray-500 mt-0.5">
 										New tickets will appear in To Do
 									</p>
 								</div>
 								<button
-									onClick={() => setIsAddTicketOpen(false)}
+									onClick={() => setIsCreateTicketOpen(false)}
 									className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
 								>
 									<X className="w-5 h-5 text-gray-400" />
@@ -294,7 +290,7 @@ export function SprintBoard() {
 
 							<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
 								<button
-									onClick={() => setIsAddTicketOpen(false)}
+									onClick={() => setIsCreateTicketOpen(false)}
 									className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
 								>
 									Cancel
@@ -313,7 +309,7 @@ export function SprintBoard() {
 			)}
 
 			{/* Ticket Detail Modal */}
-				{selectedTicket && !isEditTicketOpen && !isCreateTaskOpen && !isAddBlockerOpen && (
+				{selectedTicket && !isEditTicketOpen && !isCreateTaskOpen && !isCreateBlockerOpen && (
 				<TicketDetailModal
 					ticket={selectedTicket}
 					tasks={[]}
@@ -321,7 +317,7 @@ export function SprintBoard() {
 
 					onClose={() => setSelectedTicketId(null)}
 					onOpenCreateTask={() => setIsCreateTaskOpen(true)}
-					onOpenCreateBlocker={() => setIsAddBlockerOpen(true)}
+					onOpenCreateBlocker={() => setIsCreateBlockerOpen(true)}
 					onOpenEdit={() => {
 						setTicketForm({
 							...ticketForm,
@@ -379,15 +375,15 @@ export function SprintBoard() {
 				/>
 			)}
 
-			{/* Add Blocker Modal */}
-			{isAddBlockerOpen && selectedTicket && (
+			{/* Create Blocker Modal */}
+			{isCreateBlockerOpen && selectedTicket && (
 				<CreateBlockerModal
-					onClose={() => setIsAddBlockerOpen(false)}
+					onClose={() => setIsCreateBlockerOpen(false)}
 					ticket={selectedTicket}
 					form={blockerForm}
 					teamMembers={[]}
 					setForm={setBlockerForm}
-					onSubmit={handleAddBlocker}
+					onSubmit={handleCreateBlocker}
 				/>
 			)}
 
