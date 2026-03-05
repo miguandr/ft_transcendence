@@ -72,12 +72,19 @@ export function useSprintBoard() {
 	// Derived UI logic (permissions)
 	const canAddTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canDragTickets =
+
+	const canDragTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canEditTicket =
+	const canEditTicketPriority =
 		currentUser?.scrum_role === "product_owner";
+	const canEditTicket =
+		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
 	const canDeleteTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
+	const canDragTask =
+		currentUser?.scrum_role === "product_owner" ||
+		currentUser?.scrum_role === "scrum_master" ||
+		currentUser.id === selectedTask.assignee_id;
 	const canEditTask = (task: Task) =>
 		currentUser?.scrum_role === "product_owner" ||
 		currentUser?.scrum_role === "scrum_master" ||
@@ -102,7 +109,7 @@ export function useSprintBoard() {
 		setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
 	};
 
-	const handleUpdateTicketPriority = () => {
+	const handleEditTicket = () => {
 		if (selectedTicket) {
 			setTickets(
 				tickets.map((t) =>
@@ -142,23 +149,6 @@ export function useSprintBoard() {
 		}
 	};
 
-	const handleUpdateTask = (updatedTask: Task) => {
-		if (selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id
-						? {
-								...t,
-								tasks: t.tasks.map((task: Task) =>
-									task.id === updatedTask.id ? updatedTask : task
-								),
-							}
-						: t
-				)
-			);
-			setSelectedTask(null);
-		}
-	};
 
 	const handleDeleteTask = () => {
 		if (confirmDelete?.type === "task" && selectedTicket) {
@@ -255,6 +245,7 @@ export function useSprintBoard() {
 		selectedTask,
 		blockerForm,
 		confirmDelete,
+		taskForm,
 
 		// Setters
 		setIsAddTicketOpen,
@@ -278,18 +269,22 @@ export function useSprintBoard() {
 		handleCreateTicket,
 		handleTaskDrop,
 		handleResolveBlocker,
-		handleUpdateTicketPriority,
+		handleEditTicket,
 		handleCreateTask,
 		handleAddBlocker,
 		handleDeleteTicket,
 		handleDeleteTask,
+		handleTaskDragStart,
 
 		// Permissions
 		canResolveBlocker,
 		canEditTask,
+		canEditTicketPriority,
 		canEditTicket,
 		canDeleteTicket,
 		canAddTicket,
-		canDragTickets,
+		canDragTicket,
+		canDragTask,
+
 	}
 }
