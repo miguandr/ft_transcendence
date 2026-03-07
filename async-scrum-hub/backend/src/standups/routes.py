@@ -29,7 +29,7 @@ from src.database import get_db
 from src.database.models import User
 from src.database.models.organization import Organization
 from src.database.models.standup import Standup
-from src.api.deps import require_org_permission, require_resource_permission
+from src.api.deps import get_current_user, require_org_permission, require_resource_permission
 from src.standups import service
 from src.standups.schemas import (
 	StandupCreateRequest,
@@ -37,6 +37,7 @@ from src.standups.schemas import (
 	StandupCreateResponse,
 	StandupResponse,
 )
+from src.realtime.connection_manager import manager
 
 router = APIRouter()
 
@@ -50,7 +51,7 @@ def get_standup_loader(standup_id: uuid.UUID, db: Session = Depends(get_db)) -> 
 	response_model=StandupCreateResponse,
 	status_code=status.HTTP_201_CREATED,
 )
-def create_standup(
+async def create_standup(
 	org_id: uuid.UUID,
 	body: StandupCreateRequest,
 	db: Session = Depends(get_db),
@@ -64,7 +65,7 @@ def create_standup(
 		)
 
 	standup = service.create_standup(db, org_id, current_user, body.today)
-	return StandupCreateResponse(
+	response = StandupCreateResponse(
 		id=standup.id,
 		created_at=standup.created_at,
 		today=standup.today,
@@ -72,6 +73,23 @@ def create_standup(
 		blocker_ids=standup.blocker_ids,
 		created_by=standup.creator,
 	)
+	await manager.broadcast(
+		str(org_id),
+		"standup.created",
+		{
+			"id": str(standup.id),
+			"created_at": standup.created_at.isoformat(),
+			"today": standup.today,
+			"yesterday": standup.yesterday,
+			"blocker_ids": [str(bid) for bid in (standup.blocker_ids or [])],
+			"created_by": {
+				"id": str(standup.creator.id),
+				"name": standup.creator.name,
+				"avatar_url": standup.creator.avatar_url,
+			},
+		},
+	)
+	return response
 
 
 @router.get(
@@ -111,13 +129,26 @@ def list_standups(
 	response_model=StandupResponse,
 	status_code=status.HTTP_200_OK,
 )
-def update_standup(
+async def update_standup(
 	body: StandupUpdateRequest,
 	db: Session = Depends(get_db),
 	standup: Standup = Depends(require_resource_permission("standups:update", get_standup_loader)),
+	current_user: User = Depends(get_current_user),
 ):
 	updated = service.update_standup(db, standup, body.today)
 	blockers = service.resolve_blocker_ids(db, updated.blocker_ids)
+	await manager.broadcast(
+		str(updated.organization_id),
+		"standup.updated",
+		{
+			"id": str(updated.id),
+			"today": updated.today,
+			"updated_by": {
+				"id": str(current_user.id),
+				"name": current_user.name,
+			},
+		},
+	)
 	return StandupResponse(
 		id=updated.id,
 		created_at=updated.created_at,
