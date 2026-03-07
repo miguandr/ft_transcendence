@@ -245,7 +245,7 @@ export function TopBar() {
 														name={currentUser?.name}
 														userId={currentUser?.id}
 														className="w-20 h-20"
-														initialsClassName="text-2xl font-semibold"
+														initialsClassName="text-2xl"
 													/>
 												)}
 											</div>
