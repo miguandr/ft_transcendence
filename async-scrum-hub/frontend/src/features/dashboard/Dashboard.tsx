@@ -70,9 +70,7 @@ export function Dashboard() {
 							<div className="flex-1 min-w-0">
 								<div className="flex items-baseline gap-2 mb-1">
 									<span className="text-sm text-gray-900">{update.user.name}</span>
-									<span className="text-xs text-gray-400 ml-auto">
-										{formatRelativeTime(update.timestamp)}
-									</span>
+									<span className="text-xs text-gray-400">{formatRelativeTime(update.timestamp)}</span>
 								</div>
 								<p className="text-sm text-gray-500 capitalize">
 									{update.event} {update.type}: {update.title}

@@ -48,15 +48,15 @@ export function TopBar() {
 	} = useTopBar();
 
 	return (
-		<header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-6">
-			<div className="flex items-center flex-1 max-w-xl">
-				<div className="relative w-full">
-					<h1 className="text-3xl tracking-tight text-center text-gray-400">{currentUser?.org_name}</h1>
-					{errors.user && <p className="text-xs text-red-500">{errors.user}</p>}
-				</div>
+		<header className="h-16 border-b border-gray-100 bg-white grid grid-cols-3 items-center px-6">
+			<div />
+
+			<div className="flex flex-col items-center">
+				<h1 className="text-3xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
+				{errors.user && <p className="text-xs text-red-500">{errors.user}</p>}
 			</div>
 
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 justify-end">
 				<div className="relative pl-4 border-l border-gray-100">
 					<button
 						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
