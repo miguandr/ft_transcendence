@@ -17,7 +17,7 @@ export function formatScrumRole(
 }
 
 // UI generators
-export function generateAvatar(name: string): string {
+export function generateAvatarInitials(name: string): string {
 	const parts = name.split(" ");
 	return parts
 		.map((part) => part[0])
