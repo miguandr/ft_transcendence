@@ -437,11 +437,17 @@ export interface DashboardData {
 		active_blockers: number;
 	};
 	recent_updates: Array<{
+		user: {
+			id: string
+			name: string;
+			avatar_url: string;
+		};
 		type: "task" | "ticket";
 		event: "created" | "completed";
 		title: string;
 		timestamp: string;
 	}>;
+
 }
 
 // =============================================================
@@ -1483,6 +1489,50 @@ export async function resolveBlocker(blocker_id: string): Promise<void> {
 }
 
 // =============================================================
+// MOCK DASHBOARD
+// =============================================================
+
+export async function getDashboardData(org_id: string): Promise<DashboardData> {
+	await delay(400);
+
+	const token = localStorage.getItem("token");
+	if (!token) createApiError("UNAUTHORIZED", "Missing token");
+
+	void org_id;
+
+	return {
+		summary: {
+			tasks_in_progress: 5,
+			tickets_completed: 12,
+			active_blockers: 2,
+		},
+		recent_updates: [
+			{
+				user: { id: "u1", name: "Alex Kim", avatar_url: "" },
+				type: "ticket",
+				event: "completed",
+				title: "Fix login bug on mobile",
+				timestamp: new Date(Date.now() - 48 * 60 * 1000).toISOString(),
+			},
+			{
+				user: { id: "u2", name: "Maria Lopez", avatar_url: "" },
+				type: "task",
+				event: "created",
+				title: "Update chart labels on analytics dashboard",
+				timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+			},
+			{
+				user: { id: "u3", name: "Jordan Lee", avatar_url: "" },
+				type: "ticket",
+				event: "created",
+				title: "Resolve payment processing timeout",
+				timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+			},
+		],
+	};
+}
+
+// =============================================================
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
 
@@ -1597,7 +1647,7 @@ export async function uploadAvatar(
 
 	return response.json();
 }
-	
+
 
 // 3.1 CREATE ORGANIZATION
 export async function createOrganization(data:

@@ -1,5 +1,5 @@
 import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { Card, PageHeader, StatCard } from "../../components/custom";
+import { Avatar, Card, PageHeader, StatCard } from "../../components/custom";
 import { useDashboard } from "./useDashboard";
 import { formatRelativeTime } from "../../utils/formatters";
 
@@ -22,7 +22,7 @@ export function Dashboard() {
 	return (
 		<div className="p-8 space-y-6">
 			<PageHeader
-				title={`Good morning, ${user?.name}`}
+				title={`Hello ${user?.name?.split(" ")[0]},`}
 				subtitle="Here's what's happening with your team today"
 			/>
 
@@ -51,7 +51,7 @@ export function Dashboard() {
 			</div>
 
 			<Card>
-				<h3 className="text-base text-gray-900 mb-4">Recent Updates</h3>
+				<h3 className="text-base font-semibold text-gray-900 mb-4">Recent Updates</h3>
 				<div className="space-y-4">
 					{data?.recent_updates.length === 0 && (
 						<p className="text-sm text-gray-400">No recent updates.</p>
@@ -61,16 +61,22 @@ export function Dashboard() {
 							key={index}
 							className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
 						>
+							<Avatar
+								name={update.user.name}
+								userId={update.user.id}
+								avatarUrl={update.user.avatar_url}
+								size="md"
+							/>
 							<div className="flex-1 min-w-0">
 								<div className="flex items-baseline gap-2 mb-1">
-									<span className="text-xs text-gray-400 capitalize">{update.type}</span>
-									<span className="text-xs text-gray-300">·</span>
-									<span className="text-xs text-gray-400 capitalize">{update.event}</span>
+									<span className="text-sm text-gray-900">{update.user.name}</span>
 									<span className="text-xs text-gray-400 ml-auto">
 										{formatRelativeTime(update.timestamp)}
 									</span>
 								</div>
-								<p className="text-sm text-gray-700">{update.title}</p>
+								<p className="text-sm text-gray-500 capitalize">
+									{update.event} {update.type}: {update.title}
+								</p>
 							</div>
 						</div>
 					))}

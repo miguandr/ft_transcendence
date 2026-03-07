@@ -51,7 +51,7 @@ export function TopBar() {
 		<header className="h-16 border-b border-gray-100 bg-white flex items-center justify-between px-6">
 			<div className="flex items-center flex-1 max-w-xl">
 				<div className="relative w-full">
-					<h1 className="text-xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
+					<h1 className="text-3xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
 					{errors.user && <p className="text-xs text-red-500">{errors.user}</p>}
 				</div>
 			</div>
@@ -245,6 +245,7 @@ export function TopBar() {
 														name={currentUser?.name}
 														userId={currentUser?.id}
 														className="w-20 h-20"
+														initialsClassName="text-2xl font-semibold"
 													/>
 												)}
 											</div>
