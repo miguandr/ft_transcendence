@@ -51,6 +51,7 @@ export function Info() {
 				setOrgId(user.organization_id);
 
 				// Step 2: Fetch members using org_id
+				// Change for getOrganizationMembers !!!!!!
 				if (user.organization_id) {
 					const membersData = await getCurrentUserInfo(user.organization_id);
 

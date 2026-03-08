@@ -16,12 +16,20 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 
 from src.dashboard.schemas import DashboardSummary, RecentUpdateItem, DashboardResponse
+from src.schemas.common import UserBrief
 from src.dashboard import service
 from src.database.models import Task, Ticket, Blocker
 from src.database.models.enums import TaskStatus, TicketStatus, BlockerStatus, Priority
 
 
 DASHBOARD_URL = "/organizations/{org_id}/dashboard"
+
+
+def make_user_brief(user=None):
+	"""Helper to build a UserBrief, optionally from a User ORM object."""
+	if user is not None:
+		return UserBrief.model_validate(user)
+	return UserBrief(id=uuid4(), name="Test User", avatar_url=None)
 
 
 # ---------------------------------------------------------------------------
@@ -38,17 +46,36 @@ class TestDashboardSchemas:
 
 	def test_recent_update_item_created(self):
 		now = datetime.now(timezone.utc)
-		item = RecentUpdateItem(type="task", event="created", title="My Task", timestamp=now)
+		created_by = make_user_brief()
+		item = RecentUpdateItem(type="task", event="created", title="My Task", timestamp=now, created_by=created_by)
 		assert item.type == "task"
 		assert item.event == "created"
 		assert item.title == "My Task"
 		assert item.timestamp == now
+		assert item.created_by == created_by
 
 	def test_recent_update_item_completed(self):
 		now = datetime.now(timezone.utc)
-		item = RecentUpdateItem(type="ticket", event="completed", title="My Ticket", timestamp=now)
+		created_by = make_user_brief()
+		item = RecentUpdateItem(type="ticket", event="completed", title="My Ticket", timestamp=now, created_by=created_by)
 		assert item.type == "ticket"
 		assert item.event == "completed"
+		assert item.created_by == created_by
+
+	def test_recent_update_item_created_by_has_user_brief_fields(self):
+		now = datetime.now(timezone.utc)
+		user_id = uuid4()
+		created_by = UserBrief(id=user_id, name="Alice", avatar_url="https://example.com/avatar.png")
+		item = RecentUpdateItem(type="task", event="created", title="Task", timestamp=now, created_by=created_by)
+		assert item.created_by.id == user_id
+		assert item.created_by.name == "Alice"
+		assert item.created_by.avatar_url == "https://example.com/avatar.png"
+
+	def test_recent_update_item_created_by_nullable_avatar(self):
+		now = datetime.now(timezone.utc)
+		created_by = UserBrief(id=uuid4(), name="Bob", avatar_url=None)
+		item = RecentUpdateItem(type="task", event="created", title="Task", timestamp=now, created_by=created_by)
+		assert item.created_by.avatar_url is None
 
 	def test_dashboard_response(self):
 		summary = DashboardSummary(tasks_in_progress=0, tickets_completed=0, active_blockers=0)
@@ -219,6 +246,46 @@ class TestGetDashboardService:
 		for i in range(len(items) - 1):
 			assert items[i].timestamp >= items[i + 1].timestamp
 
+	def test_recent_updates_task_has_created_by(self, db_setup):
+		"""Each task update item has a populated created_by UserBrief."""
+		user, session, org_id = db_setup
+		session.add(Task(
+			id=uuid4(),
+			title="Task With Creator",
+			organization_id=org_id,
+			created_by=user.id,
+			ticket_id=uuid4(),
+			status=TaskStatus.IN_PROGRESS,
+		))
+		session.commit()
+		result = service.get_dashboard(session, user, org_id)
+		task_items = [i for i in result.recent_updates if i.type == "task"]
+		assert len(task_items) > 0
+		item = task_items[0]
+		assert isinstance(item.created_by, UserBrief)
+		assert item.created_by.id == user.id
+		assert item.created_by.name == user.name
+
+	def test_recent_updates_ticket_has_created_by(self, db_setup):
+		"""Each ticket update item has a populated created_by UserBrief."""
+		user, session, org_id = db_setup
+		session.add(Ticket(
+			id=uuid4(),
+			title="Ticket With Creator",
+			organization_id=org_id,
+			created_by=user.id,
+			status=TicketStatus.COMPLETED,
+			priority=Priority.MEDIUM,
+		))
+		session.commit()
+		result = service.get_dashboard(session, user, org_id)
+		ticket_items = [i for i in result.recent_updates if i.type == "ticket"]
+		assert len(ticket_items) > 0
+		item = ticket_items[0]
+		assert isinstance(item.created_by, UserBrief)
+		assert item.created_by.id == user.id
+		assert item.created_by.name == user.name
+
 
 # ---------------------------------------------------------------------------
 # Route tests
@@ -264,3 +331,40 @@ class TestDashboardRoute:
 		user, session, org_id = db_setup
 		data = client.get(DASHBOARD_URL.format(org_id=org_id)).json()
 		assert isinstance(data["recent_updates"], list)
+
+	def test_recent_update_item_has_created_by(self, client, db_setup):
+		"""Each item in recent_updates has a created_by object with id, name, avatar_url."""
+		user, session, org_id = db_setup
+		session.add(Task(
+			id=uuid4(),
+			title="Route Task",
+			organization_id=org_id,
+			created_by=user.id,
+			ticket_id=uuid4(),
+			status=TaskStatus.IN_PROGRESS,
+		))
+		session.commit()
+		data = client.get(DASHBOARD_URL.format(org_id=org_id)).json()
+		assert len(data["recent_updates"]) > 0
+		item = data["recent_updates"][0]
+		assert "created_by" in item
+		assert "id" in item["created_by"]
+		assert "name" in item["created_by"]
+		assert "avatar_url" in item["created_by"]
+
+	def test_recent_update_item_created_by_matches_user(self, client, db_setup):
+		"""created_by in route response matches the user who created the task."""
+		user, session, org_id = db_setup
+		session.add(Task(
+			id=uuid4(),
+			title="Creator Check Task",
+			organization_id=org_id,
+			created_by=user.id,
+			ticket_id=uuid4(),
+			status=TaskStatus.IN_PROGRESS,
+		))
+		session.commit()
+		data = client.get(DASHBOARD_URL.format(org_id=org_id)).json()
+		item = data["recent_updates"][0]
+		assert item["created_by"]["id"] == str(user.id)
+		assert item["created_by"]["name"] == user.name

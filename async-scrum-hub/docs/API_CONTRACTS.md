@@ -967,17 +967,35 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | completed",
-	"priority": "low | medium | high",
-	"created_by": "uuid",
-	"assignee_id": "uuid | null",
-	"organization_id": "uuid",
-	"created_at": "timestamp",
-	"updated_at": "timestamp"
+    "id": "uuid",
+    "title": "string",
+    "description": "string | null",
+    "status": "todo | in_progress | completed",
+    "priority": "low | medium | high",
+    "created_by": "UserBrief",
+    "assignee_id": "uuid | null",
+    "organization_id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+	"tasks": [
+			 {
+                "id": "uuid",
+                "title": "string",
+                "status": "in_progress | completed"
+                
+            }
+			],
+
+"blockers": [
+            {
+                "id": "uuid",
+                "description": "string",
+                "status": "open | resolved",
+                
+            }
+			]
 }
+
 ```
 
 **Error Responses:**
@@ -2472,7 +2490,8 @@ Used to render the organization board.
       "type": "task | ticket",
       "event": "created | completed",
       "title": "string",
-      "timestamp": "ISO 8601 datetime (UTC)"
+      "timestamp": "ISO 8601 datetime (UTC)",
+	  "created_by": "UserBrief"
     }
   ]
 }

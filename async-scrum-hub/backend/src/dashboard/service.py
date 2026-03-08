@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone, date
 from src.database.models import Task, Ticket, User, Blocker
 from src.database.models.enums import TaskStatus, TicketStatus, BlockerStatus
 from src.dashboard.schemas import DashboardSummary, RecentUpdateItem, DashboardResponse
+from src.schemas.common import UserBrief
 
 def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardResponse:
 	if user.organization_id != org_id:
@@ -55,16 +56,17 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 				type="task",
 				event="created",
 				title=task.title,
-				timestamp=task.created_at
+				timestamp=task.created_at,
+				created_by=UserBrief.model_validate(task.creator)
 			)
 		)
 
-	# --- Tasks completed --- 
+	# --- Tasks completed ---
 	tasksCompleted = db.query(Task).filter(
 		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.COMPLETED,
 		Task.updated_at < now,
-		Task.updated_at > start_1_week_ago		
+		Task.updated_at > start_1_week_ago
     ).all()
 
 	for task in tasksCompleted:
@@ -73,34 +75,36 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 				type="task",
 				event="completed",
 				title=task.title,
-				timestamp=task.updated_at
+				timestamp=task.updated_at,
+				created_by=UserBrief.model_validate(task.creator)
 			)
 		)
 
-	# --- Tickets created --- 
+	# --- Tickets created ---
 	ticketsCreated = db.query(Ticket).filter(
 		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.IN_PROGRESS,
 		Ticket.created_at < now,
-		Ticket.created_at > start_1_week_ago		
+		Ticket.created_at > start_1_week_ago
     ).all()
-	
+
 	for ticket in ticketsCreated:
 		updates_dashboard.append(
 			RecentUpdateItem(
 				type="ticket",
 				event="created",
 				title=ticket.title,
-				timestamp=ticket.created_at
+				timestamp=ticket.created_at,
+				created_by=UserBrief.model_validate(ticket.creator)
 			)
 		)
 
-	# --- Tickets completed --- 
+	# --- Tickets completed ---
 	ticketsCompleted = db.query(Ticket).filter(
 		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.COMPLETED,
 		Ticket.updated_at < now,
-		Ticket.updated_at > start_1_week_ago		
+		Ticket.updated_at > start_1_week_ago
     ).all()
 
 	for ticket in ticketsCompleted:
@@ -109,7 +113,8 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 				type="ticket",
 				event="completed",
 				title=ticket.title,
-				timestamp=ticket.updated_at
+				timestamp=ticket.updated_at,
+				created_by=UserBrief.model_validate(ticket.creator)
 			)
 		)
 
