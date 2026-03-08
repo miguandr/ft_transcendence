@@ -1,33 +1,32 @@
 import { useState } from "react";
-import { assignColorById, generateAvatar } from "../../utils/formatters";
+import { assignColorById, generateAvatarInitials } from "../../utils/formatters";
 
 interface AvatarProps {
 	avatarUrl?: string | null; // Optional: URL to user's uploaded image
-	name?: string; // Optional: auto-generate initials from full name
-	initials?: string; // Optional: provide initials directly
 	userId?: string; // Optional: auto-generate color from user ID
 	color?: string; // Optional: override with explicit color
 	size?: "sm" | "md" | "lg";
 	className?: string;
+	initialsClassName?: string; // Optional: custom class for initials span
+	name?: string; // User's full name
 }
 
 export function Avatar({
 	avatarUrl,
 	name,
-	initials,
 	userId,
 	color,
 	size = "md",
 	className = "",
+	initialsClassName,
 }: AvatarProps) {
 	const [imageError, setImageError] = useState(false);
 
-	// Priority: provided initials > generated from name > fallback
-	const displayInitials = initials || (name ? generateAvatar(name) : "");
+	// Always generate initials from name
+	const displayInitials = name ? generateAvatarInitials(name) : "";
 
 	// Priority: explicit color > userId-based color > default
-	const avatarColor =
-		color || (userId ? assignColorById(userId) : "from-gray-100 to-gray-300");
+	const avatarColor = color || (userId ? assignColorById(userId) : "from-gray-100 to-gray-300");
 
 	const sizeStyles = {
 		sm: "w-8 h-8 text-xs",
@@ -50,7 +49,9 @@ export function Avatar({
 					onError={() => setImageError(true)}
 				/>
 			) : (
-				<span className="text-gray-800 font-medium">{displayInitials}</span>
+				<span className={initialsClassName || "text-gray-800 font-medium"}>
+					{displayInitials}
+				</span>
 			)}
 		</div>
 	);

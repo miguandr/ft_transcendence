@@ -27,8 +27,8 @@ from src.auth.routes import router
 
 
 @pytest.fixture(scope="function")
-def test_app():
-    """Create a FastAPI app with auth router and test DB."""
+def test_db():
+    """Create in-memory SQLite DB and return engine + session factory."""
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -36,6 +36,14 @@ def test_app():
     )
     User.__table__.create(bind=engine)
     TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    yield engine, TestingSession
+    User.__table__.drop(bind=engine)
+
+
+@pytest.fixture(scope="function")
+def test_app(test_db):
+    """Create a FastAPI app with auth router and test DB."""
+    _, TestingSession = test_db
 
     app = FastAPI()
     app.include_router(router, prefix="/auth")
@@ -49,9 +57,16 @@ def test_app():
 
     app.dependency_overrides[get_db] = override_get_db
 
-    yield app
+    return app
 
-    User.__table__.drop(bind=engine)
+
+@pytest.fixture(scope="function")
+def db_session(test_db):
+    """Expose the test DB session for direct manipulation."""
+    _, TestingSession = test_db
+    db = TestingSession()
+    yield db
+    db.close()
 
 
 @pytest.fixture(scope="function")

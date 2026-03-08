@@ -17,6 +17,18 @@ export interface Ticket {
 	organization_id: string;
 	created_at: string;
 	updated_at: string;
+	tasks: {
+		id: string;
+		title: string;
+		status: TaskStatus;
+		ticket_is: string;
+	}
+	blockers: {
+		id: string;
+		description: string;
+		status: BlockerStatus;
+		created_at: string;
+	}
 }
 
 export interface ListTicketsBoard
@@ -59,4 +71,22 @@ export interface UserRef {
 	id: string;
 	name: string;
 	avatar_url : string | null;
+}
+
+export interface User {
+	id: string;
+	email: string;
+	name: string;
+	avatar_url: string | null;
+	organization_id: string | null;
+	org_name: string | null;
+	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+	org_role: "admin" | "member" | null;
+}
+
+export interface OrgMember {
+	id: string;
+	name: string;
+	avatar_url: string | null;
+	scrum_role: UserRole | null;
 }

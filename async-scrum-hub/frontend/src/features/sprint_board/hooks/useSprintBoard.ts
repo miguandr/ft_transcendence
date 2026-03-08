@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatScrumRole } from "../../../utils/formatters";
-
 import {
 	Priority,
 	TicketStatus,
@@ -22,12 +21,12 @@ import type {
 export function useSprintBoard() {
 
 	// View/UI states
-	const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
+	const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
 	const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
 	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
-	const [isAddBlockerOpen, setIsAddBlockerOpen] = useState(false);
+	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<{
 		type: "ticket" | "task";
 		id: string;
@@ -70,14 +69,20 @@ export function useSprintBoard() {
 		? formatScrumRole(currentUser.scrum_role)
 		: "";
 	// Derived UI logic (permissions)
-	const canAddTicket =
+	const canCreateTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canDragTickets =
+	const canDragTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canEditTicket =
+	const canEditTicketPriority =
 		currentUser?.scrum_role === "product_owner";
+	const canEditTicket =
+		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
 	const canDeleteTicket =
 		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
+	const canDragTask =
+		currentUser?.scrum_role === "product_owner" ||
+		currentUser?.scrum_role === "scrum_master" ||
+		currentUser.id === selectedTask.assignee_id;
 	const canEditTask = (task: Task) =>
 		currentUser?.scrum_role === "product_owner" ||
 		currentUser?.scrum_role === "scrum_master" ||
@@ -88,153 +93,136 @@ export function useSprintBoard() {
 
 	// Handlers
 	const handleCreateTicket = () => {
-		// const newTicket: Ticket = {
-		// 	id: Date.now(),
-		// 	title: ticketForm.title,
-		// 	description: ticketForm.description,
-		// 	priority: ticketForm.priority,
-		// 	assignee: ticketForm.assignee,
-		// 	status: "todo",
-		// 	tasks: [],
-		// };
-		// setTickets([...tickets, newTicket]);
-		// setIsAddTicketOpen(false);
-		// setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
+		const newTicket: Ticket = {
+			id: Date.now(),
+			title: ticketForm.title,
+			description: ticketForm.description,
+			priority: ticketForm.priority,
+			assignee: ticketForm.assignee,
+			status: "todo",
+			tasks: [],
+		};
+		setTickets([...tickets, newTicket]);
+		setIsCreateTicketOpen(false);
+		setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
 	};
 
-	const handleUpdateTicketPriority = () => {
-		// if (selectedTicket) {
-		// 	setTickets(
-		// 		tickets.map((t) =>
-		// 			t.id === selectedTicket.id ? { ...t, priority: ticketForm.priority } : t
-		// 		)
-		// 	);
-		// 	setIsEditTicketOpen(false);
-		// }
+	const handleEditTicket = () => {
+		if (selectedTicket) {
+			setTickets(
+				tickets.map((t) =>
+					t.id === selectedTicket.id ? { ...t, priority: ticketForm.priority } : t
+				)
+			);
+			setIsEditTicketOpen(false);
+		}
 	};
 
 	const handleDeleteTicket = () => {
-		// if (confirmDelete?.type === "ticket") {
-		// 	setTickets(tickets.filter((t) => t.id !== confirmDelete.id));
-		// 	setBlockers(blockers.filter((b) => b.ticketId !== confirmDelete.id));
-		// 	setConfirmDelete(null);
-		// 	setSelectedTask(null);
-		// 	setSelectedTicketId(null);
-		// }
+		if (confirmDelete?.type === "ticket") {
+			setTickets(tickets.filter((t) => t.id !== confirmDelete.id));
+			setBlockers(blockers.filter((b) => b.ticketId !== confirmDelete.id));
+			setConfirmDelete(null);
+			setSelectedTask(null);
+			setSelectedTicketId(null);
+		}
 	};
 
 	const handleCreateTask = () => {
-		// if (selectedTicket) {
-		// 	const newTask: Task = {
-		// 		id: Date.now(),
-		// 		title: taskForm.title,
-		// 		description: taskForm.description,
-		// 		assignee: taskForm.assignee,
-		// 		status: "in_progress",
-		// 	};
-		// 	setTickets(
-		// 		tickets.map((t) =>
-		// 			t.id === selectedTicket.id ? { ...t, tasks: [...t.tasks, newTask] } : t
-		// 		)
-		// 	);
-		// 	setIsCreateTaskOpen(false);
-		// 	setTaskForm({ title: "", description: "", assignee: "" });
-		// }
+		if (selectedTicket) {
+			const newTask: Task = {
+				id: Date.now(),
+				title: taskForm.title,
+				description: taskForm.description,
+				assignee: taskForm.assignee,
+				status: "in_progress",
+			};
+			setTickets(
+				tickets.map((t) =>
+					t.id === selectedTicket.id ? { ...t, tasks: [...t.tasks, newTask] } : t
+				)
+			);
+			setIsCreateTaskOpen(false);
+			setTaskForm({ title: "", description: "", assignee: "" });
+		}
 	};
 
-	const handleUpdateTask = (updatedTask: Task) => {
-		// if (selectedTicket) {
-		// 	setTickets(
-		// 		tickets.map((t) =>
-		// 			t.id === selectedTicket.id
-		// 				? {
-		// 						...t,
-		// 						tasks: t.tasks.map((task) =>
-		// 							task.id === updatedTask.id ? updatedTask : task
-		// 						),
-		// 					}
-		// 				: t
-		// 		)
-		// 	);
-		// 	setSelectedTask(null);
-		// }
-	};
 
 	const handleDeleteTask = () => {
-		// if (confirmDelete?.type === "task" && selectedTicket) {
-		// 	setTickets(
-		// 		tickets.map((t) =>
-		// 			t.id === selectedTicket.id
-		// 				? { ...t, tasks: t.tasks.filter((task) => task.id !== confirmDelete.id) }
-		// 				: t
-		// 		)
-		// 	);
-		// 	setConfirmDelete(null);
-		// 	setSelectedTask(null);
-		// }
+		if (confirmDelete?.type === "task" && selectedTicket) {
+			setTickets(
+				tickets.map((t) =>
+					t.id === selectedTicket.id
+						? { ...t, tasks: t.tasks.filter((task: Task) => task.id !== confirmDelete.id) }
+						: t
+				)
+			);
+			setConfirmDelete(null);
+			setSelectedTask(null);
+		}
 	};
 
-	const handleAddBlocker = () => {
-		// if (selectedTicket) {
-		// 	const newBlocker: Blocker = {
-		// 		id: Date.now(),
-		// 		description: blockerForm.description,
-		// 		creator: currentUser.avatar,
-		// 		status: "open",
-		// 		ticketId: selectedTicket.id,
-		// 	};
-		// 	setBlockers([...blockers, newBlocker]);
-		// 	setIsAddBlockerOpen(false);
-		// 	setBlockerForm({ description: "", assignee: "" });
-		// }
+	const handleCreateBlocker = () => {
+		if (selectedTicket) {
+			const newBlocker: Blocker = {
+				id: Date.now(),
+				description: blockerForm.description,
+				creator: currentUser.avatar,
+				status: "open",
+				ticketId: selectedTicket.id,
+			};
+			setBlockers([...blockers, newBlocker]);
+			setIsCreateBlockerOpen(false);
+			setBlockerForm({ description: "", assignee: "" });
+		}
 	};
 
 	const handleResolveBlocker = (blockerId: string) => {
-		// setBlockers(blockers.map((b) => (b.id === blockerId ? { ...b, status: "resolved" } : b)));
+		setBlockers(blockers.map((b) => (b.id === blockerId ? { ...b, status: "resolved" } : b)));
 	};
 
 	// Drag handlers for tickets
 	const handleTicketDragStart = (ticket: Ticket) => {
-		// if (canDragTickets) {
-		// 	setDraggedTicket(ticket);
-		// }
+		if (canDragTicket) {
+			setDraggedTicket(ticket);
+		}
 	};
 
 	const handleTicketDrop = (status: TicketStatus) => {
-		// if (draggedTicket && canDragTickets) {
-		// 	setTickets(tickets.map((t) => (t.id === draggedTicket.id ? { ...t, status } : t)));
-		// 	setDraggedTicket(null);
-		// }
+		if (draggedTicket && canDragTicket) {
+			setTickets(tickets.map((t) => (t.id === draggedTicket.id ? { ...t, status } : t)));
+			setDraggedTicket(null);
+		}
 	};
 
 	// Drag handlers for tasks
 	const handleTaskDragStart = (task: Task, ticketId: string) => {
-		// const canDrag =
-		// 	currentUser?.scrum_role === "product_owner" ||
-		// 	currentUser?.scrum_role === "scrum_master" ||
-		// 	task.assignee === currentUser.avatar;
-		// if (canDrag) {
-		// 	setDraggedTask({ task, ticketId });
-		// }
+		const canDrag =
+			currentUser?.scrum_role === "product_owner" ||
+			currentUser?.scrum_role === "scrum_master" ||
+			task.assignee === currentUser.avatar;
+		if (canDrag) {
+			setDraggedTask({ task, ticketId });
+		}
 	};
 
 	const handleTaskDrop = (newStatus: TaskStatus) => {
-		// if (!draggedTask) return;
-		// setTickets((prev) =>
-		// 	prev.map((t) =>
-		// 		t.id === draggedTask.ticketId
-		// 			? {
-		// 					...t,
-		// 					tasks: t.tasks.map((task) =>
-		// 						task.id === draggedTask.task.id
-		// 							? { ...task, status: newStatus }
-		// 							: task
-		// 					),
-		// 				}
-		// 			: t
-		// 	)
-		// );
-		// setDraggedTask(null);
+		if (!draggedTask) return;
+		setTickets((prev) =>
+			prev.map((t) =>
+				t.id === draggedTask.ticketId
+					? {
+							...t,
+							tasks: t.tasks.map((task: Task) =>
+								task.id === draggedTask.task.id
+									? { ...task, status: newStatus }
+									: task
+							),
+						}
+					: t
+			)
+		);
+		setDraggedTask(null);
 	};
 
 
@@ -245,24 +233,25 @@ export function useSprintBoard() {
 
 	return {
 		// States
-		isAddTicketOpen,
+		isCreateTicketOpen,
 		ticketForm,
 		isEditTicketOpen,
 		isCreateTaskOpen,
-		isAddBlockerOpen,
+		isCreateBlockerOpen,
 		selectedTicket,
 		currentUser,
 		selectedTask,
 		blockerForm,
 		confirmDelete,
+		taskForm,
 
 		// Setters
-		setIsAddTicketOpen,
+		setIsCreateTicketOpen,
 		setSelectedTicketId,
 		setTicketForm,
 		setIsCreateTaskOpen,
 		setSelectedTask,
-		setIsAddBlockerOpen,
+		setIsCreateBlockerOpen,
 		setIsEditTicketOpen,
 		setConfirmDelete,
 		setTaskForm,
@@ -278,18 +267,22 @@ export function useSprintBoard() {
 		handleCreateTicket,
 		handleTaskDrop,
 		handleResolveBlocker,
-		handleUpdateTicketPriority,
+		handleEditTicket,
 		handleCreateTask,
-		handleAddBlocker,
+		handleCreateBlocker,
 		handleDeleteTicket,
 		handleDeleteTask,
+		handleTaskDragStart,
 
 		// Permissions
 		canResolveBlocker,
 		canEditTask,
+		canEditTicketPriority,
 		canEditTicket,
 		canDeleteTicket,
-		canAddTicket,
-		canDragTickets,
+		canCreateTicket,
+		canDragTicket,
+		canDragTask,
+
 	}
 }

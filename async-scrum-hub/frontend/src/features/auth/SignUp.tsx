@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../../services/api";
+import { login, signup } from "../../services/api";
 import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom";
+import type { APIError } from "../../utils/shared.types";
+import { useAuth } from "../../routes/useAuth";
 
 export function SignUp() {
 	const navigate = useNavigate(); // Hook to programmatically navigate between pages
+	const { refreshUser } = useAuth();
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -69,13 +72,6 @@ export function SignUp() {
 		setIsLoading(true);
 		setErrors({});
 
-		type APIError = {
-			error?: {
-				code?: string;
-				message?: string;
-			};
-		};
-
 		try {
 			const response = await signup({
 				name: formData.name,
@@ -85,18 +81,33 @@ export function SignUp() {
 
 			console.log("Sign up successful!", response);
 
+			await login({
+				email: formData.email,
+				password: formData.password,
+			});
+
+			const currentUser = await refreshUser();
+
+			if (!currentUser) {
+				setErrors({ email: "Unable to load user data after sign up." });
+				return;
+			}
+
 			navigate("/team-setup");
 		} catch (error: unknown) {
 			//Handle API errors with type guard
 			console.error("Sign up failed:", error);
 
 			const apiError = error as APIError;
-			if (apiError?.error?.code === "USER_EXISTS") {
+			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
+			const errorMessage = apiError?.detail?.error?.message ?? apiError?.error?.message;
+
+			if (errorCode === "USER_EXISTS") {
 				setErrors({ email: "An account with this email already exists" });
-			} else if (apiError?.error?.code === "INVALID_INPUT") {
+			} else if (errorCode === "INVALID_INPUT") {
 				setErrors({ email: "Email format is invalid" });
-			} else if (apiError?.error?.message) {
-				setErrors({ email: apiError.error.message });
+			} else if (errorMessage) {
+				setErrors({ email: errorMessage });
 			} else {
 				setErrors({ email: "An unexpected error occurred." });
 			}

@@ -2,6 +2,15 @@
 // Later, replace with real fetch calls to http://localhost:8000/api/v1
 
 const API_URL = "http://localhost:8000/api/v1";
+
+// const rawApiUrl = import.meta.env.VITE_API_URL;
+// if (!rawApiUrl) {
+// 	throw new Error(
+// 		"Missing VITE_API_URL. Set it in frontend/.env or frontend/.env.local (see frontend/.env.example)."
+// 	);
+// }
+// const API_URL = rawApiUrl.replace(/\/+$/, "");
+
 const CURRENT_USER_ID_KEY = "current_user_id";
 
 // Simulate network delay
@@ -388,12 +397,7 @@ interface UpdateBlockerResponse {
 	resolved_at: string | null;
 }
 
-interface ApiError {
-	error: {
-		code: string;
-		message: string;
-	};
-}
+
 
 // =============================================================
 // HELPER FUNCTIONS
@@ -421,6 +425,30 @@ function getCurrentUserRecord() {
 	return user;
 }
 
+
+// =============================================================
+// DASHBOARD
+// =============================================================
+
+export interface DashboardData {
+	summary: {
+		tasks_in_progress: number;
+		tickets_completed: number;
+		active_blockers: number;
+	};
+	recent_updates: Array<{
+		user: {
+			id: string
+			name: string;
+			avatar_url: string;
+		};
+		type: "task" | "ticket";
+		event: "created" | "completed";
+		title: string;
+		timestamp: string;
+	}>;
+
+}
 
 // =============================================================
 // ANALITYCS
@@ -717,6 +745,7 @@ export async function setUserRole(data: {
 	return { success: true };
 }
 
+
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
 	await delay(300);
 
@@ -741,30 +770,30 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 // =============================================================
 
 // Login
-// export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-// 	// Simulate network delay (500ms)
-// 	await delay(500);
+export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+	// Simulate network delay (500ms)
+	await delay(500);
 
-// 	// Find user by email
-// 	const user = mockUsers.find((u) => u.email === credentials.email);
+	// Find user by email
+	const user = mockUsers.find((u) => u.email === credentials.email);
 
-// 	// Check if user exists and password matches
-// 	if (!user || user.password !== credentials.password) {
-// 		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
-// 	}
+	// Check if user exists and password matches
+	if (!user || user.password !== credentials.password) {
+		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
+	}
 
-// 	// Generate fake JWT token
-// 	const response: LoginResponse = {
-// 		access_token: `mock-jwt-token-${Date.now()}`,
-// 		token_type: "bearer",
-// 	};
+	// Generate fake JWT token
+	const response: LoginResponse = {
+		access_token: `mock-jwt-token-${Date.now()}`,
+		token_type: "bearer",
+	};
 
-// 	// Store token in localStorage
-// 	localStorage.setItem("token", response.access_token);
-// 	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
+	// Store token in localStorage
+	localStorage.setItem("token", response.access_token);
+	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
 
-// 	return response;
-// }
+	return response;
+}
 
 // =============================================================
 // MOCK SIGNUP
@@ -818,7 +847,7 @@ export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
 // MOCK USER
 // =============================================================
 
-// Mock getCurrentUser function
+//Mock getCurrentUser function
 export async function getCurrentUser() : Promise<User> {
 	await delay(300);
 
@@ -1460,13 +1489,78 @@ export async function resolveBlocker(blocker_id: string): Promise<void> {
 }
 
 // =============================================================
+// MOCK DASHBOARD
+// =============================================================
+
+export async function getDashboardData(org_id: string): Promise<DashboardData> {
+	await delay(400);
+
+	const token = localStorage.getItem("token");
+	if (!token) createApiError("UNAUTHORIZED", "Missing token");
+
+	void org_id;
+
+	return {
+		summary: {
+			tasks_in_progress: 5,
+			tickets_completed: 12,
+			active_blockers: 2,
+		},
+		recent_updates: [
+			{
+				user: { id: "u1", name: "Alex Kim", avatar_url: "" },
+				type: "ticket",
+				event: "completed",
+				title: "Fix login bug on mobile",
+				timestamp: new Date(Date.now() - 48 * 60 * 1000).toISOString(),
+			},
+			{
+				user: { id: "u2", name: "Maria Lopez", avatar_url: "" },
+				type: "task",
+				event: "created",
+				title: "Update chart labels on analytics dashboard",
+				timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+			},
+			{
+				user: { id: "u3", name: "Jordan Lee", avatar_url: "" },
+				type: "ticket",
+				event: "created",
+				title: "Resolve payment processing timeout",
+				timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+			},
+		],
+	};
+}
+
+// =============================================================
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
 
+/*
+// 1.1 REGISTER NEW USER
+export async function signup(data:
+	SignUpRequest
+): Promise<SignUpResponse> {
 
-// 1. LOGIN
-export async function login(credentials: LoginRequest): Promise<LoginResponse>
-{
+	const response = await fetch(`${API_URL}/auth/register`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 1.2 LOGIN
+export async function login(credentials:
+	LoginRequest
+): Promise<LoginResponse> {
+
 	const response = await fetch(`${API_URL}/auth/login`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -1485,25 +1579,9 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse>
 
 	return data;
 }
-/*
-// 2. SIGNUP
-export async function signup(data: SignUpRequest): Promise<SignUpResponse>
-{
-	const response = await fetch(`${API_URL}/auth/register`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(data)
-	});
 
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw errorData; // Contains { error: { code, message } }
-	}
 
-	return response.json();
-}
-
-// 3. GET CURRENT USER
+// 2.1 GET CURRENT USER
 export async function getCurrentUser(): Promise<User>
 {
 	const token = localStorage.getItem("token");
@@ -1524,9 +1602,57 @@ export async function getCurrentUser(): Promise<User>
 	return response.json();
 }
 
-// 4. CREATE ORGANIZATION
-export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse>
-{
+// 2.2 UPDATE USER
+export async function updateUser(
+	data: UpdateUserRequest
+) : Promise<User> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/users/me`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 2.3 UPLOAD AVATAR
+export async function uploadAvatar(
+	data: AvatarRequest
+) : Promise<AvatarResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/users/me/avatar`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+
+// 3.1 CREATE ORGANIZATION
+export async function createOrganization(data:
+	CreateOrgRequest
+): Promise<CreateOrgResponse> {
 	const token = localStorage.getItem("token");
 
 	const response = await fetch(`${API_URL}/organizations`, {
@@ -1546,14 +1672,15 @@ export async function createOrganization(data: CreateOrgRequest): Promise<Create
 	return response.json();
 }
 
-// 5. SET USER ROLE
+// 3.2 SELECT ROLE
 export async function setUserRole(data: {
-	organization_id: string;
+	org_id: string;
 	scrum_role: "scrum_master" | "product_owner"
 }): Promise<{ success: boolean }>
 {
-// This endpoint updates the current user's scrum role
-	const response = await fetch(`${API_URL}/users/me`, {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${data.org_id}`, {
 		method: 'PATCH',
 		headers: {
 		'Content-Type': 'application/json',
@@ -1570,9 +1697,78 @@ export async function setUserRole(data: {
 	return { success: true };
 }
 
-// 6. JOIN ORGANIZATION
-export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse>
-{
+// 3.3 GET ORGANIZATION MEMBERS
+export async function getOrganizationMembers(
+	org_id: string
+): Promise<OrganizationMember[]> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 3.4 INVITE MEMBERS TO ORGANIZATION
+export async function inviteMember(
+	org_id: string,
+	data: InviteMemberRequest
+) : Promise<InviteMemberResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 3.5 REMOVE MEMBER FROM ORGANIZATION
+export async function removeMember(
+	org_id: string,
+	user_id: string
+): Promise<{ success: boolean}> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/members/${user_id}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 3.6 JOIN ORGANIZATION BY CODE
+export async function joinOrganization(data:
+	JoinOrgRequest
+): Promise<JoinOrgResponse> {
 	const token = localStorage.getItem("token");
 
 	const response = await fetch(`${API_URL}/organizations/join`, {
@@ -1592,9 +1788,302 @@ export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgRes
 	return response.json();
 }
 
+// 4.1 CREATE TCIKETS
+	POST /organizations/{org_id}/tickets
+
+// 4.2 LIST TICKETS (SPRINTBOARD)
+	GET /organizations/{org_id}/tickets
+
+// 4.3 GET TICLET DETAILS
+	GET /tickets/{ticket_id}
+
+// 4.4 UPDATE TICKETS
+	PATCH /tickets/{ticket_id}
+
+// 4.5 MOVE TICKET (DRAG & DROP)
+	PATCH /tickets/{ticket_id}/move
+
+// 4.6 DELETE TICKET
+	DELETE /tickets/{ticket_id}
+
+// 5.1 CREATE TASK
+	POST /tickets/{ticket_id}/tasks
+
+// 5.2 LIST TASKS
+	GET /tickets/{ticket_id}/tasks"
+
+// 5.3 GET TASK DETAILS
+	GET /tasks/{task_id}
+
+// 5.4 UPDATE TASK
+	PATCH /tasks/{task_id}
+
+// 5.5 DELETE TASK
+	DELETE /tasks/{task_id}
+
+// 6.1 CREATE STANDUP
+export async function createStandup(
+	org_id: string,
+	data: CreateStandupRequest
+) : Promise<CreateStandupResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/standups`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 6.2 LIST ORGANIZATION STANDUPS
+export async function listStandups(
+	org_id: string,
+): Promise<StandupListItem[]> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/standups`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 6.3 UPDATE STANDUP
+export async function editStandup(
+	standup_id: string,
+	data: EditStandupRequest
+): Promise<EditStandupResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/standups/${standup_id}`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 6.4 DELETE STANDUP
+export async function deleteStandup(
+	standup_id: string
+): Promise<void> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/standups/${standup_id}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+}
+
+
+// 7.1 CREATE BLOCKER
+export async function createBlocker(
+	org_id: string,
+	data: CreateBlockerRequest
+): Promise<CreateBlockerResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/blockers`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 7.2 LIST ORGANIZATION BLOCKERS
+export async function listBlockers(
+	org_id: string,
+	status?: "open" | "resolved"
+): Promise<BlockerListItem[]> {
+	const token = localStorage.getItem("token");
+	const url = status
+		? `${API_URL}/organizations/${org_id}/blockers?status=${status}`
+		: `${API_URL}/organizations/${org_id}/blockers`;
+
+	const response = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+// 7.3 UPDATE BLOCKER
+export async function updateBlocker(
+	blocker_id: string,
+	data: UpdateBlockerRequest
+): Promise<UpdateBlockerResponse> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/blockers/${blocker_id}`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData; // Contains { error: { code, message } }
+	}
+
+	return response.json();
+}
+
+// 7.4 RESOLVE BLOCKER
+export async function resolveBlocker(
+	blocker_id: string
+): Promise<void> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/blockers/${blocker_id}/resolve`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+}
+
+
+// 8.1 GET LEGAL DOCUMENT
+export async function getLegalDocument(
+	key: "privacy" | "terms"
+) : Promise<LegalDocuments> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/legal/documents/${key}`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+
+// 9.1 ANALYITCS
+export async function getAnalitycsData(
+	org_id: string
+) : Promise<AnalitycsData> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/analytics`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+
+// 10.1 GET ORGANIZATION DASHBOARD
+export async function getDashboardData(
+	org_id: string
+) : Promise<DashboardData> {
+	const token = localStorage.getItem("token");
+
+	const response = await fetch(`${API_URL}/organizations/${org_id}/dashboard`, {
+		method: 'GET',
+		headers: {
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw errorData;
+	}
+
+	return response.json();
+}
+
+
+
+
+
+
+
+
+
 // 7. CHECK JOIN CODE
-export async function checkJoinCode(join_code: string): Promise<OrganizationInfo>
-{
+export async function checkJoinCode(
+	join_code: string
+): Promise<OrganizationInfo> {
 	const token = localStorage.getItem("token");
 
 	const response = await fetch(`${API_URL}/organizations/check-code?join_code=${join_code}`, {
@@ -1612,28 +2101,6 @@ export async function checkJoinCode(join_code: string): Promise<OrganizationInfo
 
 	return response.json();
 }
-
-// 8. GET ORGANIZATION MEMBERS
-export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]>
-{
-	const token = localStorage.getItem("token");
-
-	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
-		method: 'GET',
-		headers: {
-		'Content-Type': 'application/json',
-		'Authorization': `Bearer ${token}`
-		}
-	});
-
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw errorData;
-	}
-
-	return response.json();
-}
-
 
 // 9. GET ORGANIZATION MEMBERS FULL INFO
 export async function getCurrentUserInfo(org_id: string): Promise<OrganizationMemberWithActivity[]>
@@ -1657,29 +2124,13 @@ export async function getCurrentUserInfo(org_id: string): Promise<OrganizationMe
 	return response.json();
 }
 
-10. DELETE ORGANIZATION MEMBERS
-export async function removeMember(org_id: string, member_id: string): Promise<{ success: boolean}>
-{
-	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/members/${member_id}`, {
-		method: 'DELETE',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	if (!response.ok) {
-		const errorData = await response.json();
-		throw errorData;
-	}
 
-	return response.json();
-}
+
+
+
 
 11. STANDUP FUNCTION (PENDING)
 12. TICKETS FUNCTIONS (PENDING)
-13. BLOCKERS FUNCTIONS (PENDING)
-14. TOPBAR FUNTIONS (PENDING)
-
+15. ANALYTICS FUNCTIONS (PENDING)
 */

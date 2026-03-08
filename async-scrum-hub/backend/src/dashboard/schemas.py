@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Literal
+from src.schemas.common import UserBrief
 
 # Section 1: Value cards
 class DashboardSummary(BaseModel):
@@ -14,6 +15,7 @@ class RecentUpdateItem(BaseModel):
 	event: Literal["created", "completed"]
 	title: str
 	timestamp: datetime  # ISO UTC – frontend formats as "X min ago", "2 days ago"
+	created_by: UserBrief
 
 class DashboardResponse(BaseModel):
 	summary: DashboardSummary
