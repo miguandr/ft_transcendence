@@ -2472,7 +2472,8 @@ Used to render the organization board.
       "type": "task | ticket",
       "event": "created | completed",
       "title": "string",
-      "timestamp": "ISO 8601 datetime (UTC)"
+      "timestamp": "ISO 8601 datetime (UTC)",
+	  "created_by": "UserBrief"
     }
   ]
 }
