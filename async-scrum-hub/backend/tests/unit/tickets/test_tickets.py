@@ -634,6 +634,8 @@ class TestGetTicketDetailRoute:
 		assert "created_by" in data
 		assert "created_at" in data
 		assert "updated_at" in data
+		assert "tasks" in data
+		assert "blockers" in data
 
 	def test_detail_has_created_by_user_brief(self, client, db_setup, sample_ticket):
 		"""created_by field is a UserBrief with id, name, avatar_url."""
@@ -643,6 +645,40 @@ class TestGetTicketDetailRoute:
 		assert created_by["id"] == str(user.id)
 		assert created_by["name"] == user.name
 		assert "avatar_url" in created_by
+
+	def test_detail_empty_tasks_and_blockers(self, client, db_setup, sample_ticket):
+		"""Returns empty lists when ticket has no tasks or blockers."""
+		response = client.get(DETAIL_URL.format(ticket_id=sample_ticket.id))
+		data = response.json()
+		assert data["tasks"] == []
+		assert data["blockers"] == []
+
+	def test_detail_includes_tasks(self, client, db_setup, sample_ticket, sample_task):
+		"""Returns tasks linked to the ticket with id, title, status."""
+		response = client.get(DETAIL_URL.format(ticket_id=sample_ticket.id))
+		data = response.json()
+		assert len(data["tasks"]) == 1
+		task = data["tasks"][0]
+		assert task["id"] == str(sample_task.id)
+		assert task["title"] == sample_task.title
+		assert task["status"] == "in_progress"
+
+	def test_detail_includes_blockers(self, client, db_setup, sample_ticket, sample_blocker):
+		"""Returns blockers linked to the ticket with id, description, status."""
+		response = client.get(DETAIL_URL.format(ticket_id=sample_ticket.id))
+		data = response.json()
+		assert len(data["blockers"]) == 1
+		blocker = data["blockers"][0]
+		assert blocker["id"] == str(sample_blocker.id)
+		assert blocker["description"] == sample_blocker.description
+		assert blocker["status"] == "open"
+
+	def test_detail_includes_tasks_and_blockers(self, client, db_setup, sample_ticket, sample_task, sample_blocker):
+		"""Returns both tasks and blockers when ticket has both."""
+		response = client.get(DETAIL_URL.format(ticket_id=sample_ticket.id))
+		data = response.json()
+		assert len(data["tasks"]) == 1
+		assert len(data["blockers"]) == 1
 
 	def test_detail_not_found_returns_404(self, client):
 		"""Returns 404 when ticket does not exist."""

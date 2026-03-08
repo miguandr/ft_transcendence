@@ -2,9 +2,10 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from src.database.models.enums import TicketStatus, Priority
+from src.database.models.enums import TicketStatus, Priority, TaskStatus
 from src.users.schemas import UserBriefTicket
 from src.schemas.common import UserBrief
+from src.tasks.schemas import TaskBrief
 
 class TicketBriefOrg(BaseModel):
 	id: UUID
@@ -44,8 +45,17 @@ class CreateTicketResponse(BaseModel):
 #class ListTicketsResponse(BaseModel):
 #    tickets: list[TicketBriefList]
 
+class BlockerBriefTicket(BaseModel):
+	id: UUID
+	description: str
+	status: str
+
+	model_config = ConfigDict(from_attributes=True)
+
+
 class TicketDetailResponse(CreateTicketResponse):
-	pass
+	tasks: list[TaskBrief] = []
+	blockers: list[BlockerBriefTicket] = []
 
 class UpdateTicketRequest(BaseModel):
 	title: Optional[str] = Field(None, min_length=1)

@@ -30,7 +30,7 @@
   "id": "uuid",
   "name": "string",
   "join_code": "SCR-493", // generated server-side when the organization is created.
-  "created_by": "uuid (owner)"
+  "created_by": "UserBrief"
 }
 ```
 

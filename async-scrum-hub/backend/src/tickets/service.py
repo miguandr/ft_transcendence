@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from fastapi import HTTPException, status
 
 from src.database.models import User, Ticket
@@ -65,7 +65,12 @@ def _check_restricted_fields(user: User, updates: dict) -> None:
 
 def get_ticket_by_id(ticket_id: uuid.UUID, db: Session) -> Ticket:
 	"""Load a ticket from DB or raise 404."""
-	ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+	ticket = (
+		db.query(Ticket)
+		.options(selectinload(Ticket.tasks), selectinload(Ticket.blockers))
+		.filter(Ticket.id == ticket_id)
+		.first()
+	)
 	if not ticket:
 		raise _not_found()
 	return ticket

@@ -32,6 +32,7 @@ from src.tickets.schemas import (
 	CreateTicketResponse,
 	TicketBriefList,
 	TicketDetailResponse,
+	BlockerBriefTicket,
 	UpdateTicketRequest,
 	UpdateTicketResponse,
 	MoveTicketRequest,
@@ -148,6 +149,8 @@ def get_ticket_detail(
 		organization_id=ticket.organization_id,
 		created_at=ticket.created_at,
 		updated_at=ticket.updated_at,
+		tasks=ticket.tasks,
+		blockers=[BlockerBriefTicket.model_validate(b) for b in ticket.blockers],
 	)
 
 

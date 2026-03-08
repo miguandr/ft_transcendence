@@ -24,8 +24,9 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.database import get_db
-from src.database.models import User, Organization, Ticket
-from src.database.models.enums import TicketStatus, Priority
+from src.database.models import User, Organization, Ticket, Task, Blocker
+from src.database.models.enums import TicketStatus, Priority, TaskStatus
+from src.database.models.blocker import BlockerStatus
 from src.api.deps import get_current_user
 from src.tickets.routes import router
 
@@ -243,6 +244,43 @@ def completed_ticket(db_setup):
 	session.commit()
 	session.refresh(ticket)
 	return ticket
+
+
+@pytest.fixture
+def sample_task(db_setup, sample_ticket):
+	"""A task linked to the sample ticket."""
+	user, org, session = db_setup
+	task = Task(
+		id=uuid4(),
+		title="Test Task",
+		description="Task description",
+		status=TaskStatus.IN_PROGRESS,
+		ticket_id=sample_ticket.id,
+		created_by=user.id,
+		organization_id=org.id,
+	)
+	session.add(task)
+	session.commit()
+	session.refresh(task)
+	return task
+
+
+@pytest.fixture
+def sample_blocker(db_setup, sample_ticket):
+	"""A blocker linked to the sample ticket."""
+	user, org, session = db_setup
+	blocker = Blocker(
+		id=uuid4(),
+		description="Test Blocker",
+		status=BlockerStatus.OPEN,
+		organization_id=org.id,
+		created_by=user.id,
+		ticket_id=sample_ticket.id,
+	)
+	session.add(blocker)
+	session.commit()
+	session.refresh(blocker)
+	return blocker
 
 
 @pytest.fixture
