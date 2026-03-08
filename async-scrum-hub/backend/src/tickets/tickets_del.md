@@ -227,7 +227,7 @@ Used to render the organization board.
                 "status": "open | resolved",
                 
             }
-			]
+	]
 }
 
 **Error Responses:**
