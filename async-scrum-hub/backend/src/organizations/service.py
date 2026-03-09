@@ -18,6 +18,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
+from src.config.email import send_invite_email
 from src.database.models import Organization, User
 from src.database.models.enums import OrgRole, ScrumRole
 
@@ -167,7 +168,13 @@ def invite_member(
 	if existing_user and existing_user.organization_id == org_id:
 		raise _conflict("ALREADY_MEMBER", "User is already a member of this organization")
 
-	# TODO: Send email with org.join_code to the invited user
+	# Send invitation email with the join code
+	send_invite_email(
+		to_email=email,
+		to_name=name,
+		organization_name=org.name,
+		join_code=org.join_code,
+	)
 	return email
 
 
