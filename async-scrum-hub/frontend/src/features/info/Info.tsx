@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { formatOrgRole, formatScrumRole } from "../../utils/formatters";
-import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
-import { PageHeader, Avatar, Badge, StatCard, Modal, Button } from "../../components/custom";
+import { getOrganizationMembers, removeMember, type OrganizationMember } from "../../services/api";
+import { useAuth } from "../../routes/useAuth";
 import {
-	AlertCircle,
+	PageHeader,
+	Avatar,
+	Badge,
+	StatCard,
+	ModalConfirmation,
+} from "../../components/custom";
+import {
 	CheckSquare,
 	FileText,
 	ShieldAlert,
@@ -15,26 +21,21 @@ import {
 interface Member {
 	id: string;
 	name: string;
-	avatarUrl?: string | null; // Optional: URL to uploaded profile picture
+	avatarUrl?: string | null;
 	orgRole: "Admin" | "Member";
 	scrumRole: "Product Owner" | "Scrum Master" | "Developer";
-	tickets: ActivityDetail[];
-	tasks: ActivityDetail[];
-	blockers: ActivityDetail[];
-}
-
-interface ActivityDetail {
-	id: string;
-	title: string;
-	status?: "todo" | "in_progress" | "completed";
-	priority?: "low" | "medium" | "high";
+	tickets: OrganizationMember["tickets"];
+	tasks: OrganizationMember["tasks"];
+	blockers: OrganizationMember["blockers"];
 }
 
 export function Info() {
-	// Modal states
-	const [members, setMembers] = useState<Member[]>([]); // Start with empty array of members
-	const [currentUser, setCurrentUser] = useState<"Admin" | "Member" | null>(null);
-	const [orgId, setOrgId] = useState<string | null>(null);
+	const { user: authUser } = useAuth();
+
+	const currentUser = authUser?.org_role ? formatOrgRole(authUser.org_role) : null;
+	const orgId = authUser?.organization_id ?? null;
+	const [isRemoving, setIsRemoving] = useState(false);
+	const [members, setMembers] = useState<Member[]>([]);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 	const [expandedActivity, setExpandedActivity] = useState<{
 		memberId: string;
@@ -42,46 +43,33 @@ export function Info() {
 	} | null>(null);
 
 	useEffect(() => {
-		// Used to fetch API data (outside the normal React render's flow)
+		if (!orgId) return;
+
 		const fetchMembers = async () => {
 			try {
-				// Step 1: Get current user's org_id
-				const user = await getCurrentUser();
-				setCurrentUser(formatOrgRole(user.org_role!));
-				setOrgId(user.organization_id);
-
-				// Step 2: Fetch members using org_id
-				// Change for getOrganizationMembers !!!!!!
-				if (user.organization_id) {
-					const membersData = await getCurrentUserInfo(user.organization_id);
-
-					// Transform API data → UI data using your formatter functions
-					const transformedMembers: Member[] = membersData.map((memberData) => ({
-						id: memberData.id,
-						name: memberData.name,
-						avatarUrl: memberData.avatar_url,
-						orgRole: formatOrgRole(memberData.org_role),
-						scrumRole: formatScrumRole(memberData.scrum_role),
-						tickets: memberData.tickets || [],
-						tasks: memberData.tasks || [],
-						blockers:
-							memberData.blockers.map((b) => ({
-								id: b.id,
-								title: b.description,
-							})) || [],
-					}));
-					setMembers(transformedMembers);
-				}
+				const membersData = await getOrganizationMembers(orgId);
+				const transformedMembers: Member[] = membersData.map((memberData) => ({
+					id: memberData.id,
+					name: memberData.name,
+					avatarUrl: memberData.avatar_url,
+					orgRole: formatOrgRole(memberData.org_role),
+					scrumRole: formatScrumRole(memberData.scrum_role),
+					tickets: memberData.tickets,
+					tasks: memberData.tasks,
+					blockers: memberData.blockers,
+				}));
+				setMembers(transformedMembers);
 			} catch (error) {
 				console.error("Failed to fetch members:", error);
 			}
 		};
 		fetchMembers();
-	}, []); // Empty array = run once on mount
+	}, [orgId]);
 
 	const isAdmin = currentUser === "Admin";
 
 	const handleRemoveMember = async () => {
+		setIsRemoving(true);
 		if (confirmDelete && orgId) {
 			try {
 				// Call API to remove member
@@ -94,6 +82,8 @@ export function Info() {
 				setConfirmDelete(null);
 			} catch (error) {
 				console.error("Failed to remove member:", error);
+			} finally {
+				setIsRemoving(false);
 			}
 		}
 	};
@@ -325,7 +315,7 @@ export function Info() {
 																	className="bg-white rounded-lg p-3 border border-rose-200"
 																>
 																	<p className="text-sm text-gray-900">
-																		{blocker.title}
+																		{blocker.description}
 																	</p>
 																</div>
 															))
@@ -374,35 +364,17 @@ export function Info() {
 			</div>
 
 			{/* Remove Member Confirmation Modal */}
-			<Modal
+			<ModalConfirmation
 				isOpen={!!confirmDelete}
 				onClose={() => setConfirmDelete(null)}
 				title="Remove Member?"
-				size="sm"
-			>
-				<div className="text-center">
-					<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
-						<AlertCircle className="w-6 h-6 text-rose-600" />
-					</div>
-					<p className="text-sm text-gray-500 mb-6">
-						This member will be removed from the team and lose access to all data. This
-						action cannot be undone.
-					</p>
-
-					<div className="flex items-center gap-3">
-						<Button variant="secondary" onClick={() => setConfirmDelete(null)}>
-							Cancel
-						</Button>
-						<Button
-							variant="primary"
-							onClick={handleRemoveMember}
-							className="bg-rose-600 hover:bg-rose-700"
-						>
-							Remove
-						</Button>
-					</div>
-				</div>
-			</Modal>
+				description="This member will be removed from the team and lose access to all data. This action cannot be undone."
+				confirmLabel="Remove"
+				confirmVariant="danger"
+				onConfirm={() => handleRemoveMember()}
+				isConfirming={isRemoving}
+				confirmingLabel="Removing..."
+			/>
 		</div>
 	);
 }

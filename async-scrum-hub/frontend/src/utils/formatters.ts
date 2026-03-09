@@ -12,6 +12,13 @@ export function formatRelativeTime(utcString: string): string {
 	return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
 }
 
+// Scrum role helpers
+export function getTakenRoles(members: Array<{ scrum_role: string }>): string[] {
+	return members
+		.map((m) => m.scrum_role)
+		.filter((role) => role === "scrum_master" || role === "product_owner");
+}
+
 // Role formatters
 export function formatOrgRole(role: "admin" | "member"): "Admin" | "Member" {
 	return role === "admin" ? "Admin" : "Member";

@@ -2,12 +2,12 @@ import { Link } from "react-router-dom"
 import { Plus, Edit2, CheckCircle, Trash2 } from "lucide-react"
 import { Button, Modal } from "../../../../components/custom";
 import { PRIORITY_COLORS } from "../../constants/sprint.constants"
-import type { TaskStatus, Ticket, Task, Blocker } from "../../types/sprint.types";
+import type { TaskStatus, Ticket, TaskSummary, BlockerStatus } from "../../types/sprint.types";
 
 interface Props {
 	ticket: Ticket;
-	tasks: Task [];
-	blockers: Blocker[];
+	tasks: TaskSummary[];
+	blockers: { id: string; description: string; status: BlockerStatus; }[];
 
 	onClose: () => void;
 	onOpenCreateTask: () => void;
@@ -15,10 +15,10 @@ interface Props {
 	onOpenEdit: () => void;
 	onDeleteTicket: () => void;
 
-	onSelectTask: (task: Task) => void;
-	onTaskDragStart: (task: Task) => void;
+	onSelectTask: (taskId: string) => void;
+	onTaskDragStart: (task: TaskSummary) => void;
 	onTaskDrop: (status: TaskStatus) => void;
-	canDragTask: (task: Task) => boolean;
+	canDragTask: boolean;
 
 	canEdit: boolean;
 	canDelete: boolean;
@@ -51,7 +51,7 @@ export function TicketDetailModal({
 			onClose={onClose}
 			title={ticket.title}
 			subtitle={
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-3">
 					<span
 						className={`text-xs px-2 py-1 rounded-lg ${
 							PRIORITY_COLORS[ticket.priority]
@@ -68,25 +68,26 @@ export function TicketDetailModal({
 					</span>
 				</div>
 			}
-			size="xl"
-			className="flex-1 overflow-y-auto space-y-6"
+			size="lg"
+			className="flex-1 overflow-y-auto space-y-3"
 		>
 			{/* Description */}
-			<div>
-				<h4 className="text-sm text-gray-700 mb-2">Description</h4>
-				<p className="text-sm text-gray-600">
+			<div className="pb-6">
+				<h4 className="text-sm font-medium text-gray-800 mb-1.5">Description</h4>
+				<p className="text-sm text-gray-600 leading-relaxed">
 					{ticket.description || "No description provided"}
 				</p>
 			</div>
+			{/* <hr className="border-gray-100 my-3" /> */}
+
 			{/* Tasks */}
-			<div>
-				<div className="flex items-center justify-between mb-3">
-					<h4 className="text-sm text-gray-700">Tasks</h4>
+			<div className="pb-6">
+				<div className="flex items-center justify-between mb-2">
+					<h4 className="text-sm font-medium text-gray-800">Tasks</h4>
 					<Button
 						variant="ghost"
 						size="sm"
 						onClick={onOpenCreateTask}
-						className="flex items-center gap-1"
 						icon={<Plus className="w-3 h-3" />}
 						iconPosition="left"
 					>
@@ -113,24 +114,21 @@ export function TicketDetailModal({
 							>
 								{tasks
 									.filter((t) => t.status === "in_progress")
-									.map((task) => {
-										const draggableTask = canDragTask(task);
-										return (
-											<div
-												key={task.id}
-												draggable={draggableTask}
-												onDragStart={() => onTaskDragStart(task)}
-												onClick={() => onSelectTask(task)}
-												className={`bg-white p-3 rounded-lg border border-gray-200 text-sm hover:shadow-sm transition-shadow ${
-													draggableTask
-														? "cursor-grab active:cursor-grabbing"
-														: "cursor-pointer"
-												}`}
-											>
-												{task.title}
-											</div>
-										);
-									})}
+									.map((task) => (
+										<div
+											key={task.id}
+											draggable={canDragTask}
+											onDragStart={() => onTaskDragStart(task)}
+											onClick={() => onSelectTask(task.id)}
+											className={`bg-white p-3 rounded-lg border border-gray-200 text-sm hover:shadow-sm transition-shadow ${
+												canDragTask
+													? "cursor-grab active:cursor-grabbing"
+													: "cursor-pointer"
+											}`}
+										>
+											{task.title}
+										</div>
+									))}
 							</div>
 						</div>
 						{/* Completed */}
@@ -145,43 +143,42 @@ export function TicketDetailModal({
 							>
 								{tasks
 									.filter((t) => t.status === "completed")
-									.map((task) => {
-										const draggableTask = canDragTask(task);
-										return (
-											<div
-												key={task.id}
-												draggable={draggableTask}
-												onDragStart={() => onTaskDragStart(task)}
-												onClick={() => onSelectTask(task)}
-												className={`bg-white p-3 rounded-lg border border-emerald-200 text-sm hover:shadow-sm transition-shadow flex items-center gap-2 ${
-													draggableTask
-														? "cursor-grab active:cursor-grabbing"
-														: "cursor-pointer"
-												}`}
-											>
-												<CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-												<span className="flex-1">
-													{task.title}
-												</span>
-											</div>
-										);
-									})}
+									.map((task) => (
+										<div
+											key={task.id}
+											draggable={canDragTask}
+											onDragStart={() => onTaskDragStart(task)}
+											onClick={() => onSelectTask(task.id)}
+											className={`bg-white p-3 rounded-lg border border-emerald-200 text-sm hover:shadow-sm transition-shadow flex items-center gap-2 ${
+												canDragTask
+													? "cursor-grab active:cursor-grabbing"
+													: "cursor-pointer"
+											}`}
+										>
+											<CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+											<span className="flex-1">{task.title}</span>
+										</div>
+									))}
 							</div>
 						</div>
 					</div>
 				)}
 			</div>
+
 			{/* Blockers */}
-			<div>
-				<div className="flex items-center justify-between mb-3">
-					<h4 className="text-sm text-gray-700">Blockers</h4>
-					<button
+			<div className="pb-4">
+				<div className="flex items-center justify-between mb-2">
+					<h4 className="text-sm font-medium text-gray-700">Blockers</h4>
+					<Button
+						variant="secondary"
+						size="sm"
 						onClick={onOpenCreateBlocker}
-						className="flex items-center gap-1 px-3 py-1.5 text-xs text-rose-700 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors"
+						icon={<Plus className="w-3 h-3" />}
+						iconPosition="left"
+						className="text-rose-700 bg-rose-50  hover:bg-rose-50 transition-colors"
 					>
-						<Plus className="w-3 h-3" />
-						Add Blocker
-					</button>
+						Create Blocker
+					</Button>
 				</div>
 				{blockers.length === 0 ? (
 					<div className="text-center py-8 bg-gray-50 rounded-xl">
@@ -206,13 +203,14 @@ export function TicketDetailModal({
 											{blocker.description}
 										</p>
 										<p className="text-xs text-gray-500">
-											Created by {blocker.created_by.name} ·{" "}
+											Created by pepito
+											{/* Created by {blocker.created_by.name} ·{" "} */}
 											{blocker.status}
 										</p>
 									</div>
 									{blocker.status === "open" && (
 										<Link
-											to={`/blockers/${blocker.id}`}
+											to="/blockers"
 											className="px-3 py-1.5 text-xs text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
 										>
 											View Details
@@ -220,19 +218,18 @@ export function TicketDetailModal({
 									)}
 								</div>
 							</div>
-							)
-						)}
+						))}
 					</div>
 				)}
 			</div>
-			<div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-gray-100">
+
+			<div className="flex items-center justify-between gap-3 py-4 border-t border-gray-100">
 				<div className="flex items-center gap-2">
 					{canEdit ? (
 						<Button
 							variant="secondary"
 							onClick={onOpenEdit}
 							size="sm"
-							className="flex items-center gap-2"
 							icon={<Edit2 className="w-3 h-3" />}
 							iconPosition="left"
 						>
@@ -244,7 +241,7 @@ export function TicketDetailModal({
 								variant="secondary"
 								size="sm"
 								disabled
-								className="flex items-center gap-2 px-3 py-1.5  text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
+								className="text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
 							>
 								<Edit2 className="w-3 h-3" />
 								Edit Ticket
@@ -259,7 +256,7 @@ export function TicketDetailModal({
 							variant="ghost"
 							size="sm"
 							onClick={onDeleteTicket}
-							className="flex items-center gap-2 px-3 py-1.5 text-rose-700 bg-rose-50 hover:bg-rose-100"
+							className="text-rose-700 bg-rose-50 hover:bg-rose-100"
 							icon={<Trash2 className="w-3 h-3" />}
 							iconPosition="left"
 						>
@@ -271,15 +268,14 @@ export function TicketDetailModal({
 								disabled
 								variant="secondary"
 								size="sm"
-								className="flex items-center gap-2 px-3 py-1.5 text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
+								className="text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"
 								icon={<Trash2 className="w-3 h-3" />}
 								iconPosition="left"
 							>
 								Delete Ticket
 							</Button>
 							<div className="absolute left-0 top-full mt-1 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-								Only Product Owner or Scrum Master can delete
-								tickets
+								Only Product Owner or Scrum Master can delete tickets
 							</div>
 						</div>
 					)}

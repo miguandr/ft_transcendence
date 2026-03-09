@@ -9,23 +9,24 @@ import { Login } from "./features/auth/Login";
 import { SignUp } from "./features/auth/SignUp";
 import { TeamSetup } from "./features/auth/TeamSetup";
 import { Dashboard } from "./features/dashboard/Dashboard";
-//import { SprintBoard } from "./features/sprint_board/SprintBoard";
+import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
 //import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
 import { Analytics } from "./features/analytics/Analytics";
 import { Info } from "./features/info/Info";
+//import { Navigate } from "react-router-dom";
 
 function AppLayout() {
 	const location = useLocation();
-	const preAuthPaths = ["/welcome", "/login", "/signup", "/team-setup"];
+	const preAuthPaths = ["/", "/welcome", "/login", "/signup", "/team-setup"];
 	const isPreAuth = preAuthPaths.includes(location.pathname);
 
 	// User is on auth pages (not logged in)
 	if (isPreAuth) {
 		return (
 			<Routes>
-				<Route path="/welcome" element={<WelcomeAnimation />} />
+				<Route path="/" element={<WelcomeAnimation />} />
 				<Route path="/login" element={<Login />} />
 				<Route path="/signup" element={<SignUp />} />
 				<Route path="/team-setup" element={<TeamSetup />} />
@@ -51,7 +52,7 @@ function AppLayout() {
 					<main className="flex-1 overflow-y-auto">
 						<Routes>
 							<Route path="/dashboard" element={<Dashboard />} />
-							{/* <Route path="/board" element={<SprintBoard />} /> */}
+							<Route path="/board" element={<SprintBoard />} />
 							<Route path="/standup" element={<AsyncStandup />} />
 							<Route path="/blockers" element={<Blockers />} />
 							<Route path="/analytics" element={<Analytics />} />

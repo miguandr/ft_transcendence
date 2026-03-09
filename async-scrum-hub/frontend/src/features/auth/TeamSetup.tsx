@@ -5,27 +5,26 @@ import {
 	createOrganization,
 	setUserRole,
 	joinOrganization,
-	checkJoinCode,
-	getOrganizationMembers,
 } from "../../services/api";
+import { useAuth } from "../../routes/useAuth";
 import { Button, Input, Label, ErrorText } from "../../components/custom";
+import type { APIError } from "../../../utils/shared.types";
+
+
 type TeamMode = "join" | "create";
 type Role = "scrum_master" | "product_owner" | "developer" | null;
 
 export function TeamSetup() {
 	const navigate = useNavigate();
+	const { refreshUser } = useAuth();
 
-	//States
 	const [teamMode, setTeamMode] = useState<TeamMode>("join");
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
-	const [confirmedTeam, setConfirmedTeam] = useState<{
-		name: string;
-		code?: string;
-		members?: number;
-	} | null>(null);
-	const [orgId, setOrgId] = useState<string | null>(null);
+	const [confirmedTeamName, setConfirmedTeamName] = useState<string | null>(null);
+	const [joinCode, setJoinCode] = useState<string | null>(null); // only set in create mode
+	const [orgId, setOrgId] = useState<string | null>(null); // only set in create mode
 	const [copied, setCopied] = useState(false);
 	const [errors, setErrors] = useState<{
 		join?: string;
@@ -33,13 +32,18 @@ export function TeamSetup() {
 		continue?: string;
 	}>({});
 	const [isLoading, setIsLoading] = useState(false);
-	const [takenRoles, setTakenRoles] = useState<string[]>([]);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
 	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+	const [availableRoles, setAvailableRoles] = useState<{
+		role: "scrum_master" | "product_owner" | "developer";
+	}[]>([]);
 
+	type APIError = { error?: { code?: string; message?: string } };
 
+	// Join flow: no API call here — code is validated when the user continues.
+	// Role uniqueness is enforced by the backend on joinOrganization.
 	const handleCheckCode = async (e: React.FormEvent) => {
-		e.preventDefault(); // Prevents page refresh when form submits
+		e.preventDefault();
 		setErrors({});
 
 		if (!teamCode.trim()) {
@@ -47,84 +51,55 @@ export function TeamSetup() {
 			return;
 		}
 
-		setIsLoading(true); // Show loading spinner
-
-		type APIError = { error?: { code?: string; message?: string } };
+		setIsLoading(true);
 
 		try {
-			const response = await checkJoinCode(teamCode);
-
-			const members = await getOrganizationMembers(response.id);
-			const taken = members
-				.filter((m) => m.scrum_role === "scrum_master" || m.scrum_role === "product_owner")
-				.map((m) => m.scrum_role) as string[];
-
-			setOrgId(response.id);
-			setTakenRoles(taken);
-			setConfirmedTeam({
-				name: response.name,
-				members: response.members_count,
-			});
+			const orgSummary = await joinOrganization({ join_code: teamCode });
+			setAvailableRoles(orgSummary.available_scrum_role);
+			setOrgId(orgSummary.organization_id),
 			setTeamConfirmed(true);
 
 		} catch (error: unknown) {
-			console.error("Failed to check code:", error);
+			console.error("API call failed:", error);
 
 			const apiError = error as APIError;
-			if (apiError?.error?.code === "INVALID_CODE") {
-				setErrors({ join: "Invalid team code" });
-			} else if (apiError?.error?.code === "ALREADY_MEMBER") {
-				setErrors({ join: "You're already a member of this organization" });
-				setShowLoginPrompt(true);
-			} else if (apiError?.error?.message) {
-				setErrors({ join: apiError.error.message });
+			if (apiError.error?.code === "INVALID_CODE") {
+				setErrors({ join: "Invalid code." });
+			} else if (apiError.error?.code === "ALREADY_MEMBER") {
+				setErrors({ join: "User is already a member of this organization" });
 			} else {
-				setErrors({ join: "Something went wrong" });
+				setErrors({ join: "Something went wrong." });
 			}
-
 		} finally {
-			setIsLoading(false);
+				setIsLoading(false);
 		}
 	};
 
-	const handleCreateTeam = async (
-		e: React.FormEvent // Accept form event parameter
-	) => {
-		e.preventDefault(); // Prevent page refresh
+	const handleCreateTeam = async (e: React.FormEvent) => {
+		e.preventDefault();
 		setErrors({});
 
 		if (!teamName.trim()) {
 			setErrors({ create: "Team name is required" });
 			return;
-		}
-		if (teamName.trim().length < 3) {
+		} if (teamName.trim().length < 3) {
 			setErrors({ create: "Team name must be at least 3 characters" });
 			return;
-		}
-		if (teamName.trim().length > 50) {
-			setErrors({ create: "Team name must have less than 50  characters" });
+		} if (teamName.trim().length > 50) {
+			setErrors({ create: "Team name must have less than 50 characters" });
 			return;
 		}
 
 		setIsLoading(true);
 
-		type APIError = { error?: { code?: string; message?: string } };
-
 		try {
 			const response = await createOrganization({ name: teamName });
-
 			setOrgId(response.id);
-			setConfirmedTeam({
-				name: teamName,
-				code: response.join_code,
-				members: 1,
-			});
+			setJoinCode(response.join_code);
+			setConfirmedTeamName(teamName);
 			setTeamConfirmed(true);
 
 		} catch (error: unknown) {
-			console.error("Failed to create team:", error);
-
-			// Handle API errors with type guard
 			const apiError = error as APIError;
 			if (apiError?.error?.code === "INVALID_INPUT") {
 				setErrors({ create: "Team name is required." });
@@ -137,62 +112,55 @@ export function TeamSetup() {
 			} else {
 				setErrors({ create: "Something went wrong." });
 			}
-
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
 	const handleCopyCode = () => {
-		if (confirmedTeam?.code) {
-			navigator.clipboard.writeText(confirmedTeam.code);
+		if (joinCode) {
+			navigator.clipboard.writeText(joinCode);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		}
 	};
 
 	const handleContinue = async () => {
+		if (! orgId || !teamConfirmed || !selectedRole) return;
 		setErrors({});
-
-		if (!teamConfirmed || !selectedRole || !orgId) {
-			return;
-		}
 
 		setIsLoading(true);
 
-		type APIError = { error?: { code?: string; message?: string } };
-
 		try {
-			// Check which mode (create or join)
-			if (teamMode === "create") {
 				await setUserRole({
-					organization_id: orgId as string,
-					scrum_role: selectedRole as "scrum_master" | "product_owner",
-				});
-			} else {
-				await joinOrganization({
-					join_code: teamCode,
+					organization_id: orgId,
 					scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer",
 				});
-			}
+			await refreshUser();
 			navigate("/dashboard");
 
 		} catch (error: unknown) {
-			console.error("Failed to continue:", error);
-
 			const apiError = error as APIError;
-			if (apiError?.error?.message) {
+
+			if (apiError?.error?.code === "INVALID_CODE" || apiError?.error?.code === "CODE_NOT_FOUND") {
+				setErrors({ join: "Invalid team code. Please check and try again." });
+				setTeamConfirmed(false);
+			} else if (apiError?.error?.code === "ALREADY_MEMBER") {
+				setErrors({ join: "You're already a member of this organization." });
+				setShowLoginPrompt(true);
+				setTeamConfirmed(false);
+			} else if (apiError?.error?.code === "ROLE_TAKEN") {
+				setErrors({ continue: "That role is already taken. Please choose another." });
+			} else if (apiError?.error?.message) {
 				setErrors({ continue: apiError.error.message });
 			} else {
-				setErrors({ continue: "Something went wrong" });
+				setErrors({ continue: "Something went wrong." });
 			}
-
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	// Data definitions
 	const roles = [
 		{
 			id: "scrum_master",
@@ -214,11 +182,17 @@ export function TeamSetup() {
 		},
 	];
 
-	// ===== RETURN = THE UI =====
+	// In create mode, the creator must be SM or PO — developer is not available.
+	const isRoleDisabled = (roleId: string) => {
+		if (teamMode === "create") {
+			return roleId  === "developer";
+		}
+		return !availableRoles.some((r) => r.role === roleId);
+	}
+
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center p-8">
 			<div className="max-w-2xl w-full">
-				{/* Header */}
 				<div className="text-center mb-10">
 					<h1 className="text-3xl text-gray-900 mb-2">Team Setup</h1>
 					<p className="text-sm text-gray-500">
@@ -227,31 +201,26 @@ export function TeamSetup() {
 				</div>
 
 				<div className="space-y-10">
-					{/* Section 1 - Team */}
+					{/* Step 1 — Team */}
 					<div>
 						<div className="flex items-center gap-2 mb-5">
-							<span className="text-xs uppercase tracking-wide text-gray-400">
-								Step 1
-							</span>
+							<span className="text-xs uppercase tracking-wide text-gray-400">Step 1</span>
 							<span className="text-xs text-gray-300">·</span>
 							<span className="text-sm text-gray-700">Team</span>
 						</div>
 
 						{!teamConfirmed ? (
 							<div className="space-y-5">
-								{/* Toggle */}
 								<div className="flex gap-3">
 									<Button
 										variant="outlined"
 										isActive={teamMode === "join"}
 										onClick={() => {
 											setTeamMode("join");
-											setErrors({ create: undefined }); // Clear create errors when switching to join
+											setErrors({});
 											setShowLoginPrompt(false);
 										}}
-										className={`flex-1 px-4 ${
-											teamMode === "join" ? "border-cyan-500!" : ""
-										}`}
+										className={`flex-1 px-4 ${teamMode === "join" ? "border-cyan-500!" : ""}`}
 									>
 										I have a team code
 									</Button>
@@ -260,17 +229,14 @@ export function TeamSetup() {
 										isActive={teamMode === "create"}
 										onClick={() => {
 											setTeamMode("create");
-											setErrors({ join: undefined }); // Clear join errors when switching to create
+											setErrors({});
 										}}
-										className={`flex-1 px-4 ${
-											teamMode === "create" ? "border-cyan-500!" : ""
-										}`}
+										className={`flex-1 px-4 ${teamMode === "create" ? "border-cyan-500!" : ""}`}
 									>
 										Create a new team
 									</Button>
 								</div>
 
-								{/* Join Team */}
 								{teamMode === "join" && (
 									<div className="space-y-3">
 										<div>
@@ -279,9 +245,7 @@ export function TeamSetup() {
 												type="text"
 												id="teamCode"
 												value={teamCode}
-												onChange={(e) =>
-													setTeamCode(e.target.value.toUpperCase())
-												}
+												onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
 												hasError={!!errors.join}
 												className="text-center tracking-wider"
 												placeholder="Enter your code"
@@ -293,7 +257,7 @@ export function TeamSetup() {
 											variant="primary"
 											className="w-full"
 										>
-											{isLoading ? "Checking..." : "Check code"}
+											Check code
 										</Button>
 										{errors.join && <ErrorText>{errors.join}</ErrorText>}
 										{showLoginPrompt && (
@@ -308,7 +272,6 @@ export function TeamSetup() {
 									</div>
 								)}
 
-								{/* Create Team */}
 								{teamMode === "create" && (
 									<div className="space-y-3">
 										<div>
@@ -335,29 +298,22 @@ export function TeamSetup() {
 								)}
 							</div>
 						) : (
-							/* Team Confirmed */
 							<div className="bg-emerald-50/50 rounded-xl p-5 border border-emerald-200">
-								<div className="flex items-start justify-between mb-2">
+								<div className="flex items-center justify-between mb-2 w-full">
 									<div>
-										<h3 className="text-base text-gray-900">
-											{confirmedTeam?.name}
-										</h3>
-										<p className="text-xs text-gray-500 mt-1">
-											{confirmedTeam?.members}{" "}
-											{confirmedTeam?.members === 1 ? "member" : "members"}
+										<p className="text-base text-gray-500 text-center">
+											Pick your role to join: {confirmedTeamName ?? teamCode}
 										</p>
 									</div>
-									<div className="flex items-center gap-2">
-										<Check className="w-5 h-5 text-emerald-600" />
-									</div>
+									<Check className="w-5 h-5 text-emerald-600" />
 								</div>
 
-								{confirmedTeam?.code && (
+								{joinCode && (
 									<div className="mt-4 pt-4 border-t border-emerald-200">
 										<div className="flex items-center gap-3">
 											<div className="flex-1 px-3 py-2 bg-white rounded-lg border border-emerald-200">
 												<span className="text-sm text-gray-900 tracking-wider">
-													{confirmedTeam.code}
+													{joinCode}
 												</span>
 											</div>
 											<Button
@@ -382,18 +338,12 @@ export function TeamSetup() {
 						)}
 					</div>
 
-					{/* Section 2 - Role */}
+					{/* Step 2 — Role */}
 					<div>
 						<div className="flex items-center gap-2 mb-5">
-							<span className="text-xs uppercase tracking-wide text-gray-400">
-								Step 2
-							</span>
+							<span className="text-xs uppercase tracking-wide text-gray-400">Step 2</span>
 							<span className="text-xs text-gray-300">·</span>
-							<span
-								className={`text-sm ${
-									teamConfirmed ? "text-gray-700" : "text-gray-400"
-								}`}
-							>
+							<span className={`text-sm ${teamConfirmed ? "text-gray-700" : "text-gray-400"}`}>
 								Role
 							</span>
 						</div>
@@ -407,20 +357,15 @@ export function TeamSetup() {
 						) : (
 							<div className="grid grid-cols-3 gap-4">
 								{roles.map((role) => {
-									const isTaken = takenRoles.includes(role.id);
+									const isDisabled = isRoleDisabled(role.id);
 									const isSelected = selectedRole === role.id;
 									const Icon = role.icon;
-									const isDisabled =
-										isTaken ||
-										(teamMode === "create" && role.id === "developer");
 
 									return (
 										<button
 											key={role.id}
 											type="button"
-											onClick={() =>
-												!isDisabled && setSelectedRole(role.id as Role)
-											}
+											onClick={() => !isDisabled && setSelectedRole(role.id as Role)}
 											disabled={isDisabled}
 											className={`p-5 rounded-xl border-2 text-left transition-all ${
 												isDisabled
@@ -432,16 +377,12 @@ export function TeamSetup() {
 										>
 											<div
 												className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${
-													isTaken
-														? "bg-gray-200"
-														: isSelected
-															? "bg-cyan-100"
-															: "bg-gray-100"
+													isDisabled ? "bg-gray-200" : isSelected ? "bg-cyan-100" : "bg-gray-100"
 												}`}
 											>
 												<Icon
 													className={`w-5 h-5 ${
-														isTaken
+														isDisabled
 															? "text-gray-400"
 															: isSelected
 																? "text-cyan-600"
@@ -451,7 +392,7 @@ export function TeamSetup() {
 											</div>
 											<h3
 												className={`text-sm mb-1 ${
-													isTaken
+													isDisabled
 														? "text-gray-400"
 														: isSelected
 															? "text-cyan-900"
@@ -460,14 +401,7 @@ export function TeamSetup() {
 											>
 												{role.title}
 											</h3>
-											<p className="text-xs text-gray-500">
-												{role.description}
-											</p>
-											{isTaken && (
-												<p className="text-xs text-gray-400 mt-2">
-													Already assigned
-												</p>
-											)}
+											<p className="text-xs text-gray-500">{role.description}</p>
 										</button>
 									);
 								})}

@@ -7,7 +7,7 @@ import {
 	Users,
 } from "lucide-react";
 import {
-	Button,
+	//Button,
 	Modal,
 } from "../../custom"
 import { Link, useLocation } from "react-router-dom";
@@ -16,7 +16,7 @@ import ReactMarkdown from "react-markdown"
 
 const navItems = [
 	{ path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-	//{ path: "/board", icon: KanbanSquare, label: "Sprint Board" },
+	{ path: "/board", icon: KanbanSquare, label: "Sprint Board" },
 	{ path: "/standup", icon: MessageSquare, label: "Async Standup" },
 	{ path: "/blockers", icon: AlertCircle, label: "Blockers" },
 	{ path: "/analytics", icon: BarChart3, label: "Analytics" },

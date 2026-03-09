@@ -11,6 +11,7 @@ export { Input } from "./Input";
 export { Label } from "./Label";
 export { MetricCard } from "./MetricCard";
 export { Modal } from "./Modal";
+export { ModalConfirmation } from "./ModalConfirmation";
 export { PageContainer } from "./PageContainer";
 export { PageHeader } from "./PageHeader";
 export { Select } from "./Select";
