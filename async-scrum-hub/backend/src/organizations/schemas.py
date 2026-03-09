@@ -23,6 +23,7 @@ class OrgSelectRoleRequest(BaseModel):
 	scrum_role: ScrumRole
 
 class OrgSelectRoleResponse(BaseModel):
+	organization_id: UUID
 	scrum_role: ScrumRole
 
 	model_config = ConfigDict(from_attributes=True)
@@ -59,7 +60,6 @@ class OrgInviteMemberResponse(BaseModel):
 
 class OrgJoinRequest(BaseModel):
 	join_code: str = Field(..., min_length=1)
-	scrum_role: ScrumRole
 
 class OrgJoinResponse(BaseModel):
 	organization_id: UUID

@@ -207,7 +207,6 @@ def join_organization(
 	db: Session,
 	user: User,
 	join_code: str,
-	scrum_role: ScrumRole,
 ) -> dict:
 	"""Join an organization using a join code."""
 
@@ -219,26 +218,10 @@ def join_organization(
 	if user.organization_id == org.id:
 		raise _conflict("ALREADY_MEMBER", "User is already a member of this organization")
 
-	# Determine org_role: first member (creator) is admin, rest are members.
-	# Since the creator already joined via create_organization, joiners are always members.
-	org_role = OrgRole.member
-
-	# If requesting SM or PO, check availability; fall back to developer if taken
-	if scrum_role in (ScrumRole.scrum_master, ScrumRole.product_owner):
-		taken = (
-			db.query(User)
-			.filter(
-				User.organization_id == org.id,
-				User.scrum_role == scrum_role,
-			)
-			.first()
-		)
-		if taken:
-			scrum_role = ScrumRole.developer
-
+	# Joiners are always members with developer role
 	user.organization_id = org.id
-	user.org_role = org_role
-	user.scrum_role = scrum_role
+	user.org_role = OrgRole.member
+	user.scrum_role = ScrumRole.developer
 	db.commit()
 	db.refresh(user)
 
