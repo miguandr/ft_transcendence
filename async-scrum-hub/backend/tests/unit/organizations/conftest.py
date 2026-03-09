@@ -221,17 +221,12 @@ def member_user(db_session, org_with_admin):
 def admin_client(test_engine, org_with_admin):
 	"""TestClient authenticated as the org admin."""
 	org, admin_user, session = org_with_admin
-	TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 	app = FastAPI()
 	app.include_router(router)
 
 	def override_get_db():
-		db = TestingSession()
-		try:
-			yield db
-		finally:
-			db.close()
+		yield session
 
 	def override_get_current_user():
 		return admin_user
@@ -245,17 +240,12 @@ def admin_client(test_engine, org_with_admin):
 @pytest.fixture(scope="function")
 def unauthed_user_client(test_engine, db_session, second_user):
 	"""TestClient authenticated as a user with NO organization membership."""
-	TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 	app = FastAPI()
 	app.include_router(router)
 
 	def override_get_db():
-		db = TestingSession()
-		try:
-			yield db
-		finally:
-			db.close()
+		yield db_session
 
 	def override_get_current_user():
 		return second_user

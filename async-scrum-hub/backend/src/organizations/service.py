@@ -80,6 +80,7 @@ def create_organization(db: Session, user: User, name: str) -> Organization:
 		created_by=user.id,
 	)
 	db.add(org)
+	db.flush()
 
 	# Make creator the org admin
 	user.organization_id = org.id
