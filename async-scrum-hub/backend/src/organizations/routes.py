@@ -77,7 +77,6 @@ def join_organization(
 		db=db,
 		user=current_user,
 		join_code=body.join_code,
-		scrum_role=body.scrum_role,
 	)
 	return OrgJoinResponse(**result)
 
@@ -99,7 +98,7 @@ def select_role(
 		org_id=org_id,
 		scrum_role=body.scrum_role,
 	)
-	return OrgSelectRoleResponse(scrum_role=scrum_role)
+	return OrgSelectRoleResponse(organization_id=org_id, scrum_role=scrum_role)
 
 
 @router.get(
