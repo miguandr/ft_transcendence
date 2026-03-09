@@ -260,7 +260,7 @@
 ```json
 {
 	"id": "uuid",
-	"title": "string | null",
+	"title": "string",
 	"description": "string | null",
 	"status": "in_progress | completed",
 	"created_by": "uuid (owner)",
