@@ -460,14 +460,15 @@ file: binary (image file)
 **Request Body:**
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+	"organization_id": "uuid",
+	"scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -730,7 +731,6 @@ file: binary (image file)
 ```json
 {
   "join_code": "SCR-493",
-  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -738,8 +738,8 @@ file: binary (image file)
 ```json
 {
   "organization_id": "uuid",
-  "org_role": "member | admin", //first one is admin. then all other member that joins are just members
-  "scrum_role": "scrum_master | product_owner | developer"
+  "org_role": "member | admin", //first one is admin. then all other member that joins are just members 
+  "scrum_role": "scrum_master | product_owner | developer" 
 }
 ```
 
