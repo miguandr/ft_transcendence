@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session, selectinload
 from src.config.email import send_invite_email
 from src.database.models import Organization, User
 from src.database.models.enums import OrgRole, ScrumRole
+from src.organizations.schemas import available_SR
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -218,15 +219,34 @@ def join_organization(
 	if user.organization_id == org.id:
 		raise _conflict("ALREADY_MEMBER", "User is already a member of this organization")
 
-	# Joiners are always members with developer role
+	# Join the org first
 	user.organization_id = org.id
 	user.org_role = OrgRole.member
-	user.scrum_role = ScrumRole.developer
+
+	# Check which unique roles (SM, PO) are still available in the org
+	available_roles = []
+
+	sm_taken = db.query(User).filter(
+		User.organization_id == org.id,
+		User.scrum_role == ScrumRole.scrum_master,
+	).first()
+	if not sm_taken:
+		available_roles.append(available_SR(role="scrum_master"))
+
+	po_taken = db.query(User).filter(
+		User.organization_id == org.id,
+		User.scrum_role == ScrumRole.product_owner,
+	).first()
+	if not po_taken:
+		available_roles.append(available_SR(role="product_owner"))
+
+	available_roles.append(available_SR(role="developer"))
+
 	db.commit()
 	db.refresh(user)
 
 	return {
 		"organization_id": org.id,
 		"org_role": user.org_role,
-		"scrum_role": user.scrum_role,
+		"available_scrum_role": available_roles
 	}
