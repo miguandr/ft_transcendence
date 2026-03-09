@@ -35,14 +35,14 @@ export function Modal({
 			<div className="fixed inset-0 bg-black/20 z-40" onClick={onClose}></div>
 
 			{/* Modal */}
-			<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+			<div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
 				<div
-					className={`bg-white rounded-2xl shadow-xl w-full ${sizeClasses[size]} ${className}`}
+					className={`bg-white rounded-2xl shadow-xl w-full pointer-events-auto ${sizeClasses[size]} ${className}`}
 				>
 					{/* Header */}
 					<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
 						<div>
-							<h3 className="text-lg text-gray-900">{title}</h3>
+							<h2 className="text-xl text-gray-900">{title}</h2>
 							{subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
 						</div>
 						<button

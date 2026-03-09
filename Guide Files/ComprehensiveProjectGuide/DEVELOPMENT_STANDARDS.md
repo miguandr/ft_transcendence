@@ -313,7 +313,7 @@ main (production-ready, protected)
       ├── feat/auth-login          (Daniel)
       ├── feat/design-system        (You)
       ├── feat/sprint-backend       (Freddy)
-      └── feat/websocket-setup      (Malu)
+      └── feat/websocket-setup      (Maria Luiza)
 ```
 
 ### Creating a Feature Branch

@@ -7,7 +7,6 @@ IMPORTANT - Authorization Fields Required (see ARCHITECTURE.md section 9.1):
 - assignee_id: UUID FK to users, nullable (required for assignee checks)
 """
 
-
 import uuid
 from datetime import datetime
 from sqlalchemy import DateTime, String, ForeignKey, func, Enum
@@ -90,7 +89,6 @@ class Task(Base):
 		onupdate=func.now(),
 		nullable=False,
 	)
-
 #Relationships
 
 	ticket: Mapped["Ticket"] = relationship(

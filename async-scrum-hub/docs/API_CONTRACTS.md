@@ -440,8 +440,10 @@ file: binary (image file)
 **Permissions:**
 - The authenticated user
 
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
 **Rules:**
-- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
 - Only one `scrum_master` and one `product_owner` can exist per organization.
 - Scrum roles are assigned only during organization creation and when joining an organization.
 - Once both scrum roles are assigned, new members can only join as `developer`.
@@ -468,6 +470,16 @@ file: binary (image file)
   "error": {
 	"code": "UNAUTHORIZED",
 	"message": "Authentication required"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
   }
 }
 ```
@@ -946,17 +958,35 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | completed",
-	"priority": "low | medium | high",
-	"created_by": "uuid",
-	"assignee_id": "uuid | null",
-	"organization_id": "uuid",
-	"created_at": "timestamp",
-	"updated_at": "timestamp"
+    "id": "uuid",
+    "title": "string",
+    "description": "string | null",
+    "status": "todo | in_progress | completed",
+    "priority": "low | medium | high",
+    "created_by": "UserBrief",
+    "assignee_id": "uuid | null",
+    "organization_id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+	"tasks": [
+			 {
+                "id": "uuid",
+                "title": "string",
+                "status": "in_progress | completed"
+                
+            }
+			],
+
+"blockers": [
+            {
+                "id": "uuid",
+                "description": "string",
+                "status": "open | resolved",
+                
+            }
+			]
 }
+
 ```
 
 **Error Responses:**
@@ -2318,15 +2348,15 @@ Used to render the organization board.
 - `key` - Document identifier: `privacy` | `terms`
 
 **Notes:**
-- Documents are rendered from Markdown stored in the repository (`legal/privacy.md`, `legal/terms.md`)
-- Content is converted to HTML and returned in the response
+- Documents are stored as Markdown in the repository (`legal/privacy.md`, `legal/terms.md`)
+- Content is returned as raw Markdown plain text; the frontend is responsible for rendering
 
 **Success Response:** `200 OK`
 ```json
 {
   "key": "privacy",
   "title": "Privacy Policy",
-  "content_html": "<h1>Privacy Policy</h1><p>...</p>",
+  "content": "# Privacy Policy\n\n...",
   "updated_at": "timestamp"
 }
 ```
@@ -2344,4 +2374,147 @@ Used to render the organization board.
 ```
 ---
 
+## 9. Analytics
+
+### 9.1 Get Organization analytics
+
+**Endpoint:** `GET /organizations/{org_id}/analytics`
+
+**Description:** Returns a the analytics for the organization.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "tasks":[ 							//line chart
+	{ "week": "Week 1", "active": "int", "resolved": "int"},
+	{ "week": "Week 2", "active": "int", "resolved": "int"},
+	{ "week": "Week 3", "active": "int", "resolved": "int"},
+	{ "week": "Week 4", "active": "int", "resolved": "int"}
+  ],
+  "tickets":[							//bar chart
+	{ "week": "Week 1", "completed": "int"},
+	{ "week": "Week 2", "completed": "int"},
+	{ "week": "Week 3", "completed": "int"},
+	{ "week": "Week 4", "completed": "int"}
+  ],
+  "standups": {							//numeric cards
+	"posted": "int",
+	"total": "int" 
+  },
+  "blockers_avg_cycle_time": "float"    //numeric cards
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
+
+## 10. Dashboard
+
+### 10.1 Get Organization Dashboard
+
+**Endpoint:** `GET /organizations/{org_id}/dashboard`
+
+**Description:** Returns summary counts for the value cards and a feed of the 6 most recent activity events (tickets/tasks created or completed) from the last 7 days.
+
+**Notes:**
+- `recent_updates` only includes events from the last 7 days.
+- A completed item uses `updated_at` as its timestamp; a created item uses `created_at`.
+- `timestamp` is returned as a UTC datetime string — the frontend is responsible for formatting it as a relative time (e.g. "48 min ago", "2 days ago").
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "summary": {
+    "tasks_in_progress": "int",
+    "tickets_completed": "int",
+    "active_blockers": "int"
+  },
+  "recent_updates": [
+    {
+      "type": "task | ticket",
+      "event": "created | completed",
+      "title": "string",
+      "timestamp": "ISO 8601 datetime (UTC)"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - User is not part of any organization
+```json
+{
+  "error": {
+	"code": "NO_ORGANIZATION",
+	"message": "User is not part of any organization."
+  }
+}
+```
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
 **End of Document**

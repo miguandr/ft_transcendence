@@ -1,398 +1,12 @@
 import { Plus, X, AlertCircle, GripVertical, Trash2, Edit2, CheckCircle } from "lucide-react";
-import { useState } from "react";
 
-// Types
-type Priority = "high" | "medium" | "low";
-type UserRole = "Product Owner" | "Scrum Master" | "Developer";
-type TicketStatus = "todo" | "in_progress" | "completed";
-type TaskStatus = "in-progress" | "completed";
-
-interface Task {
-	id: number;
-	title: string;
-	description: string;
-	assignee: string;
-	status: TaskStatus;
-}
-
-interface Blocker {
-	id: number;
-	description: string;
-	creator: string;
-	status: "open" | "resolved";
-	ticketId: number;
-}
-
-interface Ticket {
-	id: number;
-	title: string;
-	description: string;
-	assignee: string;
-	priority: Priority;
-	status: TicketStatus;
-	tasks: Task[];
-}
+import { PRIORITY_COLORS, BOARD_COLUMNS, PRIORITY_OPTIONS } from "./constants/sprint.constants";
+import { Priority, TicketStatus, TaskStatus, UserRole, BlockerStatus } from "./types/sprint.types";
+import type { Ticket, ListTicketsBoard, Task, TaskSummary, Blocker } from "./types/sprint.types"
 
 export function SprintBoard() {
-	// Mock current user
-	const currentUser = {
-		id: "sc",
-		name: "Sarah Chen",
-		avatar: "SC",
-		role: "Product Owner" as UserRole, // Change this to test different roles
-	};
 
-	const teamMembers = [
-		{
-			id: "ak",
-			name: "Alex Kim",
-			avatar: "AK",
-			color: "from-cyan-200 to-blue-300",
-			role: "Developer",
-		},
-		{
-			id: "ml",
-			name: "Maria Lopez",
-			avatar: "ML",
-			color: "from-pink-200 to-rose-300",
-			role: "Developer",
-		},
-		{
-			id: "jl",
-			name: "Jordan Lee",
-			avatar: "JL",
-			color: "from-amber-200 to-yellow-300",
-			role: "Developer",
-		},
-		{
-			id: "sc",
-			name: "Sarah Chen",
-			avatar: "SC",
-			color: "from-emerald-200 to-green-300",
-			role: "Product Owner",
-		},
-	];
 
-	// State for tickets
-	const [tickets, setTickets] = useState<Ticket[]>([
-		{
-			id: 1,
-			title: "Design settings page",
-			description: "Create a new settings page with user preferences",
-			assignee: "ML",
-			priority: "medium",
-			status: "todo",
-			tasks: [],
-		},
-		{
-			id: 2,
-			title: "Write API documentation",
-			description: "Document all REST endpoints",
-			assignee: "JL",
-			priority: "low",
-			status: "todo",
-			tasks: [],
-		},
-		{
-			id: 3,
-			title: "Implement OAuth flow",
-			description: "Add OAuth authentication with Google and GitHub",
-			assignee: "AK",
-			priority: "high",
-			status: "in_progress",
-			tasks: [
-				{
-					id: 1,
-					title: "Set up OAuth providers",
-					description: "Configure OAuth apps",
-					assignee: "AK",
-					status: "completed",
-				},
-				{
-					id: 2,
-					title: "Build login UI",
-					description: "Create OAuth login buttons",
-					assignee: "AK",
-					status: "in-progress",
-				},
-			],
-		},
-		{
-			id: 4,
-			title: "Update dashboard charts",
-			description: "Improve chart visuals and add filters",
-			assignee: "SC",
-			priority: "medium",
-			status: "in_progress",
-			tasks: [
-				{
-					id: 3,
-					title: "Add date range picker",
-					description: "Allow filtering by date",
-					assignee: "SC",
-					status: "in-progress",
-				},
-			],
-		},
-		{
-			id: 6,
-			title: "Fix login bug",
-			description: "Resolve timeout issue on mobile",
-			assignee: "JL",
-			priority: "high",
-			status: "completed",
-			tasks: [
-				{
-					id: 4,
-					title: "Debug mobile timeout",
-					description: "Find root cause",
-					assignee: "JL",
-					status: "completed",
-				},
-				{
-					id: 5,
-					title: "Apply fix",
-					description: "Update timeout logic",
-					assignee: "JL",
-					status: "completed",
-				},
-			],
-		},
-	]);
-
-	const [blockers, setBlockers] = useState<Blocker[]>([
-		{
-			id: 1,
-			description: "Waiting for API keys from client",
-			creator: "AK",
-			status: "open",
-			ticketId: 3,
-		},
-		{
-			id: 2,
-			description: "Design assets not yet approved",
-			creator: "ML",
-			status: "resolved",
-			ticketId: 1,
-		},
-	]);
-
-	// Modal states
-	const [isAddTicketOpen, setIsAddTicketOpen] = useState(false);
-	const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
-	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
-	const [isAddBlockerOpen, setIsAddBlockerOpen] = useState(false);
-	const [confirmDelete, setConfirmDelete] = useState<{
-		type: "ticket" | "task";
-		id: number;
-	} | null>(null);
-
-	// Form states
-	const [ticketForm, setTicketForm] = useState({
-		title: "",
-		description: "",
-		priority: "medium" as Priority,
-		assignee: "",
-	});
-
-	const [taskForm, setTaskForm] = useState({
-		title: "",
-		description: "",
-		assignee: "",
-	});
-
-	const [blockerForm, setBlockerForm] = useState({
-		description: "",
-		assignee: "",
-	});
-
-	// Drag state
-	const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
-	const [draggedTask, setDraggedTask] = useState<{ task: Task; ticketId: number } | null>(null);
-
-	// Permission helpers
-	const canAddTicket =
-		currentUser.role === "Product Owner" || currentUser.role === "Scrum Master";
-	const canDragTickets =
-		currentUser.role === "Product Owner" || currentUser.role === "Scrum Master";
-	const canEditTicket = currentUser.role === "Product Owner";
-	const canDeleteTicket =
-		currentUser.role === "Product Owner" || currentUser.role === "Scrum Master";
-	const canEditTask = (task: Task) =>
-		currentUser.role === "Product Owner" ||
-		currentUser.role === "Scrum Master" ||
-		task.assignee === currentUser.avatar;
-	const canResolveBlocker = (blocker: Blocker) =>
-		blocker.creator === currentUser.avatar || currentUser.role === "Scrum Master";
-
-	const priorityColors = {
-		high: "bg-rose-100/50 text-rose-700 border border-rose-200",
-		medium: "bg-amber-100/50 text-amber-700 border border-amber-200",
-		low: "bg-gray-100 text-gray-600 border border-gray-200",
-	};
-
-	const columns = [
-		{ id: "todo", title: "To Do", borderColor: "border-l-gray-300" },
-		{ id: "in_progress", title: "In Progress", borderColor: "border-l-cyan-400" },
-		{ id: "completed", title: "Completed", borderColor: "border-l-emerald-400" },
-	];
-
-	// Handlers
-	const handleCreateTicket = () => {
-		const newTicket: Ticket = {
-			id: Date.now(),
-			title: ticketForm.title,
-			description: ticketForm.description,
-			priority: ticketForm.priority,
-			assignee: ticketForm.assignee,
-			status: "todo",
-			tasks: [],
-		};
-		setTickets([...tickets, newTicket]);
-		setIsAddTicketOpen(false);
-		setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
-	};
-
-	const handleUpdateTicketPriority = () => {
-		if (selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id ? { ...t, priority: ticketForm.priority } : t
-				)
-			);
-			setIsEditTicketOpen(false);
-		}
-	};
-
-	const handleDeleteTicket = () => {
-		if (confirmDelete?.type === "ticket") {
-			setTickets(tickets.filter((t) => t.id !== confirmDelete.id));
-			setBlockers(blockers.filter((b) => b.ticketId !== confirmDelete.id));
-			setConfirmDelete(null);
-			setSelectedTicket(null);
-		}
-	};
-
-	const handleCreateTask = () => {
-		if (selectedTicket) {
-			const newTask: Task = {
-				id: Date.now(),
-				title: taskForm.title,
-				description: taskForm.description,
-				assignee: taskForm.assignee,
-				status: "in-progress",
-			};
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id ? { ...t, tasks: [...t.tasks, newTask] } : t
-				)
-			);
-			setIsCreateTaskOpen(false);
-			setTaskForm({ title: "", description: "", assignee: "" });
-		}
-	};
-
-	const handleUpdateTask = (updatedTask: Task) => {
-		if (selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id
-						? {
-								...t,
-								tasks: t.tasks.map((task) =>
-									task.id === updatedTask.id ? updatedTask : task
-								),
-							}
-						: t
-				)
-			);
-			setSelectedTask(null);
-		}
-	};
-
-	const handleDeleteTask = () => {
-		if (confirmDelete?.type === "task" && selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id
-						? { ...t, tasks: t.tasks.filter((task) => task.id !== confirmDelete.id) }
-						: t
-				)
-			);
-			setConfirmDelete(null);
-			setSelectedTask(null);
-		}
-	};
-
-	const handleAddBlocker = () => {
-		if (selectedTicket) {
-			const newBlocker: Blocker = {
-				id: Date.now(),
-				description: blockerForm.description,
-				creator: currentUser.avatar,
-				status: "open",
-				ticketId: selectedTicket.id,
-			};
-			setBlockers([...blockers, newBlocker]);
-			setIsAddBlockerOpen(false);
-			setBlockerForm({ description: "", assignee: "" });
-		}
-	};
-
-	const handleResolveBlocker = (blockerId: number) => {
-		setBlockers(blockers.map((b) => (b.id === blockerId ? { ...b, status: "resolved" } : b)));
-	};
-
-	// Drag handlers for tickets
-	const handleTicketDragStart = (ticket: Ticket) => {
-		if (canDragTickets) {
-			setDraggedTicket(ticket);
-		}
-	};
-
-	const handleTicketDrop = (status: TicketStatus) => {
-		if (draggedTicket && canDragTickets) {
-			setTickets(tickets.map((t) => (t.id === draggedTicket.id ? { ...t, status } : t)));
-			setDraggedTicket(null);
-		}
-	};
-
-	// Drag handlers for tasks
-	const handleTaskDragStart = (task: Task, ticketId: number) => {
-		const canDrag =
-			currentUser.role === "Product Owner" ||
-			currentUser.role === "Scrum Master" ||
-			task.assignee === currentUser.avatar;
-		if (canDrag) {
-			setDraggedTask({ task, ticketId });
-		}
-	};
-
-	const handleTaskDrop = (newStatus: TaskStatus) => {
-		if (draggedTask) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === draggedTask.ticketId
-						? {
-								...t,
-								tasks: t.tasks.map((task) =>
-									task.id === draggedTask.task.id
-										? { ...task, status: newStatus }
-										: task
-								),
-							}
-						: t
-				)
-			);
-			setDraggedTask(null);
-		}
-	};
-
-	const getTicketsByStatus = (status: TicketStatus) => tickets.filter((t) => t.status === status);
-	const getBlockersForTicket = (ticketId: number) =>
-		blockers.filter((b) => b.ticketId === ticketId);
 
 	return (
 		<div className="p-8">
@@ -431,8 +45,8 @@ export function SprintBoard() {
 			</div>
 
 			<div className="grid grid-cols-3 gap-6">
-				{columns.map((column) => {
-					const columnTickets = getTicketsByStatus(column.id as TicketStatus);
+				{BOARD_COLUMNS.map((column) => {
+					const columnTickets = getTicketsByStatus(column.id);
 					return (
 						<div key={column.id} className="space-y-4">
 							<div className="flex items-center justify-between">
@@ -445,7 +59,7 @@ export function SprintBoard() {
 							<div
 								className="bg-gray-50 rounded-2xl p-4 min-h-[600px] space-y-3"
 								onDragOver={(e) => e.preventDefault()}
-								onDrop={() => handleTicketDrop(column.id as TicketStatus)}
+								onDrop={() => handleTicketDrop(column.id)}
 							>
 								{columnTickets.map((ticket) => {
 									const member = teamMembers.find(
@@ -456,7 +70,7 @@ export function SprintBoard() {
 											key={ticket.id}
 											draggable={canDragTickets}
 											onDragStart={() => handleTicketDragStart(ticket)}
-											onClick={() => setSelectedTicket(ticket)}
+											onClick={() => setSelectedTicketId(ticket.id)}
 											className={`bg-white rounded-xl p-4 border border-gray-100 border-l-4 ${column.borderColor} hover:shadow-sm transition-shadow cursor-pointer ${
 												canDragTickets
 													? "cursor-grab active:cursor-grabbing"
@@ -469,7 +83,7 @@ export function SprintBoard() {
 												</span>
 												<span
 													className={`text-xs px-2 py-1 rounded-lg ${
-														priorityColors[ticket.priority]
+														PRIORITY_COLORS[ticket.priority]
 													}`}
 												>
 													{ticket.priority}
@@ -646,7 +260,7 @@ export function SprintBoard() {
 				<>
 					<div
 						className="fixed inset-0 bg-black/20 z-40"
-						onClick={() => setSelectedTicket(null)}
+						onClick={() => setSelectedTicketId(null)}
 					/>
 					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
 						<div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -658,7 +272,7 @@ export function SprintBoard() {
 									<div className="flex items-center gap-2">
 										<span
 											className={`text-xs px-2 py-1 rounded-lg ${
-												priorityColors[selectedTicket.priority]
+												PRIORITY_COLORS[selectedTicket.priority]
 											}`}
 										>
 											{selectedTicket.priority}
@@ -673,7 +287,7 @@ export function SprintBoard() {
 									</div>
 								</div>
 								<button
-									onClick={() => setSelectedTicket(null)}
+									onClick={() => setSelectedTicketId(null)}
 									className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
 								>
 									<X className="w-5 h-5 text-gray-400" />
@@ -718,16 +332,16 @@ export function SprintBoard() {
 												<div
 													className="space-y-2 min-h-[100px] bg-gray-50 rounded-xl p-3"
 													onDragOver={(e) => e.preventDefault()}
-													onDrop={() => handleTaskDrop("in-progress")}
+													onDrop={() => handleTaskDrop("in_progress")}
 												>
 													{selectedTicket.tasks
-														.filter((t) => t.status === "in-progress")
+														.filter((t) => t.status === "in_progress")
 														.map((task) => {
 															const canDrag =
 																currentUser.role ===
-																	"Product Owner" ||
+																	"product_owner" ||
 																currentUser.role ===
-																	"Scrum Master" ||
+																	"scrum_master" ||
 																task.assignee ===
 																	currentUser.avatar;
 															return (
@@ -771,9 +385,9 @@ export function SprintBoard() {
 														.map((task) => {
 															const canDrag =
 																currentUser.role ===
-																	"Product Owner" ||
+																	"product_owner" ||
 																currentUser.role ===
-																	"Scrum Master" ||
+																	"scrum_master" ||
 																task.assignee ===
 																	currentUser.avatar;
 															return (
@@ -933,7 +547,7 @@ export function SprintBoard() {
 								</div>
 
 								<button
-									onClick={() => setSelectedTicket(null)}
+									onClick={() => setSelectedTicketId(null)}
 									className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
 								>
 									Close
@@ -1266,7 +880,7 @@ export function SprintBoard() {
 									/>
 								</div>
 
-								{currentUser.role === "Scrum Master" && (
+								{currentUser.role === "scrum_master" && (
 									<div>
 										<label className="block text-sm text-gray-700 mb-1.5">
 											Assignee (optional)
