@@ -319,13 +319,46 @@ class TestJoinOrganization:
 	"""Tests for service.join_organization."""
 
 	def test_join_success(self, org_with_admin, second_user):
-		"""User joins org as member with developer role."""
+		"""User joins org as member and receives available_scrum_role list."""
 		org, admin, session = org_with_admin
 		result = service.join_organization(session, second_user, org.join_code)
 		assert result["organization_id"] == org.id
 		assert result["org_role"] == OrgRole.member
-		assert result["scrum_role"] == ScrumRole.developer
 		assert second_user.organization_id == org.id
+		roles = [r.role for r in result["available_scrum_role"]]
+		assert "developer" in roles
+
+	def test_join_available_roles_excludes_taken_sm(self, org_with_admin, second_user):
+		"""SM not in available_scrum_role when already taken (admin has scrum_master)."""
+		org, admin, session = org_with_admin
+		result = service.join_organization(session, second_user, org.join_code)
+		roles = [r.role for r in result["available_scrum_role"]]
+		assert "scrum_master" not in roles
+
+	def test_join_available_roles_includes_po_when_free(self, org_with_admin, second_user):
+		"""PO is in available_scrum_role when not yet taken."""
+		org, admin, session = org_with_admin
+		result = service.join_organization(session, second_user, org.join_code)
+		roles = [r.role for r in result["available_scrum_role"]]
+		assert "product_owner" in roles
+
+	def test_join_available_roles_excludes_taken_po(self, org_with_admin, second_user):
+		"""PO not in available_scrum_role when already taken."""
+		org, admin, session = org_with_admin
+		po_user = User(
+			id=uuid4(),
+			email="po@example.com",
+			name="PO User",
+			password_hash="hashed",
+			organization_id=org.id,
+			org_role="member",
+			scrum_role="product_owner",
+		)
+		session.add(po_user)
+		session.commit()
+		result = service.join_organization(session, second_user, org.join_code)
+		roles = [r.role for r in result["available_scrum_role"]]
+		assert "product_owner" not in roles
 
 	def test_join_invalid_code_raises_400(self, db_session, admin_user):
 		"""Raises 400 INVALID_CODE for wrong join code."""
@@ -409,8 +442,10 @@ class TestJoinOrganizationRoute:
 		assert response.status_code == 200
 		data = response.json()
 		assert data["org_role"] == "member"
-		assert data["scrum_role"] == "developer"
 		assert "organization_id" in data
+		assert "available_scrum_role" in data
+		roles = [r["role"] for r in data["available_scrum_role"]]
+		assert "developer" in roles
 
 	def test_join_invalid_code_returns_400(self, unauthed_user_client):
 		"""Returns 400 for invalid join code."""
