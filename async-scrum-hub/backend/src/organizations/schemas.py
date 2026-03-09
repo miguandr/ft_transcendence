@@ -61,10 +61,13 @@ class OrgInviteMemberResponse(BaseModel):
 class OrgJoinRequest(BaseModel):
 	join_code: str = Field(..., min_length=1)
 
+class available_SR(BaseModel):
+	role: str
+
 class OrgJoinResponse(BaseModel):
 	organization_id: UUID
 	org_role: OrgRole
-	scrum_role: ScrumRole
+	available_scrum_role: list[available_SR]
 
 	model_config = ConfigDict(from_attributes=True)
 
