@@ -65,17 +65,12 @@ class TestOrgSchemas:
 			OrgInviteMemberRequest(name="John", email="")
 
 	def test_join_request_valid(self):
-		req = OrgJoinRequest(join_code="ABC-123", scrum_role=ScrumRole.developer)
+		req = OrgJoinRequest(join_code="ABC-123")
 		assert req.join_code == "ABC-123"
-		assert req.scrum_role == ScrumRole.developer
 
 	def test_join_request_empty_code_is_invalid(self):
 		with pytest.raises(Exception):
-			OrgJoinRequest(join_code="", scrum_role=ScrumRole.developer)
-
-	def test_join_request_missing_role_is_invalid(self):
-		with pytest.raises(Exception):
-			OrgJoinRequest(join_code="ABC-123")
+			OrgJoinRequest(join_code="")
 
 
 # ---------------------------------------------------------------------------
@@ -324,9 +319,9 @@ class TestJoinOrganization:
 	"""Tests for service.join_organization."""
 
 	def test_join_success(self, org_with_admin, second_user):
-		"""User joins org as member with chosen role."""
+		"""User joins org as member with developer role."""
 		org, admin, session = org_with_admin
-		result = service.join_organization(session, second_user, org.join_code, ScrumRole.developer)
+		result = service.join_organization(session, second_user, org.join_code)
 		assert result["organization_id"] == org.id
 		assert result["org_role"] == OrgRole.member
 		assert result["scrum_role"] == ScrumRole.developer
@@ -336,7 +331,7 @@ class TestJoinOrganization:
 		"""Raises 400 INVALID_CODE for wrong join code."""
 		from fastapi import HTTPException
 		with pytest.raises(HTTPException) as exc_info:
-			service.join_organization(db_session, admin_user, "XXX-999", ScrumRole.developer)
+			service.join_organization(db_session, admin_user, "XXX-999")
 		assert exc_info.value.status_code == 400
 		assert exc_info.value.detail["error"]["code"] == "INVALID_CODE"
 
@@ -345,41 +340,9 @@ class TestJoinOrganization:
 		from fastapi import HTTPException
 		org, admin, session = org_with_admin
 		with pytest.raises(HTTPException) as exc_info:
-			service.join_organization(session, admin, org.join_code, ScrumRole.developer)
+			service.join_organization(session, admin, org.join_code)
 		assert exc_info.value.status_code == 409
 		assert exc_info.value.detail["error"]["code"] == "ALREADY_MEMBER"
-
-	def test_join_sm_taken_falls_back_to_developer(self, org_with_admin, second_user):
-		"""Falls back to developer when scrum_master is already taken."""
-		org, admin, session = org_with_admin
-		# admin already has scrum_master
-		result = service.join_organization(session, second_user, org.join_code, ScrumRole.scrum_master)
-		assert result["scrum_role"] == ScrumRole.developer
-
-	def test_join_po_available(self, org_with_admin, second_user):
-		"""User can take product_owner if not taken."""
-		org, admin, session = org_with_admin
-		result = service.join_organization(session, second_user, org.join_code, ScrumRole.product_owner)
-		assert result["scrum_role"] == ScrumRole.product_owner
-
-	def test_join_po_taken_falls_back_to_developer(self, org_with_admin, second_user):
-		"""Falls back to developer when product_owner is already taken."""
-		org, admin, session = org_with_admin
-		# Assign PO to another user first
-		po_user = User(
-			id=uuid4(),
-			email="po@example.com",
-			name="PO User",
-			password_hash="hashed",
-			organization_id=org.id,
-			org_role="member",
-			scrum_role="product_owner",
-		)
-		session.add(po_user)
-		session.commit()
-
-		result = service.join_organization(session, second_user, org.join_code, ScrumRole.product_owner)
-		assert result["scrum_role"] == ScrumRole.developer
 
 
 # ---------------------------------------------------------------------------
@@ -441,7 +404,7 @@ class TestJoinOrganizationRoute:
 		org, admin, session = org_with_admin
 		response = unauthed_user_client.post(
 			JOIN_URL,
-			json={"join_code": org.join_code, "scrum_role": "developer"},
+			json={"join_code": org.join_code},
 		)
 		assert response.status_code == 200
 		data = response.json()
@@ -453,7 +416,7 @@ class TestJoinOrganizationRoute:
 		"""Returns 400 for invalid join code."""
 		response = unauthed_user_client.post(
 			JOIN_URL,
-			json={"join_code": "INVALID", "scrum_role": "developer"},
+			json={"join_code": "INVALID"},
 		)
 		assert response.status_code == 400
 		assert response.json()["detail"]["error"]["code"] == "INVALID_CODE"
@@ -463,7 +426,7 @@ class TestJoinOrganizationRoute:
 		org, admin, session = org_with_admin
 		response = admin_client.post(
 			JOIN_URL,
-			json={"join_code": org.join_code, "scrum_role": "developer"},
+			json={"join_code": org.join_code},
 		)
 		assert response.status_code == 409
 		assert response.json()["detail"]["error"]["code"] == "ALREADY_MEMBER"
@@ -472,7 +435,7 @@ class TestJoinOrganizationRoute:
 		"""Returns 422 when join_code is missing."""
 		response = unauthed_user_client.post(
 			JOIN_URL,
-			json={"scrum_role": "developer"},
+			json={},
 		)
 		assert response.status_code == 422
 
@@ -485,7 +448,7 @@ class TestSelectRoleRoute:
 	"""Tests for PATCH /organizations/{org_id}."""
 
 	def test_select_role_returns_201(self, admin_client, org_with_admin):
-		"""Successful role selection returns 201."""
+		"""Successful role selection returns 201 with organization_id and scrum_role."""
 		org, admin, session = org_with_admin
 		response = admin_client.patch(
 			SELECT_ROLE_URL.format(org_id=org.id),
@@ -494,6 +457,7 @@ class TestSelectRoleRoute:
 		assert response.status_code == 201
 		data = response.json()
 		assert data["scrum_role"] == "product_owner"
+		assert data["organization_id"] == str(org.id)
 
 	def test_select_role_invalid_role_returns_422(self, admin_client, org_with_admin):
 		"""Returns 422 for invalid scrum role."""
