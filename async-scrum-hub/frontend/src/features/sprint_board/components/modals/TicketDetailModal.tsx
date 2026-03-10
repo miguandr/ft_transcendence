@@ -1,13 +1,22 @@
 import { Link } from "react-router-dom"
 import { Plus, Edit2, CheckCircle, Trash2 } from "lucide-react"
-import { Button, Modal } from "../../../../components/custom";
+import { Button, Modal, ErrorText } from "../../../../components/custom";
 import { PRIORITY_COLORS } from "../../constants/sprint.constants"
 import type { TaskStatus, Ticket, TaskSummary, BlockerStatus } from "../../types/sprint.types";
 
 interface Props {
 	ticket: Ticket;
 	tasks: TaskSummary[];
-	blockers: { id: string; description: string; status: BlockerStatus; }[];
+	blockers:{
+		id: string;
+		description: string;
+		status: BlockerStatus;
+		created_by: {
+			id: string;
+			name: string;
+			avatar_url: string;
+		};
+	}[];
 
 	onClose: () => void;
 	onOpenCreateTask: () => void;
@@ -22,6 +31,8 @@ interface Props {
 
 	canEdit: boolean;
 	canDelete: boolean;
+	error?: string;
+	errorTaskDrop?: string;
 }
 
 
@@ -43,6 +54,8 @@ export function TicketDetailModal({
 
 	canEdit,
 	canDelete,
+	error,
+	errorTaskDrop,
 }: Props) {
 
 	return (
@@ -159,6 +172,7 @@ export function TicketDetailModal({
 											<span className="flex-1">{task.title}</span>
 										</div>
 									))}
+								{errorTaskDrop && <ErrorText>{errorTaskDrop}</ErrorText>}
 							</div>
 						</div>
 					</div>
@@ -203,7 +217,7 @@ export function TicketDetailModal({
 											{blocker.description}
 										</p>
 										<p className="text-xs text-gray-500">
-											Created by pepito
+											Created by {blocker.created_by.name}
 											{/* Created by {blocker.created_by.name} ·{" "} */}
 											{blocker.status}
 										</p>
@@ -251,6 +265,7 @@ export function TicketDetailModal({
 							</div>
 						</div>
 					)}
+
 					{canDelete ? (
 						<Button
 							variant="ghost"
@@ -280,6 +295,7 @@ export function TicketDetailModal({
 						</div>
 					)}
 				</div>
+				{error && <ErrorText>{error}</ErrorText>}
 				<Button
 					variant="secondary"
 					size="sm"

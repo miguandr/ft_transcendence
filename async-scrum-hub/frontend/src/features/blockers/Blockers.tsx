@@ -1,7 +1,9 @@
 import { AlertCircle, Clock, CheckCircle2, Plus, Edit2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Button, Label, Modal, PageHeader, Avatar, ModalConfirmation } from "../../components/custom";
+import { useAuth } from "../../routes/useAuth";
+import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
+import { Button, Label, Modal, PageHeader, Avatar, ModalConfirmation, ErrorText } from "../../components/custom";
 import {
 	createBlocker,
 	listBlockers,
@@ -9,36 +11,16 @@ import {
 	resolveBlocker,
 	listTickets,
 	getOrganizationMembers,
-	getCurrentUser,
 } from "../../services/api";
-import type { TicketListItem, OrganizationMember, User } from "../../services/api";
+import type { TicketListItem, OrganizationMember, BlockerListItem } from "../../services/api";
+import type { APIError } from "../..//utils/shared.types";
 
-interface Blocker {
-	id: string;
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	};
-	description: string;
-	status: "open" | "resolved";
-	assignee?: {
-		id: string;
-		name: string;
-	} | null;
-	ticket: {
-		id: string;
-		title: string;
-	};
-	created_at: string;
-	resolved_at?: string | null;
-}
 
 export function Blockers() {
 	// Modal states
 	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
 	const [isEditBlockerOpen, setIsEditBlockerOpen] = useState(false);
-	const [selectedBlocker, setSelectedBlocker] = useState<Blocker | null>(null);
+	const [selectedBlocker, setSelectedBlocker] = useState<BlockerListItem | null>(null);
 	const [confirmResolved, setConfirmResolved] = useState<string | null>(null);
 	// Form states
 	const [blockerForm, setBlockerForm] = useState({
@@ -47,10 +29,15 @@ export function Blockers() {
 		assignee_id: "",
 	});
 	// Auth states
-	const [orgId, setOrgId] = useState<string | null>(null);
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const { user: authUser } = useAuth();
+	const [errors, setErrors] = useState<{
+		fetchBlocker?: string;
+		createBlocker?: string;
+		editBlocker?: string;
+		resolveBlocker?: string;
+	}>({});
 	// Data states
-	const [blockers, setBlockers] = useState<Blocker[]>([]);
+	const [blockers, setBlockers] = useState<BlockerListItem[]>([]);
 	const [ticketList, setTicketList] = useState<TicketListItem[]>([]);
 	const [teamMembers, setTeamMembers] = useState<OrganizationMember[]>([]);
 	//Routing states
@@ -62,47 +49,63 @@ export function Blockers() {
 	const [isSaving, setIsSaving] = useState(false);
 	const [isResolving, setIsResolving] = useState(false);
 	//Derived states
+	const orgId = authUser?.organization_id ?? null;
 	const availableAssignees = teamMembers.filter((member) => {
-		const isNotCurrentUser = member.id !== currentUser?.id;
+		const isNotCurrentUser = member.id !== authUser?.id;
 		const isDeveloper = member.scrum_role === "developer";
-
 		return (isNotCurrentUser && isDeveloper);
 	})
 
-	// Fetch blockers and user at the same time.
-	const fetchBlockers = async () => {
-		setIsLoading(true);
-		try {
-			// Step 1: Get user's org_id
-			const user = await getCurrentUser();
-			setCurrentUser(user);
-			setOrgId(user.organization_id); // we dont use currentUser state cuz as useState is async and doesnt update inmidiatly (race condition)
+	// Permission helpers
+	const canEditBlocker = (blocker: BlockerListItem) =>
+		blocker.created_by.id === authUser?.id ||
+		blocker.assignee?.id === authUser?.id ||
+		authUser?.scrum_role === "scrum_master" ||
+		authUser?.scrum_role === "product_owner";
 
-			// Step 2: Fetch blockers and team members
-			if (user.organization_id) {
-				const blockersData = await listBlockers(user.organization_id);
-				const ticketsData = await listTickets(user.organization_id);
-				const membersData = await getOrganizationMembers(user.organization_id);
-				setBlockers(blockersData);
-				setTicketList(ticketsData);
-				setTeamMembers(membersData);
-			}
-		} catch (error) {
-			if (!currentUser) {
-				console.error("API call failed:", error);
+	const canResolveBlocker = (blocker: BlockerListItem) =>
+		blocker.created_by.id === authUser?.id ||
+		blocker.assignee?.id === authUser?.id ||
+		authUser?.scrum_role === "scrum_master" ||
+		authUser?.scrum_role === "product_owner";
+
+
+	const fetchBlockers = useCallback(async () => {
+		if (!orgId) return ;
+		setIsLoading(true);
+
+		try {
+			const blockersData = await listBlockers(orgId);
+			const ticketsData = await listTickets(orgId);
+			const membersData = await getOrganizationMembers(orgId);
+			setBlockers(blockersData);
+			setTicketList(ticketsData);
+			setTeamMembers(membersData);
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ fetchBlocker: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ fetchBlocker: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ fetchBlocker: "Organization not found" });
 			} else {
-				console.error("Failed to fetch blockers:", error);
+				setErrors({ fetchBlocker: "Something went wrong" });
 			}
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, [orgId]);
 
 	useEffect(() => {
 		fetchBlockers();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []); // Empty array = run once on mount. setState functions are stable and don't need to be dependencies
+	}, [fetchBlockers]);
 
+
+	//Handlers
 	const handleCreateBlocker = async () => {
 		if (!orgId) return ;
 		setIsCreating(true);
@@ -114,50 +117,62 @@ export function Blockers() {
 				ticket_id: blockerForm.ticket_id || null,
 				assignee_id: blockerForm.assignee_id || null,
 			});
-
-			// Refresh the list and close modal
 			await fetchBlockers();
 			setIsCreateBlockerOpen(false);
 			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" }); // Reset form values
-		} catch (error) {
-			console.error("Failed to create blocker:", error);
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ createBlocker: apiError.detail[0]?.msg ?? "Validation error message" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ createBlocker: "Only users with Developer role can be assigned to blockers" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ createBlocker: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ createBlocker: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ createBlocker: "Organization not found" });
+			} else {
+				setErrors({ createBlocker: "Something went wrong" });
+			}
 		} finally {
 			setIsCreating(false);
 		}
 	};
 
-	// Permission helpers
-
-	const canEditBlocker = (blocker: Blocker) =>
-		blocker.created_by.id === currentUser?.id ||
-		blocker.assignee?.id === currentUser?.id ||
-		currentUser?.scrum_role === "scrum_master" ||
-		currentUser?.scrum_role === "product_owner";
-
-	const canResolveBlocker = (blocker: Blocker) =>
-		blocker.created_by.id === currentUser?.id ||
-		blocker.assignee?.id === currentUser?.id ||
-		currentUser?.scrum_role === "scrum_master" ||
-		currentUser?.scrum_role === "product_owner";
-
-	// Handle functions
 	const handleEditBlocker = async () => {
 		setIsSaving(true);
 		try {
-			// Call API to edit blocker
 			await updateBlocker(selectedBlocker!.id, {
 				description: blockerForm.description,
 				ticket_id: blockerForm.ticket_id,
 				assignee_id: blockerForm.assignee_id || null,
 			});
-
-			// Refresh the list and close modal
 			await fetchBlockers();
 			setIsEditBlockerOpen(false);
 			setSelectedBlocker(null);
-			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" }); // Reset form values
-		} catch (error) {
-			console.error("Failed to edit blocker:", error);
+			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" });
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ editBlocker: apiError.detail[0]?.msg ?? "Validation error message" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ editBlocker: "Only users with Developer role can be assigned to blockers" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ editBlocker: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ editBlocker: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ editBlocker: "Blocker not found" });
+			} else {
+				setErrors({ editBlocker: "Something went wrong" });
+			}
 		} finally {
 			setIsSaving(false);
 		}
@@ -166,15 +181,28 @@ export function Blockers() {
 	const handleResolveBlocker = async () => {
 		if (!confirmResolved) return;
 		setIsResolving(true);
+
 		try {
-			// Call API to resolve blocker
 			await resolveBlocker(confirmResolved);
-			// Refresh the list and close modal
 			await fetchBlockers();
 			setConfirmResolved(null);
 			setSelectedBlocker(null);
-		} catch (error) {
-			console.error("Failed to resolve blocker:", error);
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ resolveBlocker: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ resolveBlocker: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ resolveBlocker: "Blocker not found" });
+			} else if (apiError.error?.code === "BLOCKER_ALREADY_RESOLVED") {
+				setErrors({ resolveBlocker: "Blocker already resolved" });
+			} else {
+				setErrors({ resolveBlocker: "Something went wrong" });
+			}
 		} finally {
 			setIsResolving(false);
 		}
@@ -185,7 +213,7 @@ export function Blockers() {
 		setIsCreateBlockerOpen(true);
 	};
 
-	const openEditModal = (blocker: Blocker) => {
+	const openEditModal = (blocker: BlockerListItem) => {
 		setSelectedBlocker(blocker);
 		setBlockerForm({
 			description: blocker.description,
@@ -199,8 +227,21 @@ export function Blockers() {
 	const openBlockers = blockers.filter((b) => b.status === "open").sort((a, b) => b.created_at.localeCompare(a.created_at));
 	const resolvedBlockers = blockers.filter((b) => b.status === "resolved").sort((a, b) => b.created_at.localeCompare(a.created_at));
 
+
+	useOrgWebSocket(orgId, (msg) => {
+		const reFetchEvents = [
+			"blocker.created",
+			"blocker.updated",
+			"blocker.resolved",
+		]
+		if (reFetchEvents.includes(msg.event)) {
+			fetchBlockers();
+		}
+	});
+
 	return (
 		<div className="p-8">
+
 			<PageHeader
 				title="Blockers"
 				subtitle="Issues that need attention"
@@ -216,6 +257,8 @@ export function Blockers() {
 			/>
 
 			<div className="max-w-3xl space-y-6">
+				{errors.fetchBlocker && <ErrorText>{errors.fetchBlocker}</ErrorText>}
+
 				{isLoading && (
 					<div className="flex items-center justify-center py-16 text-gray-400 text-sm">
 						Loading blockers...
@@ -416,6 +459,7 @@ export function Blockers() {
 			</div>
 
 			{/* Resolve Blocker Confirmation Modal */}
+			{errors.resolveBlocker && <ErrorText>{errors.resolveBlocker}</ErrorText>}
 			{confirmResolved && (
 				<ModalConfirmation
 					isOpen={true}
@@ -503,6 +547,7 @@ export function Blockers() {
 						</select>
 					</div>
 				</div>
+				{errors.createBlocker && <ErrorText>{errors.createBlocker}</ErrorText>}
 
 				{/* Actions */}
 				<div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
@@ -570,8 +615,8 @@ export function Blockers() {
 						</select>
 					</div>
 
-					{(currentUser?.scrum_role === "scrum_master" ||
-						selectedBlocker?.created_by.id === currentUser?.id) && (
+					{(authUser?.scrum_role === "scrum_master" ||
+						selectedBlocker?.created_by.id === authUser?.id) && (
 						<div>
 							<Label htmlFor="edit-assignee">Assignee (optional)</Label>
 							<select
@@ -595,6 +640,7 @@ export function Blockers() {
 						</div>
 					)}
 				</div>
+				{errors.editBlocker && <ErrorText>{errors.editBlocker}</ErrorText>}
 
 				{/* Actions */}
 				<div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-100">

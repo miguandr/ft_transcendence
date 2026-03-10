@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../../routes/useAuth";
+import { useOrgWebSocket } from "../../../hooks/useOrgWebSocket";
 import {
 	createBlocker,
 	createTask,
@@ -25,6 +26,7 @@ import type {
 	TaskSummary,
 } from "../types/sprint.types"
 import type { APIError } from "../../../utils/shared.types";
+
 
 export function useSprintBoard() {
 
@@ -105,7 +107,7 @@ export function useSprintBoard() {
 		task.assignee_id === authUser?.id;
 
 
-	const fetchTicketBoard = async () => {
+	const fetchTicketBoard = useCallback(async () => {
 		if (!orgId) return;
 		setIsLoading(true);
 		setErrors({});
@@ -133,18 +135,18 @@ export function useSprintBoard() {
 		} finally {
 			setIsLoading(false);
 		}
-	}
+	}, [orgId]);
 
 	useEffect(() => {
 		fetchTicketBoard();
-	}, []);
+	}, [fetchTicketBoard]);
 
 
 	// Handlers
 	const handleSelectTicket = async (ticketId: string) => {
 		setErrors({});
-
 		setSelectedTicketId(ticketId);
+
 		try {
 			const ticketDetail = await getTicketDetails(ticketId);
 			setSelectedTicketDetail(ticketDetail);
@@ -161,8 +163,6 @@ export function useSprintBoard() {
 			} else {
 				setErrors({ ticketDetail: "Something went wrong" });
 			}
-		} finally {
-			setIsLoading(false);
 		}
 	}
 
@@ -229,6 +229,10 @@ export function useSprintBoard() {
 			}
 			setIsEditTicketOpen(false);
 			fetchTicketBoard();
+			if (selectedTicketId) {
+				const updated = await getTicketDetails(selectedTicketId);
+				setSelectedTicketDetail(updated);
+			}
 
 		} catch (error: unknown) {
 			console.error("API call failed:", error);
@@ -328,7 +332,6 @@ export function useSprintBoard() {
 
 	const handleSelectTask = async (taskId: string) => {
 		if (!taskId) return;
-		setIsLoading(true);
 
 		try {
 			const task = await getTaskDetails(taskId);
@@ -337,19 +340,17 @@ export function useSprintBoard() {
 		} catch (error: unknown) {
 			console.error("API call failed:", error);
 
-				const apiError = error as APIError;
-				if (apiError.error?.code === "UNAUTHORIZED") {
-					setErrors({ taskDetail: "Authentication required" });
-				} else if (apiError.error?.code === "FORBIDDEN") {
-					setErrors({ taskDetail: "You do not have permission to perform this action" });
-				} else if (apiError.error?.code === "NOT_FOUND") {
-					setErrors({ taskDetail: "Organization not found" });
-				} else {
-					setErrors({ taskDetail: "Something went wrong" });
-				}
-			} finally {
-				setIsDeleting(false);
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ taskDetail: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ taskDetail: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ taskDetail: "Organization not found" });
+			} else {
+				setErrors({ taskDetail: "Something went wrong" });
 			}
+		}
 	}
 
 	const handleDeleteTask = async () => {
@@ -364,6 +365,10 @@ export function useSprintBoard() {
 			setConfirmDelete(null);
 			setSelectedTask(null);
 			fetchTicketBoard();
+			if (selectedTicketId) {
+				const updated = await getTicketDetails(selectedTicketId);
+				setSelectedTicketDetail(updated);
+			}
 
 		} catch (error: unknown) {
 			console.error("API call failed:", error);
@@ -433,7 +438,6 @@ export function useSprintBoard() {
 
 	const handleTicketDrop = async (newStatus: TicketStatus) => {
 		if (!draggedTicket || !isLeadRole) return;
-		setIsLoading(true);
 
 		try {
 			await moveTicket(
@@ -459,8 +463,6 @@ export function useSprintBoard() {
 			} else {
 				setErrors({ ticketDrop: "Something went wrong" });
 			}
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
@@ -471,7 +473,6 @@ export function useSprintBoard() {
 
 	const handleTaskDrop = async (newStatus: TaskStatus) => {
 		if (!draggedTask || !selectedTicketId) return;
-		setIsLoading(true);
 
 		try {
 			await updateTask(
@@ -506,28 +507,40 @@ export function useSprintBoard() {
 			} else {
 				setErrors({ taskDrop: "Something went wrong" });
 			}
-		} finally {
-			setIsLoading(false);
 		}
-		// setTickets((prev) =>
-		// 	prev.map((t) =>
-		// 		t.id === draggedTask.ticketId
-		// 			? {
-		// 					...t,
-		// 					tasks: t.tasks.map((task: Task) =>
-		// 						task.id === draggedTask.task.id
-		// 							? { ...task, status: newStatus }
-		// 							: task
-		// 					),
-		// 				}
-		// 			: t
-		// 	)
-		// );
 	};
-
 
 	//Getters
 	const getTicketsByStatus = (status: TicketStatus) => ticketsBoard.filter((t) => t.status === status);
+
+
+	useOrgWebSocket(orgId, (msg) => {
+		switch (msg.event) {
+			case "ticket.created":
+			case "ticket.updated":
+			case "ticket.moved":
+			case "ticket.deleted":
+				fetchTicketBoard();
+				break;
+
+			case "task.created":
+			case "task.updated":
+			case "task.deleted":
+				fetchTicketBoard();
+				if (selectedTicketId) {
+					getTicketDetails(selectedTicketId).then(setSelectedTicketDetail);
+				}
+				break;
+
+			case "blocker.created":
+			case "blocker.updated":
+			case "blocker.resolved":
+				if (selectedTicketId) {
+					getTicketDetails(selectedTicketId).then(setSelectedTicketDetail);
+				}
+				break;
+		}
+	});
 
 	return {
 		// States
@@ -583,8 +596,8 @@ export function useSprintBoard() {
 		handleSelectTask,
 
 		// Permissions
-		isLeadRole,
 		canEditTask,
+		isLeadRole,
 		canEditTicketPriority,
 	}
 }

@@ -26,6 +26,11 @@ export interface Ticket {
 		id: string;
 		description: string;
 		status: BlockerStatus;
+		created_by: {
+			id: string;
+			name: string;
+			avatar_url: string;
+		}
 	}>
 }
 

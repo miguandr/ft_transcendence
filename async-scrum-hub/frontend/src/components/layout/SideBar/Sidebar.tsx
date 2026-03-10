@@ -7,7 +7,7 @@ import {
 	Users,
 } from "lucide-react";
 import {
-	//Button,
+	ErrorText,
 	Modal,
 } from "../../custom"
 import { Link, useLocation } from "react-router-dom";
@@ -95,7 +95,7 @@ export function Sidebar() {
 					size="lg"
 				>
 					{isLoading && <p className="text-sm text-grey-500">Loading...</p>}
-					{errors.doc && <p className="text-sm text-red-500">{errors.doc}</p>}
+					{errors.doc && <ErrorText>{errors.doc}</ErrorText>}
 					{document && (
 						<div className="overflow-y-auto max-h-[60vh] prose prose-sm">
 							<ReactMarkdown>{document.content}</ReactMarkdown>

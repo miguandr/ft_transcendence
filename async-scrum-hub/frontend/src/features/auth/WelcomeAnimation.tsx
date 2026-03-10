@@ -198,7 +198,7 @@ export function WelcomeAnimation() {
 						<h1 className="text-5xl font-bold text-gray-900">ScrumHub</h1>
 					</motion.div>
 				)}
-				{/* Final Content - Exact replica of Welcome page */}
+				{/* Final Content - Welcome page */}
 				<motion.div
 					initial={{ opacity: 0 }}
 					animate={{ opacity: isExiting ? 0 : showContent ? 1 : 0 }}

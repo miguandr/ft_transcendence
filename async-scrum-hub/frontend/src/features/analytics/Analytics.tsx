@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { getAnalitycsData, getCurrentUser} from "../../services/api";
+import { useEffect, useState, useCallback } from "react";
+import { getAnalitycsData} from "../../services/api";
+import { useAuth } from "../../routes/useAuth";
+import { ErrorText } from "../../components/custom";
 import {
 	BarChart,
 	Bar,
@@ -13,30 +15,28 @@ import {
 	Legend,
 } from "recharts";
 import type { AnalitycsData } from "../../services/api"
-type APIError = {
-	error?: { code?: string; message?: string };
-};
+import type { APIError } from "../../utils/shared.types";
 
 
 export function Analytics() {
 	//Data states
 	const [analytics, setAnalytics] = useState<AnalitycsData | null>(null);
 	//Auth states
+	const { user: authUser } = useAuth();
 	const [errors, setErrors] = useState<{ analytics?: string }>({});
 	//Communication states
 	const [isLoading, setIsLoading] = useState(false);
+	//Derived data
+	const orgId = authUser?.organization_id ?? null;
 
-	const fetchAnalitycs = async () => {
+	const fetchAnalitycs = useCallback(async () => {
+		if (!orgId) return;
 		setIsLoading(true);
 		setErrors({});
 
 		try {
-			const user = await getCurrentUser();
-
-			if (user.organization_id) {
-				const data = await getAnalitycsData(user.organization_id);
-				setAnalytics(data);
-			}
+			const data = await getAnalitycsData(orgId);
+			setAnalytics(data);
 
 		} catch (error:unknown) {
 			console.error("API call failed:", error);
@@ -55,11 +55,11 @@ export function Analytics() {
 		} finally {
 			setIsLoading(false);
 		}
-	}
+	}, [orgId]);
 
 	useEffect(() => {
 		fetchAnalitycs();
-	}, []);
+	}, [fetchAnalitycs]);
 
 	return (
 		<div className="p-8">
@@ -74,11 +74,7 @@ export function Analytics() {
 				</div>
 			)}
 
-			{errors.analytics && (
-				<div className="flex items-center justify-center py-16 text-red-500 text-sm">
-					{errors.analytics}
-				</div>
-			)}
+			{errors.analytics && <ErrorText>{errors.analytics}</ErrorText>}
 
 			{!isLoading && !errors.analytics && (
 				<div>
@@ -160,13 +156,6 @@ export function Analytics() {
 								<p className="text-3xl text-gray-900">{analytics?.standups.posted}/{analytics?.standups.total}</p>
 							</div>
 						</div>
-
-						{/* <div className="flex justify-center items center">
-							<div className="bg-white rounded-2xl p-6 border border-gray-100 text-center">
-								<p className="text-sm text-gray-500 mb-2">Total Standups this week</p>
-								<p className="text-3xl text-gray-900">{analytics?.standups.total}</p>
-							</div>
-						</div> */}
 					</div>
 				</div>
 			)}
