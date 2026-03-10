@@ -12,11 +12,11 @@ export function BoardHeader({ onCreateTicket, canCreateTicket }: Props) {
 			title="Sprint Board"
 			subtitle="Visualize your team's workflow"
 			action={
-				<div className="flex flex-col items-end gap-1">
+				<div className="flex flex-col items-end gap-2">
 					{canCreateTicket ? (
 						<Button
-							variant="ghost"
-							size="sm"
+							variant="outlined"
+							size="md"
 							onClick={onCreateTicket}
 							icon={<Plus className="w-4 h-4" />}
 							iconPosition="left"

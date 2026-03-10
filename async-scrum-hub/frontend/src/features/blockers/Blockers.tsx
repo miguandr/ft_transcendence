@@ -1,7 +1,7 @@
 import { AlertCircle, Clock, CheckCircle2, Plus, Edit2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Button, Label, Modal, PageHeader, Avatar } from "../../components/custom";
+import { Button, Label, Modal, PageHeader, Avatar, ModalConfirmation } from "../../components/custom";
 import {
 	createBlocker,
 	listBlockers,
@@ -267,7 +267,7 @@ export function Blockers() {
 														</span>
 													</div>
 
-																										<div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
+													<div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
 														<div className="flex items-center gap-2">
 															<Avatar
 																avatarUrl={blocker.created_by.avatar_url}
@@ -417,42 +417,17 @@ export function Blockers() {
 
 			{/* Resolve Blocker Confirmation Modal */}
 			{confirmResolved && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/40 z-50"
-						onClick={() => setConfirmResolved(null)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-							<div className="px-6 py-5">
-								<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
-									<CheckCircle2 className="w-6 h-6 text-emerald-600" />
-								</div>
-								<h3 className="text-lg text-gray-900 text-center mb-2">
-									Mark blocker as resolved?
-								</h3>
-								<p className="text-sm text-gray-500 text-center">
-									This will mark the blocker as resolved for your team.
-								</p>
-							</div>
-							<div className="flex items-center gap-3 px-6 py-4 border-t border-gray-100">
-								<button
-									onClick={() => setConfirmResolved(null)}
-									className="flex-1 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleResolveBlocker}
-									disabled={isResolving}
-									className="flex-1 px-4 py-2 text-sm text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{isResolving ? "Resolving..." : "Confirm"}
-								</button>
-							</div>
-						</div>
-					</div>
-				</>
+				<ModalConfirmation
+					isOpen={true}
+					onClose={() => setConfirmResolved(null)}
+					title="Mark blocker as resolved?"
+					description="This will mark the blocker as resolved for your team"
+					confirmLabel="Resolve"
+					confirmVariant="success"
+					onConfirm={handleResolveBlocker}
+					isConfirming={isResolving}
+					confirmingLabel="Resolving..."
+				/>
 			)}
 
 			{/* Create Blocker Modal */}

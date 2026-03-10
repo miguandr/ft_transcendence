@@ -1,43 +1,67 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { formatScrumRole } from "../../../utils/formatters";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../../routes/useAuth";
 import {
-	Priority,
-	TicketStatus,
-	TaskStatus,
-	UserRole,
-	BlockerStatus
-} from "./types/sprint.types";
+	createBlocker,
+	createTask,
+	createTicket,
+	deleteTask,
+	deleteTicket,
+	getOrganizationMembers,
+	getTaskDetails,
+	getTicketDetails,
+	listTicketsBoard,
+	moveTicket,
+	updateTask,
+	updateTicket
+} from "../../../services/api";
 import type {
-	User,
 	Ticket,
 	ListTicketsBoard,
 	Task,
+	Priority,
+	TicketStatus,
+	TaskStatus,
+	OrgMember,
 	TaskSummary,
-	Blocker
-} from "./types/sprint.types"
-
+} from "../types/sprint.types"
+import type { APIError } from "../../../utils/shared.types";
 
 export function useSprintBoard() {
 
 	// View/UI states
-	const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+	const [draggedTicket, setDraggedTicket] = useState<ListTicketsBoard | null>(null);
+	const [draggedTask, setDraggedTask] = useState<{ task: TaskSummary; ticketId: string; } | null>(null);
 	const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+	const [selectedTicketDetail, setSelectedTicketDetail] = useState<Ticket | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
+	const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
 	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
+	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<{
 		type: "ticket" | "task";
 		id: string;
 	} | null>(null);
 	// Data states
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [tickets, setTickets] = useState<Ticket[]>([]);
-	const [blockers, setBlockers] = useState<Blocker[]>([]);
+	const { user: authUser } = useAuth();
+	const [teamMembers, setTeamMembers] = useState<OrgMember[]>([]);
+	const [ticketsBoard, setTicketsBoard] = useState<ListTicketsBoard[]>([]);
 	// Auth states
-	const [orgId, setOrgId] = useState<string | null>(null);
-	const [errors, setErrors] = useState<{ ticket?: string; task?: string; blocker?: string }>({});
+	const [errors, setErrors] = useState<{
+		ticketBoard?: string;
+		ticketDrop?: string;
+		ticketDetail?: string;
+		ticketCreate?: string;
+		ticketEdit?: string,
+		ticketDelete?: string,
+		taskCreate?: string,
+		taskDetail?: string;
+		taskDelete?: string,
+		taskDrop?: string,
+		blockerCreate?: string,
+		task?: string;
+		blocker?: string
+	}>({});
 	// Form states
 	const [ticketForm, setTicketForm] = useState({
 		title: "",
@@ -54,182 +78,456 @@ export function useSprintBoard() {
 		description: "",
 		assignee: "",
 	});
-	const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
-	const [draggedTask, setDraggedTask] = useState<{ task: Task; ticketId: string } | null>(null);
 	// Communication states
 	const [isSaving, setIsSaving] = useState(false);
-	const [isInviting, setIsInviting] = useState(false);
-	const [isUploading, setIsUploading] = useState(false);
-	// Routing state
-	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	// Derived state
-	const selectedTicket = tickets.find(t => t.id === selectedTicketId) || null;
+	const selectedTicket = ticketsBoard.find(t => t.id === selectedTicketId) || null;
+	const getTasksForTicket = () => selectedTicketDetail?.tasks ?? [];
+	const getActiveBlockers = () => selectedTicketDetail?.blockers
+		.filter(b => b.status === "open") ?? [];
 	// Derived data
-	const formattedScrumRole = currentUser?.scrum_role
-		? formatScrumRole(currentUser.scrum_role)
-		: "";
+	const orgId = authUser?.organization_id ?? null;
 	// Derived UI logic (permissions)
-	const canCreateTicket =
-		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canDragTicket =
-		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
+	const isLeadRole =
+		authUser?.scrum_role === "product_owner" ||
+		authUser?.scrum_role === "scrum_master";
 	const canEditTicketPriority =
-		currentUser?.scrum_role === "product_owner";
-	const canEditTicket =
-		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
-	const canDeleteTicket =
-		currentUser?.scrum_role === "product_owner" || currentUser?.scrum_role === "scrum_master";
+		authUser?.scrum_role === "product_owner";
 	const canDragTask =
-		currentUser?.scrum_role === "product_owner" ||
-		currentUser?.scrum_role === "scrum_master" ||
-		currentUser.id === selectedTask.assignee_id;
+		authUser?.scrum_role === "product_owner" ||
+		authUser?.scrum_role === "scrum_master" ||
+		authUser?.id === selectedTask?.assignee_id;
 	const canEditTask = (task: Task) =>
-		currentUser?.scrum_role === "product_owner" ||
-		currentUser?.scrum_role === "scrum_master" ||
-		task.assignee === currentUser.avatar;
-	const canResolveBlocker = (blocker: Blocker) =>
-		blocker.creator === currentUser.avatar || currentUser?.scrum_role === "scrum_master";
+		authUser?.scrum_role === "product_owner" ||
+		authUser?.scrum_role === "scrum_master" ||
+		task.assignee_id === authUser?.id;
+
+
+	const fetchTicketBoard = async () => {
+		if (!orgId) return;
+		setIsLoading(true);
+		setErrors({});
+
+		try {
+			const [members, boardTickets] = await Promise.all([
+				getOrganizationMembers(orgId),
+				listTicketsBoard(orgId),
+			]);
+			setTeamMembers(members);
+			setTicketsBoard(boardTickets);
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketBoard: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketBoard: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketBoard: "Ticket not found" });
+			} else {
+				setErrors({ ticketBoard: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
+	useEffect(() => {
+		fetchTicketBoard();
+	}, []);
 
 
 	// Handlers
-	const handleCreateTicket = () => {
-		const newTicket: Ticket = {
-			id: Date.now(),
-			title: ticketForm.title,
-			description: ticketForm.description,
-			priority: ticketForm.priority,
-			assignee: ticketForm.assignee,
-			status: "todo",
-			tasks: [],
-		};
-		setTickets([...tickets, newTicket]);
-		setIsCreateTicketOpen(false);
-		setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
-	};
+	const handleSelectTicket = async (ticketId: string) => {
+		setErrors({});
 
-	const handleEditTicket = () => {
-		if (selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id ? { ...t, priority: ticketForm.priority } : t
-				)
+		setSelectedTicketId(ticketId);
+		try {
+			const ticketDetail = await getTicketDetails(ticketId);
+			setSelectedTicketDetail(ticketDetail);
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketDetail: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketDetail: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketDetail: "Ticket not found" });
+			} else {
+				setErrors({ ticketDetail: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
+	const handleCreateTicket = async () => {
+		if (!orgId) return;
+		setIsSaving(true);
+		setErrors({});
+
+		try {
+			await createTicket(
+				orgId,
+				{
+					title: ticketForm.title,
+					description: ticketForm.description,
+					priority: ticketForm.priority,
+					assignee_id: ticketForm.assignee || null,
+				}
 			);
-			setIsEditTicketOpen(false);
+			setIsCreateTicketOpen(false);
+			setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
+			fetchTicketBoard();
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ ticketCreate: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ ticketCreate: "Only users with Developer role can be assigned to tickets" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketCreate: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketCreate: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketCreate: "Organization not found" });
+			} else {
+				setErrors({ ticketCreate: "Something went wrong" });
+			}
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
-	const handleDeleteTicket = () => {
-		if (confirmDelete?.type === "ticket") {
-			setTickets(tickets.filter((t) => t.id !== confirmDelete.id));
-			setBlockers(blockers.filter((b) => b.ticketId !== confirmDelete.id));
+	const handleEditTicket = async () => {
+		if (!selectedTicket || !isLeadRole) return;
+		setIsSaving(true);
+		setErrors({});
+
+		try {
+			if (canEditTicketPriority) {
+				await updateTicket(
+					selectedTicket.id,
+					{
+						description: ticketForm.description,
+						priority: ticketForm.priority,
+					}
+				);
+			} else {
+				await updateTicket(
+					selectedTicket.id, {
+						description: ticketForm.description,
+					}
+				);
+			}
+			setIsEditTicketOpen(false);
+			fetchTicketBoard();
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ ticketEdit: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ ticketEdit: "Only users with Developer role can be assigned to tickets" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketEdit: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketEdit: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketEdit: "Organization not found" });
+			} else {
+				setErrors({ ticketEdit: "Something went wrong" });
+			}
+		} finally {
+			setIsSaving(false);
+		};
+	}
+
+	const handleDeleteTicket = async () => {
+		if (confirmDelete?.type !== "ticket") return;
+		setIsDeleting(true);
+		setErrors({});
+
+		try {
+			await deleteTicket(confirmDelete.id);
 			setConfirmDelete(null);
 			setSelectedTask(null);
 			setSelectedTicketId(null);
+			setSelectedTicketDetail(null);
+			fetchTicketBoard();
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketDelete: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketDelete: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketDelete: "Organization not found" });
+			} else {
+				setErrors({ ticketDelete: "Something went wrong" });
+			}
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
-	const handleCreateTask = () => {
-		if (selectedTicket) {
-			const newTask: Task = {
-				id: Date.now(),
-				title: taskForm.title,
-				description: taskForm.description,
-				assignee: taskForm.assignee,
-				status: "in_progress",
-			};
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id ? { ...t, tasks: [...t.tasks, newTask] } : t
-				)
-			);
+	const handleCreateTask = async () => {
+		if (!selectedTicket) return
+		setIsSaving(true);
+
+		try {
+			await createTask(
+				selectedTicket.id,
+				{
+					title: taskForm.title,
+					description: taskForm.description || null,
+					assignee_id: taskForm.assignee || null,
+				}
+			)
 			setIsCreateTaskOpen(false);
 			setTaskForm({ title: "", description: "", assignee: "" });
+			fetchTicketBoard();
+			if (selectedTicketId) {
+				const updated = await getTicketDetails(selectedTicketId);
+				setSelectedTicketDetail(updated);
+			}
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ taskCreate: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ taskCreate: "Only users with Developer role can be assigned to tasks" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ taskCreate: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ taskCreate: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ taskCreate: "Organization not found" });
+			} else {
+				setErrors({ taskCreate: "Something went wrong" });
+			}
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
+	const handleSelectTask = async (taskId: string) => {
+		if (!taskId) return;
+		setIsLoading(true);
 
-	const handleDeleteTask = () => {
-		if (confirmDelete?.type === "task" && selectedTicket) {
-			setTickets(
-				tickets.map((t) =>
-					t.id === selectedTicket.id
-						? { ...t, tasks: t.tasks.filter((task: Task) => task.id !== confirmDelete.id) }
-						: t
-				)
-			);
+		try {
+			const task = await getTaskDetails(taskId);
+			setSelectedTask(task);
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+				const apiError = error as APIError;
+				if (apiError.error?.code === "UNAUTHORIZED") {
+					setErrors({ taskDetail: "Authentication required" });
+				} else if (apiError.error?.code === "FORBIDDEN") {
+					setErrors({ taskDetail: "You do not have permission to perform this action" });
+				} else if (apiError.error?.code === "NOT_FOUND") {
+					setErrors({ taskDetail: "Organization not found" });
+				} else {
+					setErrors({ taskDetail: "Something went wrong" });
+				}
+			} finally {
+				setIsDeleting(false);
+			}
+	}
+
+	const handleDeleteTask = async () => {
+		if (!selectedTask ||
+			confirmDelete?.type !== "task" ||
+			confirmDelete.id !== selectedTask?.id) return;
+		setIsDeleting(true);
+		setErrors({});
+
+		try {
+			await deleteTask(selectedTask?.id)
 			setConfirmDelete(null);
 			setSelectedTask(null);
+			fetchTicketBoard();
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ taskDelete: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ taskDelete: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ taskDelete: "Organization not found" });
+			} else {
+				setErrors({ taskDelete: "Something went wrong" });
+			}
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
-	const handleCreateBlocker = () => {
-		if (selectedTicket) {
-			const newBlocker: Blocker = {
-				id: Date.now(),
-				description: blockerForm.description,
-				creator: currentUser.avatar,
-				status: "open",
-				ticketId: selectedTicket.id,
-			};
-			setBlockers([...blockers, newBlocker]);
+	const handleCreateBlocker = async () => {
+		if (!selectedTicket || !orgId) return;
+		setIsSaving(true);
+
+		try {
+			await createBlocker(
+				orgId,
+				{
+					description: blockerForm.description,
+					ticket_id: selectedTicket.id,
+					assignee_id: blockerForm.assignee || null,
+				}
+			)
 			setIsCreateBlockerOpen(false);
 			setBlockerForm({ description: "", assignee: "" });
+			fetchTicketBoard();
+			if (selectedTicketId) {
+				const updated = await getTicketDetails(selectedTicketId);
+				setSelectedTicketDetail(updated);
+			}
+
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ blockerCreate: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ blockerCreate: "Only users with Developer role can be assigned to blockers" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ blockerCreate: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ blockerCreate: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ blockerCreate: "Organization not found" });
+			} else {
+				setErrors({ blockerCreate: "Something went wrong" });
+			}
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
-	const handleResolveBlocker = (blockerId: string) => {
-		setBlockers(blockers.map((b) => (b.id === blockerId ? { ...b, status: "resolved" } : b)));
+	const handleTicketDrag = (ticket: ListTicketsBoard) => {
+		if (!isLeadRole) return;
+		setDraggedTicket(ticket);
 	};
 
-	// Drag handlers for tickets
-	const handleTicketDragStart = (ticket: Ticket) => {
-		if (canDragTicket) {
-			setDraggedTicket(ticket);
-		}
-	};
+	const handleTicketDrop = async (newStatus: TicketStatus) => {
+		if (!draggedTicket || !isLeadRole) return;
+		setIsLoading(true);
 
-	const handleTicketDrop = (status: TicketStatus) => {
-		if (draggedTicket && canDragTicket) {
-			setTickets(tickets.map((t) => (t.id === draggedTicket.id ? { ...t, status } : t)));
+		try {
+			await moveTicket(
+				draggedTicket.id,
+				{
+					status: newStatus,
+				}
+			);
 			setDraggedTicket(null);
+			fetchTicketBoard();
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ ticketDrop: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ ticketDrop: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ ticketDrop: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ ticketDrop: "Organization not found" });
+			} else {
+				setErrors({ ticketDrop: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	// Drag handlers for tasks
-	const handleTaskDragStart = (task: Task, ticketId: string) => {
-		const canDrag =
-			currentUser?.scrum_role === "product_owner" ||
-			currentUser?.scrum_role === "scrum_master" ||
-			task.assignee === currentUser.avatar;
-		if (canDrag) {
-			setDraggedTask({ task, ticketId });
-		}
+	const handleTaskDragStart = (task: TaskSummary, ticketId: string) => {
+		if (!canDragTask) return;
+		setDraggedTask({ task, ticketId });
 	};
 
-	const handleTaskDrop = (newStatus: TaskStatus) => {
-		if (!draggedTask) return;
-		setTickets((prev) =>
-			prev.map((t) =>
-				t.id === draggedTask.ticketId
-					? {
-							...t,
-							tasks: t.tasks.map((task: Task) =>
-								task.id === draggedTask.task.id
-									? { ...task, status: newStatus }
-									: task
-							),
-						}
+	const handleTaskDrop = async (newStatus: TaskStatus) => {
+		if (!draggedTask || !selectedTicketId) return;
+		setIsLoading(true);
+
+		try {
+			await updateTask(
+				draggedTask.task.id,
+				{
+					status: newStatus,
+				}
+			);
+			setSelectedTicketDetail(prev => prev ? {
+				...prev,
+				tasks: prev.tasks.map(t =>
+					t.id === draggedTask.task.id
+					? {...t, status: newStatus }
 					: t
-			)
-		);
-		setDraggedTask(null);
+				)
+			} : prev);
+			setDraggedTask(null);
+		} catch (error: unknown ) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ taskDrop: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
+				setErrors({ taskDrop: "Only users with Developer role can be assigned to tasks" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ taskDrop: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ taskDrop: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ taskDrop: "Organization not found" });
+			} else {
+				setErrors({ taskDrop: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+		// setTickets((prev) =>
+		// 	prev.map((t) =>
+		// 		t.id === draggedTask.ticketId
+		// 			? {
+		// 					...t,
+		// 					tasks: t.tasks.map((task: Task) =>
+		// 						task.id === draggedTask.task.id
+		// 							? { ...task, status: newStatus }
+		// 							: task
+		// 					),
+		// 				}
+		// 			: t
+		// 	)
+		// );
 	};
 
 
 	//Getters
-	const getTicketsByStatus = (status: TicketStatus) => tickets.filter((t) => t.status === status);
-	const getBlockersForTicket = (ticketId: string) =>
-		blockers.filter((b) => b.ticketId === ticketId);
+	const getTicketsByStatus = (status: TicketStatus) => ticketsBoard.filter((t) => t.status === status);
 
 	return {
 		// States
@@ -239,11 +537,18 @@ export function useSprintBoard() {
 		isCreateTaskOpen,
 		isCreateBlockerOpen,
 		selectedTicket,
-		currentUser,
+		authUser,
+		teamMembers,
 		selectedTask,
 		blockerForm,
 		confirmDelete,
 		taskForm,
+		errors,
+		selectedTicketDetail,
+		isLoading,
+		isSaving,
+		isDeleting,
+		canDragTask,
 
 		// Setters
 		setIsCreateTicketOpen,
@@ -256,33 +561,30 @@ export function useSprintBoard() {
 		setConfirmDelete,
 		setTaskForm,
 		setBlockerForm,
+		setSelectedTicketDetail,
 
 		// Getters
 		getTicketsByStatus,
-		getBlockersForTicket,
+		getTasksForTicket,
+		getActiveBlockers,
 
 		// Handlers
 		handleTicketDrop,
-		handleTicketDragStart,
+		handleTicketDrag,
 		handleCreateTicket,
 		handleTaskDrop,
-		handleResolveBlocker,
 		handleEditTicket,
 		handleCreateTask,
 		handleCreateBlocker,
 		handleDeleteTicket,
 		handleDeleteTask,
 		handleTaskDragStart,
+		handleSelectTicket,
+		handleSelectTask,
 
 		// Permissions
-		canResolveBlocker,
+		isLeadRole,
 		canEditTask,
 		canEditTicketPriority,
-		canEditTicket,
-		canDeleteTicket,
-		canCreateTicket,
-		canDragTicket,
-		canDragTask,
-
 	}
 }

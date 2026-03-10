@@ -1,16 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Edit2, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, Modal, PageHeader, Avatar} from "../../components/custom"
-import type { User, StandupListItem } from "../../services/api";
+import { Button, ModalConfirmation, PageHeader, Avatar } from "../../components/custom";
+import type { User } from "../../services/api";
 import {
 	createStandup,
 	listStandups,
 	editStandup,
 	deleteStandup,
-	getCurrentUser
+	getCurrentUser,
 } from "../../services/api";
-
 
 interface Standup {
 	id: string;
@@ -23,13 +22,13 @@ interface Standup {
 		ticket: {
 			id: string;
 			title: string;
-		}
-	} [];
+		};
+	}[];
 	created_by: {
 		id: string;
 		name: string;
 		avatar_url: string | null;
-	}
+	};
 }
 
 export function AsyncStandup() {
@@ -47,7 +46,6 @@ export function AsyncStandup() {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	//Data states
 	const [standups, setStandups] = useState<Standup[]>([]);
-	//const [standupsList, setStandupsList] = useState<StandupListItem[]>([]);
 	const [editingStandup, setEditingStandup] = useState<Standup | null>(null);
 	// Routing states
 	const navigate = useNavigate();
@@ -59,6 +57,7 @@ export function AsyncStandup() {
 
 	const fetchStandups = async () => {
 		setIsLoading(true);
+		
 		try {
 			//Step 1: Get user's org_id
 			const user = await getCurrentUser();
@@ -107,27 +106,28 @@ export function AsyncStandup() {
 	};
 
 	const now = new Date();
-	const today = now.toISOString().split('T')[0];
+	const today = now.toISOString().split("T")[0];
 	const yesterdayDate = new Date();
 	yesterdayDate.setDate(now.getDate() - 1);
 	//const yesterday = yesterdayDate.toISOString().split('T')[0];
 
 	// Check if logged-in user submitted standup today
 	const hasCreatedStandupToday = standups.some(
-		(currentStandup) => currentStandup.created_by.id === currentUser?.id
-					&& currentStandup.created_at.startsWith(today)
+		(currentStandup) =>
+			currentStandup.created_by.id === currentUser?.id &&
+			currentStandup.created_at.startsWith(today)
 	);
 
 	// Gets the latest standup of the current user
-	const latestPerUser = standups.reduce((acc, s) => {
-		const existing = acc.find(x => x.created_by.id === s.created_by.id);
-		if (!existing || s.created_at > existing.created_at) {
-			return [...acc.filter(x => x.created_by.id !== s.created_by.id), s]; //We keep all other standups and replace only the one from the current user
-		}
-		return acc;
-
-	}, [] as Standup[]).sort((a, b) => b.created_at.localeCompare(a.created_at));
-
+	const latestPerUser = standups
+		.reduce((acc, s) => {
+			const existing = acc.find((x) => x.created_by.id === s.created_by.id);
+			if (!existing || s.created_at > existing.created_at) {
+				return [...acc.filter((x) => x.created_by.id !== s.created_by.id), s]; //We keep all other standups and replace only the one from the current user
+			}
+			return acc;
+		}, [] as Standup[])
+		.sort((a, b) => b.created_at.localeCompare(a.created_at));
 
 	const canEditStandup = (standup: Standup) => {
 		return standup.created_by.id === currentUser?.id && standup.created_at.startsWith(today);
@@ -176,13 +176,9 @@ export function AsyncStandup() {
 		setIsEditStandupOpen(true);
 	};
 
-
 	return (
 		<div className="p-8">
-			<PageHeader
-				title="Async Standup"
-				subtitle="Team updates - Updated today"
-			/>
+			<PageHeader title="Async Standup" subtitle="Team updates - Updated today" />
 
 			<div className="max-w-3xl space-y-5 mb-6">
 				{/* Add Standup Button */}
@@ -207,137 +203,141 @@ export function AsyncStandup() {
 					</button>
 				)}
 
-					{isLoading && (
+
+				{isLoading && (
 					<div className="flex items-center justify-center py-16 text-gray-400 text-sm">
 						Loading standups...
 					</div>
 				)}
 
-				{!isLoading && latestPerUser.map((s) => {
+				{!isLoading && latestPerUser.length === 0 && (
+					<div className="flex flex-col items-center justify-center py-16 text-center">
+						<p className="text-sm text-gray-400">No standups yet.</p>
+						<p className="text-xs text-gray-300 mt-1">Be the first to post an update.</p>
+					</div>
+				)}
 
-					if (!s.today) return null;
-					const canEdit = canEditStandup(s);
+				{!isLoading &&
+					latestPerUser.map((s) => {
+						if (!s.today) return null;
+						const canEdit = canEditStandup(s);
 
-					return (
-						<div
-							key={s.id}
-							className="bg-white rounded-2xl p-6 border border-gray-100"
-						>
-							<div className="flex items-center gap-4 mb-6">
-								<Avatar
-									avatarUrl={s.created_by.avatar_url}
-									name={s.created_by.name}
-									userId={s.created_by.id}
-									size="md"
-								/>
-								<div>
-									<h3 className="text-base text-gray-900">{s.created_by.name}</h3>
-									<p className="text-xs text-gray-400">
-										{new Date(s.created_at).toLocaleDateString("en-GB")}
-									</p>
-								</div>
-							</div>
-
-							<div className="space-y-4">
-								{/* Yesterday Section */}
-								{s.yesterday && (
-									<div className="pb-4 border-b border-gray-100">
-										<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-											Yesterday
-										</h4>
-										<p className="text-sm text-gray-600">
-											{s.yesterday}
+						return (
+							<div
+								key={s.id}
+								className="bg-white rounded-2xl p-6 border border-gray-100"
+							>
+								<div className="flex items-center gap-4 mb-6">
+									<Avatar
+										avatarUrl={s.created_by.avatar_url}
+										name={s.created_by.name}
+										userId={s.created_by.id}
+										size="md"
+									/>
+									<div>
+										<h3 className="text-base text-gray-900">
+											{s.created_by.name}
+										</h3>
+										<p className="text-xs text-gray-400">
+											{new Date(s.created_at).toLocaleDateString("en-GB")}
 										</p>
 									</div>
-								)}
-
-								{/* Today Section */}
-								<div
-									className="pb-4 border-b border-gray-100 relative"
-									onMouseEnter={() => setHoveredStandup(s.id)}
-									onMouseLeave={() => setHoveredStandup(null)}
-								>
-									<div className="flex items-start justify-between gap-3">
-										<div className="flex-1">
-											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-												Today
-											</h4>
-											<p className="text-sm text-gray-600">
-												{s.today}
-											</p>
-										</div>
-
-										{canEdit && hoveredStandup === s.id && (
-											<div className="flex items-center gap-2">
-												<button
-													onClick={() => openEditModal(s)}
-													className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-													title="Edit standup"
-												>
-													<Edit2 className="w-3.5 h-3.5 text-gray-500" />
-												</button>
-												<button
-													onClick={() =>
-														setConfirmDelete(s.id)
-													}
-													className="p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
-													title="Delete standup"
-												>
-													<Trash2 className="w-3.5 h-3.5 text-rose-500" />
-												</button>
-											</div>
-										)}
-									</div>
 								</div>
 
-								{/* Blockers Section */}
-								{s.blockers.length > 0 && (
-									<div>
-										<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-											Blockers
-										</h4>
-										<div className="space-y-2">
-											<div className="flex items-center gap-2 mb-2">
-												<AlertCircle className="w-4 h-4 text-rose-500" />
-												<span className="text-sm text-rose-600 font-medium">
-													{s.blockers.length} active blocker
-													{s.blockers.length > 1 ? "s" : ""}
-												</span>
+								<div className="space-y-4">
+									{/* Yesterday Section */}
+									{s.yesterday && (
+										<div className="pb-4 border-b border-gray-100">
+											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+												Yesterday
+											</h4>
+											<p className="text-sm text-gray-600">{s.yesterday}</p>
+										</div>
+									)}
+
+									{/* Today Section */}
+									<div
+										className="pb-4 border-b border-gray-100 relative"
+										onMouseEnter={() => setHoveredStandup(s.id)}
+										onMouseLeave={() => setHoveredStandup(null)}
+									>
+										<div className="flex items-start justify-between gap-3">
+											<div className="flex-1">
+												<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+													Today
+												</h4>
+												<p className="text-sm text-gray-600">{s.today}</p>
 											</div>
-											{s.blockers.map((blocker) => (
-												<div
-													key={blocker.id}
-													className="bg-rose-50 rounded-lg p-3 border border-rose-100"
-												>
-													<p className="text-sm text-gray-700 mb-1">
-														{blocker.title}
-													</p>
-													<div className="flex items-center justify-between">
-														<span className="text-xs text-gray-500">
-															Ticket: {blocker.ticket.title}
-														</span>
-														<button
-															onClick={() =>
-																navigate("/blockers", {
-																	state: {
-																		blockerId: blocker.id,
-																	},
-																})
-															}
-															className="text-xs text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
-														>
-															View details →
-														</button>
-													</div>
+
+											{canEdit && hoveredStandup === s.id && (
+												<div className="flex items-center gap-2">
+													<button
+														onClick={() => openEditModal(s)}
+														className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+														title="Edit standup"
+													>
+														<Edit2 className="w-3.5 h-3.5 text-gray-500" />
+													</button>
+													<button
+														onClick={() => setConfirmDelete(s.id)}
+														className="p-1.5 hover:bg-rose-50 rounded-lg transition-colors"
+														title="Delete standup"
+													>
+														<Trash2 className="w-3.5 h-3.5 text-rose-500" />
+													</button>
 												</div>
-											))}
+											)}
 										</div>
 									</div>
-								)}
+
+									{/* Blockers Section */}
+									{s.blockers.length > 0 && (
+										<div>
+											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+												Blockers
+											</h4>
+											<div className="space-y-2">
+												<div className="flex items-center gap-2 mb-2">
+													<AlertCircle className="w-4 h-4 text-rose-500" />
+													<span className="text-sm text-rose-600 font-medium">
+														{s.blockers.length} active blocker
+														{s.blockers.length > 1 ? "s" : ""}
+													</span>
+												</div>
+												{s.blockers.map((blocker) => (
+													<div
+														key={blocker.id}
+														className="bg-rose-50 rounded-lg p-3 border border-rose-100"
+													>
+														<p className="text-sm text-gray-700 mb-1">
+															{blocker.title}
+														</p>
+														<div className="flex items-center justify-between">
+															<span className="text-xs text-gray-500">
+																Ticket: {blocker.ticket.title}
+															</span>
+															<button
+																onClick={() =>
+																	navigate("/blockers", {
+																		state: {
+																			blockerId: blocker.id,
+																		},
+																	})
+																}
+																className="text-xs text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1"
+															>
+																View details →
+															</button>
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
 							</div>
-						</div>
-					);
-				})}
+						);
+					})}
 			</div>
 
 			{/* Create Standup Modal */}
@@ -469,46 +469,17 @@ export function AsyncStandup() {
 			)}
 
 			{/* Delete Confirmation Modal */}
-			{confirmDelete && (
-				<>
-					<div
-						className="fixed inset-0 bg-black/40 z-50"
-						onClick={() => setConfirmDelete(null)}
-					/>
-					<div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-						<div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-							<div className="px-6 py-5">
-								<div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4">
-									<AlertCircle className="w-6 h-6 text-rose-600" />
-								</div>
-								<h3 className="text-lg text-gray-900 text-center mb-2">
-									Delete Standup?
-								</h3>
-								<p className="text-sm text-gray-500 text-center">
-									This action cannot be undone. Your standup update will be
-									permanently deleted.
-								</p>
-							</div>
-
-							<div className="flex items-center gap-3 px-6 py-4 border-t border-gray-100">
-								<button
-									onClick={() => setConfirmDelete(null)}
-									className="flex-1 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-								>
-									Cancel
-								</button>
-								<button
-									onClick={handleDeleteStandup}
-									disabled={isDeleting}
-									className="flex-1 px-4 py-2 text-sm text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{isDeleting ? "Deleting..." : "Delete"}
-								</button>
-							</div>
-						</div>
-					</div>
-				</>
-			)}
+			<ModalConfirmation
+				isOpen={!!confirmDelete}
+				onClose={() => setConfirmDelete(null)}
+				title="Delete Standup?"
+				description="This action cannot be undone. Your standup update will be permanently deleted."
+				confirmLabel="Delete"
+				confirmVariant="danger"
+				onConfirm={handleDeleteStandup}
+				isConfirming={isDeleting}
+				confirmingLabel="Deleting..."
+			/>
 		</div>
 	);
 }

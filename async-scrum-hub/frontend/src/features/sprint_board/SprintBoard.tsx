@@ -14,17 +14,22 @@ import { CreateTicketModal } from "./components/modals/CreateTicketModal";
 export function SprintBoard() {
 	const {
 		// States
+		teamMembers,
 		isCreateTicketOpen,
 		ticketForm,
 		isEditTicketOpen,
 		isCreateTaskOpen,
 		isCreateBlockerOpen,
 		selectedTicket,
-		//currentUser,
 		selectedTask,
 		blockerForm,
 		confirmDelete,
 		taskForm,
+		selectedTicketDetail,
+		errors,
+		isLoading,
+		isSaving,
+		isDeleting,
 
 		// Setters
 		setIsCreateTicketOpen,
@@ -37,14 +42,16 @@ export function SprintBoard() {
 		setConfirmDelete,
 		setTaskForm,
 		setBlockerForm,
+		setSelectedTicketDetail,
 
 		// Getters
 		getTicketsByStatus,
-		getBlockersForTicket,
+		getTasksForTicket,
+		getActiveBlockers,
 
 		// Handlers
 		handleTicketDrop,
-		handleTicketDragStart,
+		handleTicketDrag,
 		handleCreateTicket,
 		handleTaskDrop,
 		handleEditTicket,
@@ -53,16 +60,31 @@ export function SprintBoard() {
 		handleDeleteTicket,
 		handleDeleteTask,
 		handleTaskDragStart,
+		handleSelectTicket,
+		handleSelectTask,
 
 		// Permissions
-		canEditTask,
+		isLeadRole,
 		canEditTicketPriority,
-		canEditTicket,
-		canDeleteTicket,
-		canCreateTicket,
-		canDragTicket,
-		//canDragTask,
+		canDragTask,
+		canEditTask,
 	} = useSprintBoard();
+
+	if (isLoading) {
+		return (
+			<div className="p-8 flex items-center justify-center min-h-[400px]">
+				<p className="text-sm text-gray-400">Loading board...</p>
+			</div>
+		);
+	}
+
+	if (errors.ticketBoard) {
+		return (
+			<div className="p-8 flex items-center justify-center min-h-[400px]">
+				<p className="text-sm text-rose-500">{errors.ticketBoard}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="p-8">
@@ -70,21 +92,21 @@ export function SprintBoard() {
 			{/* Board Header */}
 			<BoardHeader
 				onCreateTicket={() => setIsCreateTicketOpen(true)}
-				canCreateTicket={canCreateTicket}
+				canCreateTicket={isLeadRole}
 			/>
 
-			{/* Kanban Clumn */}
-			<div className="grid grid-cols-3 gap-6">
+			{/* Kanban Column */}
+			<div className="grid grid-cols-3 gap-6 mt-4">
 				{BOARD_COLUMNS.map((columns) => (
 						<KanbanColumn
 							key={columns.id}
 							column={columns}
 							tickets={getTicketsByStatus(columns.id)}
-							teamMembers={[]}
-							onSelectTicket={setSelectedTicketId}
-							onTicketDragStart={handleTicketDragStart}
+							teamMembers={teamMembers}
+							onSelectTicket={handleSelectTicket}
+							onTicketDrag={handleTicketDrag}
 							onTicketDrop={handleTicketDrop}
-							canDragTicket={canDragTicket}
+							canDragTicket={isLeadRole}
 						/>
 					))}
 			</div>
@@ -95,41 +117,47 @@ export function SprintBoard() {
 					onClose={() => setIsCreateTicketOpen(false)}
 					form={ticketForm}
 					setForm={setTicketForm}
-					teamMembers={[]}
+					teamMembers={teamMembers}
 					onSubmit={handleCreateTicket}
+					isSaving={isSaving}
+					error={errors.ticketCreate}
 				/>
 			)}
 
 			{/* Ticket Detail Modal */}
-				{selectedTicket && !isEditTicketOpen && !isCreateTaskOpen && !isCreateBlockerOpen && (
+				{selectedTicketDetail && !isEditTicketOpen && !isCreateTaskOpen && !isCreateBlockerOpen && (
 				<TicketDetailModal
-					ticket={selectedTicket}
-					tasks={[]}
-					blockers={getBlockersForTicket(selectedTicket.id)}
+					ticket={selectedTicketDetail}
+					tasks={getTasksForTicket()}
+					blockers={getActiveBlockers()}
 
-					onClose={() => setSelectedTicketId(null)}
+					onClose={() => {
+						setSelectedTicketId(null);
+						setSelectedTicketDetail(null);
+					}}
 					onOpenCreateTask={() => setIsCreateTaskOpen(true)}
 					onOpenCreateBlocker={() => setIsCreateBlockerOpen(true)}
 					onOpenEdit={() => {
 						setTicketForm({
 							...ticketForm,
-							priority: selectedTicket.priority,
+							description: selectedTicketDetail.description ?? "",
+							priority: selectedTicketDetail.priority,
 						});
 						setIsEditTicketOpen(true);
 					}}
 					onDeleteTicket={() =>
 						setConfirmDelete({
 							type: "ticket",
-							id: selectedTicket.id,
+							id: selectedTicketDetail.id,
 					})}
 
-					onSelectTask={setSelectedTask}
-					onTaskDragStart={(task) => handleTaskDragStart(task, selectedTicket.id)}
+					onSelectTask={handleSelectTask}
+					onTaskDragStart={(task) => handleTaskDragStart(task, selectedTicketDetail.id)}
 					onTaskDrop={handleTaskDrop}
-					canDragTask={canEditTask}
+					canDragTask={canDragTask}
 
-					canEdit={canEditTicket}
-					canDelete={canDeleteTicket}
+					canEdit={isLeadRole}
+					canDelete={isLeadRole}
 				/>
 			)}
 
@@ -138,10 +166,12 @@ export function SprintBoard() {
 				<EditTicketModal
 					onClose={() => setIsEditTicketOpen(false)}
 					canEditPriority={canEditTicketPriority}
-					canEditDescription={canEditTicket}
+					canEditDescription={isLeadRole}
 					form={ticketForm}
 					setForm={setTicketForm}
 					onSubmit={handleEditTicket}
+					isSaving={isSaving}
+					error={errors.ticketEdit}
 				/>
 			)}
 
@@ -151,8 +181,10 @@ export function SprintBoard() {
 					onClose={() => setIsCreateTaskOpen(false)}
 					form={taskForm}
 					setForm={setTaskForm}
-					teamMembers={[]}
+					teamMembers={teamMembers}
 					onSubmit={handleCreateTask}
+					isSaving={isSaving}
+					error={errors.taskCreate}
 				/>
 			)}
 
@@ -162,20 +194,22 @@ export function SprintBoard() {
 					onClose={() => setSelectedTask(null)}
 					onDelete={() => setConfirmDelete({ type: "task", id: selectedTask.id })}
 					task={selectedTask}
-					teamMembers={[]}
+					teamMembers={teamMembers}
 					canDelete={canEditTask(selectedTask)}
 				/>
 			)}
 
 			{/* Create Blocker Modal */}
-			{isCreateBlockerOpen && selectedTicket && (
+			{isCreateBlockerOpen && selectedTicketDetail && (
 				<CreateBlockerModal
 					onClose={() => setIsCreateBlockerOpen(false)}
-					ticket={selectedTicket}
+					ticket={selectedTicketDetail}
 					form={blockerForm}
-					teamMembers={[]}
+					teamMembers={teamMembers}
 					setForm={setBlockerForm}
 					onSubmit={handleCreateBlocker}
+					isSaving={isSaving}
+					error={errors.blockerCreate}
 				/>
 			)}
 
@@ -185,6 +219,7 @@ export function SprintBoard() {
 				onCancel={() => setConfirmDelete(null)}
 				onDeleteTicket={handleDeleteTicket}
 				onDeleteTask={handleDeleteTask}
+				isDeleting={isDeleting}
 			/>
 		</div>
 	);

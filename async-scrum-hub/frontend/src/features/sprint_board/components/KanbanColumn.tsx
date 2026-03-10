@@ -1,6 +1,6 @@
 import { Avatar } from "../../../components/custom";
 import { PRIORITY_COLORS } from "../constants/sprint.constants";
-import type { OrgMember, Ticket, TicketStatus } from "../types/sprint.types";
+import type { OrgMember, ListTicketsBoard, TicketStatus } from "../types/sprint.types";
 
 interface Column {
 	id: TicketStatus;
@@ -10,11 +10,11 @@ interface Column {
 
 interface Props {
 	column: Column;
-	tickets: Ticket[];
+	tickets: ListTicketsBoard[];
 	teamMembers: OrgMember[];
 
 	onSelectTicket: (id: string) => void;
-	onTicketDragStart: (ticket: Ticket) => void;
+	onTicketDrag: (tickets: ListTicketsBoard) => void;
 	onTicketDrop: (status: TicketStatus) => void;
 	canDragTicket: boolean;
 }
@@ -25,7 +25,7 @@ export function KanbanColumn({
 	teamMembers,
 
 	onSelectTicket,
-	onTicketDragStart,
+	onTicketDrag,
 	onTicketDrop,
 	canDragTicket,
 }: Props) {
@@ -50,13 +50,13 @@ export function KanbanColumn({
 				) : (
 					tickets.map((ticket) => {
 						const member = teamMembers.find(
-							(m) => m.id === ticket.assignee_id
+							(m) => m.id === ticket.assignee?.id
 						);
 						return (
 							<div
 								key={ticket.id}
 								draggable={canDragTicket}
-								onDragStart={() => onTicketDragStart(ticket)}
+								onDragStart={() => onTicketDrag(ticket)}
 								onClick={() => onSelectTicket(ticket.id)}
 								className={`bg-white rounded-xl p-4 border border-gray-100 border-l-4 ${column.borderColor} hover:shadow-sm transition-shadow cursor-pointer ${
 									canDragTicket
@@ -69,7 +69,7 @@ export function KanbanColumn({
 										{ticket.title}
 									</span>
 									<span
-										className={`text-xs px-2 py-1 rounded-lg ${
+										className={`text-xs px-2 py-1 rounded-lg shrink-0 ${
 											PRIORITY_COLORS[ticket.priority]
 										}`}
 									>
@@ -82,7 +82,7 @@ export function KanbanColumn({
 											avatarUrl={member.avatar_url}
 											name={member.name}
 											userId={member.id}
-											className={`w-6 h-6`}
+											size="sm"
 										/>
 										<span className="text-xs text-gray-400">{member.name}</span>
 									</div>

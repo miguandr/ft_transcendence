@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, updateUser, uploadAvatar, inviteMember } from "../../../services/api";
 import { formatScrumRole } from "../../../utils/formatters";
 import type { User } from "../../../services/api";
+//import type { APIError } from "../../../utils/shared.types";
 type APIError = {
 	error?: { code?: string; message?: string };
 	detail?: Array<{ msg: string }>;

@@ -1,4 +1,4 @@
-import { Button, Modal, Label, Input, Select } from "../../../../components/custom"
+import { Button, Modal, Label, Input, Select, ErrorText } from "../../../../components/custom"
 import type {Ticket, UserRef } from "../../types/sprint.types"
 type BlockerFormData = { description: string; assignee: string }
 
@@ -9,6 +9,8 @@ interface Props {
 	teamMembers: UserRef[];
 	setForm: (form: BlockerFormData) => void;
 	onSubmit: () => void;
+	isSaving?: boolean;
+	error?: string;
 }
 
 export function CreateBlockerModal({
@@ -17,8 +19,9 @@ export function CreateBlockerModal({
 	form,
 	teamMembers,
 	setForm,
-	onSubmit
-
+	onSubmit,
+	isSaving = false,
+	error,
 }: Props) {
 
 	return (
@@ -42,7 +45,7 @@ export function CreateBlockerModal({
 						})
 					}
 					placeholder="Describe what's blocking progress"
-					rows={4}
+					rows={3}
 					className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors resize-none"
 				/>
 			</div>
@@ -55,13 +58,13 @@ export function CreateBlockerModal({
 					type="text"
 					value={ticket.title}
 					disabled
-					className="px-3 py-2 bg-gray-100 border text-gray-600"
+					className="px-3 py-2 bg-gray-50 border text-gray-600"
 				/>
 			</div>
 			<div>
 				<Select
-					label="Related to (optional"
-					className="mb-1.5"
+					label="Related to (optional)"
+					className="mb-4.5 bg-gray-50 border text-gray-600"
 					value={form.assignee}
 					onChange={(e) =>
 						setForm({
@@ -79,20 +82,22 @@ export function CreateBlockerModal({
 				/>
 			</div>
 		</div>
-
+		{error && <ErrorText>{error}</ErrorText>}
 		<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
 			<Button
 				variant="secondary"
-				size="sm"
+				size="md"
 				className="text-sm"
 				onClick={onClose}
+				disabled={isSaving}
 			>
 				Cancel
 			</Button>
 			<Button
 				className="px-4 py-2 text-sm text-white bg-cyan-500 hover:bg-cyan-600 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				onClick={onSubmit}
-				disabled={!form.description.trim()}
+				disabled={!form.description.trim() || isSaving}
+				isLoading={isSaving}
 			>
 				Create blocker
 			</Button>
