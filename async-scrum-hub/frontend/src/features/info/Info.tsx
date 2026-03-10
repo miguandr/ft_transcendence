@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatScrumRole } from "../../utils/formatters";
-import { getOrganizationMembers, removeMember, type OrganizationMember } from "../../services/api";
+import { getOrganizationMembers, removeMember } from "../../services/api";
+import type { OrganizationMember } from "../../types/api.types"
 import { useAuth } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
 import {

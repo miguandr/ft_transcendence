@@ -1,8 +1,9 @@
 import os
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+import time
 
 from src.database.models import User
 from src.users.schemas import AvatarResponse
@@ -49,14 +50,16 @@ def upload_avatar(db: Session, user: User, content: bytes, content_type: str) ->
 		)
 
 	ext = ALLOWED_CONTENT_TYPES[content_type]
-	filename = f"{user.id}.{ext}"
+	filename = f"{user.id}_{int(time.time())}.{ext}"
 	filepath = os.path.join(AVATARS_DIR, filename)
 
 	os.makedirs(AVATARS_DIR, exist_ok=True)
 
 	image = Image.open(BytesIO(content))
+	image = ImageOps.exif_transpose(image)
 	image = image.convert("RGB")
-	image = image.resize((256, 256))
+	resample = Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.LANCZOS
+	image = ImageOps.fit(image, (256, 256), method=resample)
 	buffer = BytesIO()
 	image.save(buffer, format=PIL_FORMAT[ext])
 

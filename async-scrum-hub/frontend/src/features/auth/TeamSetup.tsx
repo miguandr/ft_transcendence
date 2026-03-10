@@ -127,7 +127,7 @@ export function TeamSetup() {
 
 		try {
 			await setUserRole({
-				organization_id: orgId,
+				org_id: orgId,
 				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer",
 			});
 			await refreshUser();

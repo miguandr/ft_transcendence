@@ -11,7 +11,7 @@ import {
 	deleteStandup,
 } from "../../services/api";
 import type { APIError } from "../../utils/shared.types";
-import type { StandupListItem } from "../../services/api";
+import type { StandupListItem } from "../../types/api.types";
 
 
 export function AsyncStandup() {
