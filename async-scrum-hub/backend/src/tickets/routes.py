@@ -27,6 +27,7 @@ from src.database.models.enums import TicketStatus, Priority
 from src.api.deps import get_current_user, require_org_permission, require_resource_permission
 from src.tickets import service
 from src.schemas.common import UserBrief
+from src.realtime.connection_manager import manager
 from src.tickets.schemas import (
 	CreateTicketRequest,
 	CreateTicketResponse,
@@ -55,7 +56,7 @@ def get_ticket_loader(ticket_id: uuid.UUID, db: Session = Depends(get_db)) -> Ti
 	response_model=CreateTicketResponse,
 	status_code=status.HTTP_201_CREATED,
 )
-def create_ticket(
+async def create_ticket(
 	org_id: uuid.UUID,
 	body: CreateTicketRequest,
 	db: Session = Depends(get_db),
@@ -76,6 +77,20 @@ def create_ticket(
 		description=body.description,
 		priority=body.priority,
 		assignee_id=body.assignee_id,
+	)
+	await manager.broadcast(
+		str(org_id),
+		"ticket.created",
+		{
+			"id": str(ticket.id),
+			"title": ticket.title,
+			"description": ticket.description,
+			"status": ticket.status.value if hasattr(ticket.status, "value") else ticket.status,
+			"priority": ticket.priority.value if hasattr(ticket.priority, "value") else ticket.priority,
+			"assignee": {"id": str(ticket.assignee.id), "name": ticket.assignee.name} if ticket.assignee else None,
+			"created_by": str(ticket.created_by),
+			"created_at": ticket.created_at.isoformat(),
+		},
 	)
 	return CreateTicketResponse(
 		id=ticket.id,
@@ -159,7 +174,7 @@ def get_ticket_detail(
 	response_model=UpdateTicketResponse,
 	status_code=status.HTTP_200_OK,
 )
-def update_ticket(
+async def update_ticket(
 	body: UpdateTicketRequest,
 	db: Session = Depends(get_db),
 	ticket: Ticket = Depends(require_resource_permission("tickets:update", get_ticket_loader)),
@@ -171,6 +186,18 @@ def update_ticket(
 		ticket=ticket,
 		user=current_user,
 		updates=updates,
+	)
+	await manager.broadcast(
+		str(updated.organization_id),
+		"ticket.updated",
+		{
+			"id": str(updated.id),
+			"title": updated.title,
+			"description": updated.description,
+			"priority": updated.priority.value if hasattr(updated.priority, "value") else updated.priority,
+			"assignee": {"id": str(updated.assignee.id), "name": updated.assignee.name} if updated.assignee else None,
+			"updated_at": updated.updated_at.isoformat(),
+		},
 	)
 	return UpdateTicketResponse(
 		id=updated.id,
@@ -191,7 +218,7 @@ def update_ticket(
 	response_model=MoveTicketResponse,
 	status_code=status.HTTP_200_OK,
 )
-def move_ticket(
+async def move_ticket(
 	body: MoveTicketRequest,
 	db: Session = Depends(get_db),
 	ticket: Ticket = Depends(require_resource_permission("tickets:move", get_ticket_loader)),
@@ -200,6 +227,15 @@ def move_ticket(
 		db=db,
 		ticket=ticket,
 		new_status=body.status,
+	)
+	await manager.broadcast(
+		str(moved.organization_id),
+		"ticket.moved",
+		{
+			"id": str(moved.id),
+			"status": moved.status.value if hasattr(moved.status, "value") else moved.status,
+			"updated_at": moved.updated_at.isoformat(),
+		},
 	)
 	return MoveTicketResponse(
 		id=moved.id,
@@ -212,8 +248,15 @@ def move_ticket(
 	"/tickets/{ticket_id}",
 	status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_ticket(
+async def delete_ticket(
 	db: Session = Depends(get_db),
 	ticket: Ticket = Depends(require_resource_permission("tickets:delete", get_ticket_loader)),
 ):
+	org_id = str(ticket.organization_id)
+	ticket_id = str(ticket.id)
 	service.delete_ticket(db=db, ticket=ticket)
+	await manager.broadcast(
+		org_id,
+		"ticket.deleted",
+		{"id": ticket_id},
+	)
