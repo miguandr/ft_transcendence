@@ -49,6 +49,7 @@ class BlockerBriefTicket(BaseModel):
 	id: UUID
 	description: str
 	status: str
+	created_by: UserBrief
 
 	model_config = ConfigDict(from_attributes=True)
 
@@ -64,7 +65,7 @@ class UpdateTicketRequest(BaseModel):
 	status: Optional[TicketStatus] = None
 	assignee_id: Optional[UUID] = None
 
-class UpdateTicketResponse(CreateTicketResponse):
+class UpdateTicketResponse(TicketDetailResponse):
 	pass
 
 

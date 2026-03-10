@@ -150,7 +150,15 @@ def get_ticket_detail(
 		created_at=ticket.created_at,
 		updated_at=ticket.updated_at,
 		tasks=ticket.tasks,
-		blockers=[BlockerBriefTicket.model_validate(b) for b in ticket.blockers],
+		blockers=[
+			BlockerBriefTicket(
+				id=b.id,
+				description=b.description,
+				status=b.status,
+				created_by=UserBrief.model_validate(b.creator),
+			)
+			for b in ticket.blockers
+		],
 	)
 
 
@@ -183,6 +191,16 @@ def update_ticket(
 		organization_id=updated.organization_id,
 		created_at=updated.created_at,
 		updated_at=updated.updated_at,
+		tasks=ticket.tasks,
+		blockers=[
+			BlockerBriefTicket(
+				id=b.id,
+				description=b.description,
+				status=b.status,
+				created_by=UserBrief.model_validate(b.creator),
+			)
+			for b in ticket.blockers
+		],
 	)
 
 
