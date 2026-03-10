@@ -1,5 +1,5 @@
 import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { Avatar, Card, PageHeader, StatCard, ErrorText } from "../../components/custom";
+import { Avatar, Card, PageHeader, StatCard, ErrorText } from "../../components/custom/index";
 import { useDashboard } from "./useDashboard";
 import { formatRelativeTime } from "../../utils/formatters";
 

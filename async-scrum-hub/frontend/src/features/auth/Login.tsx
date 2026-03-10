@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../../services/api";
-import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
+import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom/index";
 import { motion } from "framer-motion";
 import { useAuth } from "../../routes/useAuth";
 import type { APIError } from "../../utils/shared.types";

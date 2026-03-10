@@ -1,4 +1,4 @@
-import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom"
+import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom/index"
 import { Trash2 } from "lucide-react"
 import type { Task, UserRef } from "../../types/sprint.types"
 

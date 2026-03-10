@@ -1,4 +1,4 @@
-import { ErrorText } from "../../components/custom";
+import { ErrorText } from "../../components/custom/index";
 import { BOARD_COLUMNS } from "./constants/sprint.constants";
 import { useSprintBoard } from "./hooks/useSprintBoard";
 import { BoardHeader } from "./components/BoardHeader"

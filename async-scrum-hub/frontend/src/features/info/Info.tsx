@@ -10,7 +10,7 @@ import {
 	StatCard,
 	ModalConfirmation,
 	ErrorText,
-} from "../../components/custom";
+} from "../../components/custom/index";
 import {
 	CheckSquare,
 	FileText,

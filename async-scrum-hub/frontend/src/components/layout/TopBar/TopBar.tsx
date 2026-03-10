@@ -1,5 +1,5 @@
 import { useTopBar } from "./useTopBar"
-import { Button, Label, Input, Avatar, ErrorText } from "../../custom"
+import { Button, Label, Input, Avatar, ErrorText } from "../../custom/index"
 import {
 	LogOut,
 	User,

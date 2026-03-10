@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, signup } from "../../services/api";
-import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom";
+import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom/index";
 import { useAuth } from "../../routes/useAuth";
 import type { APIError } from "../../utils/shared.types";
 

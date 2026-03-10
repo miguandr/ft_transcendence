@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Columns, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button, IconBox } from "../../components/custom";
+import { Button, IconBox } from "../../components/custom/index";
 
 type Particle = {
 	start: { x: number; y: number };

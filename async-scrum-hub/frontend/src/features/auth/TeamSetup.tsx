@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
 import { useAuth } from "../../routes/useAuth";
-import { Button, Input, Label, ErrorText } from "../../components/custom";
+import { Button, Input, Label, ErrorText } from "../../components/custom/index";
 import {
 	createOrganization,
 	setUserRole,

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Edit2, Trash2, X } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import { ModalConfirmation, PageHeader, Avatar, ErrorText } from "../../components/custom";
+import { ModalConfirmation, PageHeader, Avatar, ErrorText } from "../../components/custom/index";
 import { useAuth } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
 import {

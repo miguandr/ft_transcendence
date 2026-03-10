@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { Plus, Edit2, CheckCircle, Trash2 } from "lucide-react"
-import { Button, Modal, ErrorText } from "../../../../components/custom";
+import { Button, Modal, ErrorText } from "../../../../components/custom/index";
 import { PRIORITY_COLORS } from "../../constants/sprint.constants"
 import type { TaskStatus, Ticket, TaskSummary, BlockerStatus } from "../../types/sprint.types";
 

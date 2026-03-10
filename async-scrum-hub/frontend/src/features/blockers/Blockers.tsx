@@ -3,7 +3,15 @@ import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
-import { Button, Label, Modal, PageHeader, Avatar, ModalConfirmation, ErrorText } from "../../components/custom";
+import {
+	Button,
+	Label,
+	Modal,
+	PageHeader,
+	Avatar,
+	ModalConfirmation,
+	ErrorText
+} from "../../components/custom/index";
 import {
 	createBlocker,
 	listBlockers,

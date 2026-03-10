@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { Button, PageHeader } from "../../../components/custom";
+import { Button, PageHeader } from "../../../components/custom/index";
 
 interface Props {
 	onCreateTicket: () => void;
