@@ -1,4 +1,4 @@
-import { Button, Modal, Label, Input, Select, ErrorText } from "../../../../components/custom"
+import { Button, Modal, Label, Input, Select, ErrorText } from "../../../../components/custom/index"
 import type {Ticket, UserRef } from "../../types/sprint.types"
 type BlockerFormData = { description: string; assignee: string }
 

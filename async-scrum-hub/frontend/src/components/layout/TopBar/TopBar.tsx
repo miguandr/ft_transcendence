@@ -1,5 +1,5 @@
 import { useTopBar } from "./useTopBar"
-import { Button, Label, Input, Avatar } from "../../custom"
+import { Button, Label, Input, Avatar, ErrorText } from "../../custom/index"
 import {
 	LogOut,
 	User,
@@ -22,8 +22,9 @@ export function TopBar() {
 		showImageAvatar,
 		showDefaultAvatar,
 		isAdmin,
-		currentUser,
-		errors, // IMPLEMENTE ERRORS AND LOADING STATES IN UI !!!!!!
+		authUser,
+		errors,
+		isUploading,
 		isSaving,
 		isInviting,
 		formattedScrumRole,
@@ -52,8 +53,8 @@ export function TopBar() {
 			<div />
 
 			<div className="flex flex-col items-center">
-				<h1 className="text-3xl tracking-tight text-gray-400">{currentUser?.org_name}</h1>
-				{errors.user && <p className="text-xs text-red-500">{errors.user}</p>}
+				<h1 className="text-3xl tracking-tight text-gray-400">{authUser?.org_name}</h1>
+				{errors.user && <ErrorText>{errors.user}</ErrorText>}
 			</div>
 
 			<div className="flex items-center gap-4 justify-end">
@@ -63,21 +64,21 @@ export function TopBar() {
 						className="flex items-center gap-3 hover:opacity-80 transition-opacity"
 					>
 						<div className="text-right">
-							<p className="text-sm text-gray-900">{currentUser?.name}</p>
+							<p className="text-sm text-gray-900">{authUser?.name}</p>
 							<p className="text-xs text-gray-500">{formattedScrumRole}</p>
 						</div>
 						{showDefaultAvatar ? (
 							<img
 								src={showImageAvatar}
-								alt={currentUser?.name}
+								alt={authUser?.name}
 								className="w-10 h-10 rounded-full object-cover"
 							/>
 						) : (
 							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
 								<Avatar
-									avatarUrl={currentUser?.avatar_url}
-									name={currentUser?.name}
-									userId={currentUser?.id}
+									avatarUrl={authUser?.avatar_url}
+									name={authUser?.name}
+									userId={authUser?.id}
 									size="md"
 								/>
 							</div>
@@ -121,7 +122,7 @@ export function TopBar() {
 															Name
 														</p>
 														<p className="text-sm text-gray-900">
-															{currentUser?.name}
+															{authUser?.name}
 														</p>
 													</div>
 													<div>
@@ -129,7 +130,7 @@ export function TopBar() {
 															Email
 														</p>
 														<p className="text-sm text-gray-900">
-															{currentUser?.email}
+															{authUser?.email}
 														</p>
 													</div>
 													<div>
@@ -137,7 +138,7 @@ export function TopBar() {
 															Team
 														</p>
 														<p className="text-sm text-gray-900">
-															{currentUser?.org_name}
+															{authUser?.org_name}
 														</p>
 													</div>
 
@@ -186,9 +187,7 @@ export function TopBar() {
 															className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
 														/>
 													</div>
-													{errors.user && (
-														<p className="text-xs text-red-500">{errors.user}</p>
-													)}
+													{errors.user && <ErrorText>{errors.user}</ErrorText>}
 													<div className="flex gap-2">
 														<button
 															onClick={handleSaveProfile}
@@ -235,15 +234,15 @@ export function TopBar() {
 												{showDefaultAvatar ? (
 													<img
 														src={showImageAvatar}
-														alt={currentUser!.name}
+														alt={authUser!.name}
 														className="w-20 h-20 rounded-full object-cover"
 													/>
 												) : (
 													//<div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
 													<Avatar
-														avatarUrl={currentUser?.avatar_url}
-														name={currentUser?.name}
-														userId={currentUser?.id}
+														avatarUrl={authUser?.avatar_url}
+														name={authUser?.name}
+														userId={authUser?.id}
 														className="w-20 h-20"
 														initialsClassName="text-2xl"
 													/>
@@ -255,18 +254,17 @@ export function TopBar() {
 													accept="image/png,image/jpeg"
 													onChange={handleAvatarUpload}
 													className="hidden"
+													disabled={isUploading}
 												/>
 												<div className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center cursor-pointer flex items-center justify-center gap-2">
 													<Upload className="w-3 h-3" />
-													<span>Upload image</span>
+													{isUploading ? "Uploading..." : "Upload image"}
 												</div>
 											</Label>
 
 											<p className="text-xs text-gray-500 text-center">
 												PNG/JPG up to 5 MB
-												{errors.avatar && (
-													<p className="text-xs text-red-500 text-center">{errors.avatar}</p>
-												)}
+												{errors.avatar && <ErrorText>{errors.avatar}</ErrorText>}
 											</p>
 										</div>
 									)}
@@ -328,9 +326,7 @@ export function TopBar() {
 																placeholder="Enter email"
 															/>
 														</div>
-														{errors.invite && (
-															<p className="text-xs text-red-500">{errors.invite}</p>
-														)}
+														{errors.invite && <ErrorText>{errors.invite}</ErrorText>}
 														<p className="text-xs text-gray-500">
 															Invitation link will be emailed.
 														</p>

@@ -20,10 +20,6 @@ export function getTakenRoles(members: Array<{ scrum_role: string }>): string[] 
 }
 
 // Role formatters
-export function formatOrgRole(role: "admin" | "member"): "Admin" | "Member" {
-	return role === "admin" ? "Admin" : "Member";
-}
-
 export function formatScrumRole(
 	role: "scrum_master" | "product_owner" | "developer"
 ): "Scrum Master" | "Product Owner" | "Developer" {

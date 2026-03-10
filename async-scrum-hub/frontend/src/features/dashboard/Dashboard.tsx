@@ -1,11 +1,11 @@
 import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { Avatar, Card, PageHeader, StatCard } from "../../components/custom";
+import { Avatar, Card, PageHeader, StatCard, ErrorText } from "../../components/custom/index";
 import { useDashboard } from "./useDashboard";
 import { formatRelativeTime } from "../../utils/formatters";
 
 export function Dashboard() {
 	const {
-		user,
+		authUser,
 		data,
 		isLoading,
 		errors
@@ -15,14 +15,14 @@ export function Dashboard() {
 		return <div className="p-8 text-gray-400">Loading...</div>;
 	}
 
-	if (errors) {
-		return <div className="p-8 text-rose-500">{errors}</div>;
+	if (errors.dashboard) {
+		return <ErrorText>{errors.dashboard}</ErrorText>;
 	}
 
 	return (
 		<div className="p-8 space-y-6">
 			<PageHeader
-				title={`Hello ${user?.name?.split(" ")[0]},`}
+				title={`Hello ${authUser?.name?.split(" ")[0]},`}
 				subtitle="Here's what's happening with your team today"
 			/>
 

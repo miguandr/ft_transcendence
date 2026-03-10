@@ -1,4 +1,4 @@
-import { Button, Modal, Avatar } from "../../../../components/custom"
+import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom/index"
 import { Trash2 } from "lucide-react"
 import type { Task, UserRef } from "../../types/sprint.types"
 
@@ -8,6 +8,7 @@ interface Props {
 	task: Task;
 	teamMembers: UserRef[];
 	canDelete: boolean;
+	error?: string;
 }
 
 export function TaskDetailModal({
@@ -16,6 +17,7 @@ export function TaskDetailModal({
 	task,
 	teamMembers,
 	canDelete,
+	error,
 
 }: Props) {
 	const assignee = teamMembers.find(m => m.id === task.assignee_id)
@@ -63,7 +65,8 @@ export function TaskDetailModal({
 						)}
 				</div>
 			</div>
-			
+
+			{error && <ErrorText>{error}</ErrorText>}
 			<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
 				{canDelete ? (
 					<Button

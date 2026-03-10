@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
-import { formatOrgRole, formatScrumRole } from "../../utils/formatters";
+import { useState, useEffect, useCallback } from "react";
+import { formatScrumRole } from "../../utils/formatters";
 import { getOrganizationMembers, removeMember, type OrganizationMember } from "../../services/api";
 import { useAuth } from "../../routes/useAuth";
+import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
 import {
 	PageHeader,
 	Avatar,
 	Badge,
 	StatCard,
 	ModalConfirmation,
-} from "../../components/custom";
+	ErrorText,
+} from "../../components/custom/index";
 import {
 	CheckSquare,
 	FileText,
@@ -17,54 +19,60 @@ import {
 	ChevronDown,
 	ChevronUp,
 } from "lucide-react";
+import type { APIError } from "../../utils/shared.types";
 
-interface Member {
-	id: string;
-	name: string;
-	avatarUrl?: string | null;
-	orgRole: "Admin" | "Member";
-	scrumRole: "Product Owner" | "Scrum Master" | "Developer";
-	tickets: OrganizationMember["tickets"];
-	tasks: OrganizationMember["tasks"];
-	blockers: OrganizationMember["blockers"];
-}
 
 export function Info() {
 	const { user: authUser } = useAuth();
 
-	const currentUser = authUser?.org_role ? formatOrgRole(authUser.org_role) : null;
+	const currentUser = authUser?.org_role ? authUser.org_role : null;
 	const orgId = authUser?.organization_id ?? null;
+	const [errors, setErrors] = useState<{ fetchMember?: string; removeMember?: string }>({});
 	const [isRemoving, setIsRemoving] = useState(false);
-	const [members, setMembers] = useState<Member[]>([]);
+	const [members, setMembers] = useState<OrganizationMember[]>([]);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 	const [expandedActivity, setExpandedActivity] = useState<{
 		memberId: string;
 		type: "tickets" | "tasks" | "blockers";
 	} | null>(null);
 
-	useEffect(() => {
-		if (!orgId) return;
+	const fetchMembers = useCallback(async () => {
+		if (!orgId) return ;
+		setErrors({});
 
-		const fetchMembers = async () => {
-			try {
-				const membersData = await getOrganizationMembers(orgId);
-				const transformedMembers: Member[] = membersData.map((memberData) => ({
-					id: memberData.id,
-					name: memberData.name,
-					avatarUrl: memberData.avatar_url,
-					orgRole: formatOrgRole(memberData.org_role),
-					scrumRole: formatScrumRole(memberData.scrum_role),
-					tickets: memberData.tickets,
-					tasks: memberData.tasks,
-					blockers: memberData.blockers,
-				}));
-				setMembers(transformedMembers);
-			} catch (error) {
-				console.error("Failed to fetch members:", error);
+		try {
+			const membersData = await getOrganizationMembers(orgId);
+			const transformedMembers: OrganizationMember[] = membersData.map((memberData) => ({
+				id: memberData.id,
+				name: memberData.name,
+				avatar_url: memberData.avatar_url,
+				org_role: memberData.org_role,
+				scrum_role: memberData.scrum_role,
+				tickets: memberData.tickets,
+				tasks: memberData.tasks,
+				blockers: memberData.blockers,
+			}));
+			setMembers(transformedMembers);
+
+		} catch (error) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ fetchMember: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ fetchMember: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ fetchMember: "Organization not found" });
+			} else {
+				setErrors({ fetchMember: "Something went wrong" });
 			}
-		};
-		fetchMembers();
+		}
 	}, [orgId]);
+
+	useEffect(() => {
+		fetchMembers();
+	}, [fetchMembers]);
 
 	const isAdmin = currentUser === "Admin";
 
@@ -81,16 +89,27 @@ export function Info() {
 				// Close modal
 				setConfirmDelete(null);
 			} catch (error) {
-				console.error("Failed to remove member:", error);
+				console.error("API call failed:", error);
+
+				const apiError = error as APIError;
+				if (apiError.error?.code === "UNAUTHORIZED") {
+					setErrors({ removeMember: "Authentication required" });
+				} else if (apiError.error?.code === "FORBIDDEN") {
+					setErrors({ removeMember: "You do not have permission to perform this action" });
+				} else if (apiError.error?.code === "NOT_FOUND") {
+					setErrors({ removeMember: "Organization or user not found" });
+				} else {
+					setErrors({ removeMember: "Something went wrong" });
+				}
 			} finally {
 				setIsRemoving(false);
 			}
 		}
 	};
 
-	const canRemoveMember = (member: Member) => {
+	const canRemoveMember = (member: OrganizationMember) => {
 		if (!isAdmin) return false;
-		if (member.orgRole === "Admin") return false;
+		if (member.org_role === "admin") return false;
 		return true;
 	};
 
@@ -102,11 +121,29 @@ export function Info() {
 		}
 	};
 
+	useOrgWebSocket(orgId, (msg) => {
+		const reFetchEvents = [
+			 "ticket.created", "ticket.updated", "ticket.deleted",
+			"task.created", "task.updated", "task.deleted",
+			"blocker.created", "blocker.updated", "blocker.resolved",
+		];
+		if (reFetchEvents.includes(msg.event)) {
+			fetchMembers();
+		}
+	});
+
 	return (
 		<div className="p-8">
-			<PageHeader title="Info" subtitle="Team members and current work context" />
+
+			<PageHeader
+				title="Info"
+				subtitle="Team members and current work context"
+			/>
 			<div className="w-full">
+				{errors.fetchMember && <ErrorText>{errors.fetchMember}</ErrorText>}
+
 				<div className="bg-white rounded-2xl border border-gray-100">
+
 					{/* Table Header */}
 					<div className="grid grid-cols-12 gap-6 px-6 py-4 border-b border-gray-100 text-xs uppercase tracking-wide text-gray-500">
 						<div className="col-span-4">Member</div>
@@ -114,6 +151,7 @@ export function Info() {
 						<div className="col-span-5 text-center">Activity</div>
 						<div className="col-span-1"></div>
 					</div>{" "}
+
 					{/* Member Rows */}
 					<div className="divide-y divide-gray-100">
 						{members.map((member) => {
@@ -126,10 +164,11 @@ export function Info() {
 							return (
 								<div key={member.id}>
 									<div className="grid grid-cols-12 gap-6 px-6 py-5 items-center">
+
 										{/* Member Info */}
 										<div className="col-span-4 flex items-center gap-3">
 											<Avatar
-												avatarUrl={member.avatarUrl}
+												avatarUrl={member.avatar_url}
 												name={member.name}
 												userId={member.id}
 												size="md"
@@ -144,7 +183,7 @@ export function Info() {
 										{/* Scrum Role */}
 										<div className="col-span-2 flex justify-center">
 											<span className="text-sm text-gray-700">
-												{member.scrumRole}
+												{formatScrumRole(member.scrum_role)}
 											</span>
 										</div>
 
@@ -364,6 +403,8 @@ export function Info() {
 			</div>
 
 			{/* Remove Member Confirmation Modal */}
+			{errors.removeMember && <ErrorText>{errors.removeMember}</ErrorText>}
+
 			<ModalConfirmation
 				isOpen={!!confirmDelete}
 				onClose={() => setConfirmDelete(null)}

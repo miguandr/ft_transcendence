@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, updateUser, uploadAvatar, inviteMember } from "../../../services/api";
+import { updateUser, uploadAvatar, inviteMember } from "../../../services/api";
 import { formatScrumRole } from "../../../utils/formatters";
-import type { User } from "../../../services/api";
-//import type { APIError } from "../../../utils/shared.types";
-type APIError = {
-	error?: { code?: string; message?: string };
-	detail?: Array<{ msg: string }>;
-};
+import { useAuth } from "../../../routes/useAuth";
+import type { APIError } from "../../../utils/shared.types";
+
 
 export function useTopBar() {
 	//View/UI states
@@ -15,10 +12,9 @@ export function useTopBar() {
 	const [expandedSection, setExpandedSection] = useState<string | null>(null);
 	const [inviteSent, setInviteSent] = useState(false);
 	//Auth states
-	const [orgId, setOrgId] = useState<string | null>(null);
+	const { user: authUser, refreshUser } = useAuth();
+	const orgId = authUser?.organization_id ?? null;
 	const [errors, setErrors] = useState<{ invite?: string; avatar?: string; user?: string }>({});
-	//Data states
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	//Form states
 	const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 	const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -34,43 +30,18 @@ export function useTopBar() {
 	//Routing state
 	const navigate = useNavigate();
 	//Derived states
-	const isAdmin = currentUser?.org_role === "admin";
+	const isAdmin = authUser?.org_role === "admin";
 	//Derived data
-	const showImageAvatar = previewAvatar || currentUser?.avatar_url || "";
-	const formattedScrumRole = currentUser?.scrum_role
-		? formatScrumRole(currentUser.scrum_role)
+	const showImageAvatar = previewAvatar || authUser?.avatar_url || "";
+	const formattedScrumRole = authUser?.scrum_role
+		? formatScrumRole(authUser.scrum_role)
 		: "";
 	//Derived UI logic
-	const showDefaultAvatar = Boolean(previewAvatar || currentUser?.avatar_url);
+	const showDefaultAvatar = Boolean(previewAvatar || authUser?.avatar_url);
 	const canSaveProfile = Boolean(editFormData?.name.trim() && editFormData.email.trim());
 	const canSendInvite = Boolean(inviteFormData.name.trim() && inviteFormData.email.trim());
 
-	const fetchUser = async () => {
-		setErrors({});
 
-		try {
-			const user = await getCurrentUser();
-			setCurrentUser(user);
-			setOrgId(user.organization_id);
-		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
-			const apiError = error as APIError;
-			if (apiError.detail) {
-				setErrors({ user: apiError.detail[0]?.msg ?? "Validation error" });
-			} else if (apiError.error?.code === "UNAUTHORIZED") {
-				setErrors({ user: "Authentication required" });
-			} else {
-				setErrors({ user: "Something went wrong" });
-			}
-		}
-	};
-
-	useEffect(() => {
-		fetchUser();
-	}, []);
-
-	//Figma mock
 	const toggleSection = (section: string) => {
 		if (expandedSection === section) {
 			setExpandedSection(null);
@@ -81,13 +52,11 @@ export function useTopBar() {
 		}
 	};
 
-	//Double check
 	const startEditingProfile = () => {
-		if (currentUser) {
-			// "Snapshot" the truth into the draft ONLY when the user clicks Edit
+		if (authUser) {
 			setEditFormData({
-				name: currentUser.name,
-				email: currentUser.email,
+				name: authUser.name,
+				email: authUser.email,
 			});
 		}
 	};
@@ -98,15 +67,14 @@ export function useTopBar() {
 		setErrors({});
 
 		try {
-			const updatedFields = await updateUser({
+			await updateUser({
 				name: editFormData.name,
 				email: editFormData.email,
 			});
-
-			//Replaces the user profile with the new information
-			setCurrentUser((prev) => (prev ? { ...prev, ...updatedFields } : prev));
+			await refreshUser();
 			setIsEditingProfile(false);
 			setExpandedSection(null);
+
 		} catch (error) {
 			console.error("Failed to save profile", error);
 
@@ -127,6 +95,7 @@ export function useTopBar() {
 		const file = e.target.files?.[0];
 		if (!file) return;
 		setErrors({});
+		setIsUploading(true);
 
 		//Step 1: instant local preview
 		const reader = new FileReader();
@@ -135,15 +104,11 @@ export function useTopBar() {
 		};
 		reader.readAsDataURL(file);
 
-		//Step 2: send to API
-		setIsUploading(true);
 		try {
-			const response = await uploadAvatar({ file });
-
-			//Upadate the SSOT (currentUser)
-			setCurrentUser((prev) => (prev ? { ...prev, avatar_url: response.avatar_url } : prev));
-			//Clear temporary preview
+			await uploadAvatar({ file });
+			await refreshUser();
 			setPreviewAvatar(null);
+
 		} catch (error) {
 			console.error("Failed to upload avatar:", error);
 
@@ -166,7 +131,6 @@ export function useTopBar() {
 
 	const handleSendInvite = async () => {
 		if (!orgId) return;
-
 		setIsInviting(true);
 		setErrors({});
 
@@ -204,7 +168,6 @@ export function useTopBar() {
 		}
 	};
 
-	//Figma mock
 	const handleLogout = () => {
 		setIsDropdownOpen(false);
 		navigate("/welcome");
@@ -221,7 +184,7 @@ export function useTopBar() {
 		showImageAvatar,
 		showDefaultAvatar,
 		isAdmin,
-		currentUser,
+		authUser,
 		errors,
 		isSaving,
 		isInviting,

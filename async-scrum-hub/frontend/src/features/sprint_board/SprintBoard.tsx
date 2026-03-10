@@ -1,3 +1,4 @@
+import { ErrorText } from "../../components/custom/index";
 import { BOARD_COLUMNS } from "./constants/sprint.constants";
 import { useSprintBoard } from "./hooks/useSprintBoard";
 import { BoardHeader } from "./components/BoardHeader"
@@ -79,10 +80,7 @@ export function SprintBoard() {
 	}
 
 	if (errors.ticketBoard) {
-		return (
-			<div className="p-8 flex items-center justify-center min-h-[400px]">
-				<p className="text-sm text-rose-500">{errors.ticketBoard}</p>
-			</div>
+		return ( <ErrorText>{errors.ticketBoard}</ErrorText>
 		);
 	}
 
@@ -96,6 +94,7 @@ export function SprintBoard() {
 			/>
 
 			{/* Kanban Column */}
+			{errors.ticketDrop && <ErrorText>{errors.ticketDrop}</ErrorText>}
 			<div className="grid grid-cols-3 gap-6 mt-4">
 				{BOARD_COLUMNS.map((columns) => (
 						<KanbanColumn
@@ -158,6 +157,8 @@ export function SprintBoard() {
 
 					canEdit={isLeadRole}
 					canDelete={isLeadRole}
+					error={errors.ticketDelete}
+					errorTaskDrop={errors.taskDrop}
 				/>
 			)}
 
@@ -196,6 +197,7 @@ export function SprintBoard() {
 					task={selectedTask}
 					teamMembers={teamMembers}
 					canDelete={canEditTask(selectedTask)}
+					error={errors.taskDelete}
 				/>
 			)}
 

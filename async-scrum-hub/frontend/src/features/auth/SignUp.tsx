@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, signup } from "../../services/api";
-import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom";
-import type { APIError } from "../../utils/shared.types";
+import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom/index";
 import { useAuth } from "../../routes/useAuth";
+import type { APIError } from "../../utils/shared.types";
+
 
 export function SignUp() {
-	const navigate = useNavigate(); // Hook to programmatically navigate between pages
+	const navigate = useNavigate();
 	const { refreshUser } = useAuth();
 	const [formData, setFormData] = useState({
 		name: "",
@@ -64,11 +65,7 @@ export function SignUp() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		if (!validateForm()) {
-			return;
-		}
-
+		if (!validateForm()) return;
 		setIsLoading(true);
 		setErrors({});
 
@@ -95,19 +92,17 @@ export function SignUp() {
 
 			navigate("/team-setup");
 		} catch (error: unknown) {
-			//Handle API errors with type guard
 			console.error("Sign up failed:", error);
 
 			const apiError = error as APIError;
 			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
-			const errorMessage = apiError?.detail?.error?.message ?? apiError?.error?.message;
 
-			if (errorCode === "USER_EXISTS") {
+			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
+				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error message" });
+			} else if (errorCode === "USER_EXISTS") {
 				setErrors({ email: "An account with this email already exists" });
-			} else if (errorCode === "INVALID_INPUT") {
-				setErrors({ email: "Email format is invalid" });
-			} else if (errorMessage) {
-				setErrors({ email: errorMessage });
+			} else if (apiError?.error?.message) {
+				setErrors({ email: apiError.error.message });
 			} else {
 				setErrors({ email: "An unexpected error occurred." });
 			}

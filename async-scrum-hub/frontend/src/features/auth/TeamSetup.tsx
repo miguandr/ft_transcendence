@@ -1,23 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Users, Target, Code } from "lucide-react";
+import { useAuth } from "../../routes/useAuth";
+import { Button, Input, Label, ErrorText } from "../../components/custom/index";
 import {
 	createOrganization,
 	setUserRole,
 	joinOrganization,
 } from "../../services/api";
-import { useAuth } from "../../routes/useAuth";
-import { Button, Input, Label, ErrorText } from "../../components/custom";
-import type { APIError } from "../../../utils/shared.types";
-
-
+import type { APIError } from "../../utils/shared.types";
 type TeamMode = "join" | "create";
 type Role = "scrum_master" | "product_owner" | "developer" | null;
 
 export function TeamSetup() {
 	const navigate = useNavigate();
 	const { refreshUser } = useAuth();
-
 	const [teamMode, setTeamMode] = useState<TeamMode>("join");
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
@@ -26,22 +23,19 @@ export function TeamSetup() {
 	const [joinCode, setJoinCode] = useState<string | null>(null); // only set in create mode
 	const [orgId, setOrgId] = useState<string | null>(null); // only set in create mode
 	const [copied, setCopied] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [selectedRole, setSelectedRole] = useState<Role>(null);
+	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 	const [errors, setErrors] = useState<{
 		join?: string;
 		create?: string;
 		continue?: string;
 	}>({});
-	const [isLoading, setIsLoading] = useState(false);
-	const [selectedRole, setSelectedRole] = useState<Role>(null);
-	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 	const [availableRoles, setAvailableRoles] = useState<{
 		role: "scrum_master" | "product_owner" | "developer";
 	}[]>([]);
 
-	type APIError = { error?: { code?: string; message?: string } };
-
-	// Join flow: no API call here — code is validated when the user continues.
-	// Role uniqueness is enforced by the backend on joinOrganization.
+	//Handlers
 	const handleCheckCode = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setErrors({});
@@ -56,7 +50,7 @@ export function TeamSetup() {
 		try {
 			const orgSummary = await joinOrganization({ join_code: teamCode });
 			setAvailableRoles(orgSummary.available_scrum_role);
-			setOrgId(orgSummary.organization_id),
+			setOrgId(orgSummary.organization_id);
 			setTeamConfirmed(true);
 
 		} catch (error: unknown) {
@@ -101,8 +95,9 @@ export function TeamSetup() {
 
 		} catch (error: unknown) {
 			const apiError = error as APIError;
-			if (apiError?.error?.code === "INVALID_INPUT") {
-				setErrors({ create: "Team name is required." });
+
+			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
+				setErrors({ create: apiError.detail[0]?.msg ?? "Validation error message" });
 			} else if (apiError?.error?.code === "UNAUTHORIZED") {
 				setErrors({ create: "Authentication required" });
 			} else if (apiError?.error?.code === "ORG_EXISTS") {
@@ -128,33 +123,28 @@ export function TeamSetup() {
 	const handleContinue = async () => {
 		if (! orgId || !teamConfirmed || !selectedRole) return;
 		setErrors({});
-
 		setIsLoading(true);
 
 		try {
-				await setUserRole({
-					organization_id: orgId,
-					scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer",
-				});
+			await setUserRole({
+				organization_id: orgId,
+				scrum_role: selectedRole as "scrum_master" | "product_owner" | "developer",
+			});
 			await refreshUser();
 			navigate("/dashboard");
 
 		} catch (error: unknown) {
 			const apiError = error as APIError;
 
-			if (apiError?.error?.code === "INVALID_CODE" || apiError?.error?.code === "CODE_NOT_FOUND") {
-				setErrors({ join: "Invalid team code. Please check and try again." });
+			if (apiError?.error?.code === "UNAUTHORIZED") {
+				setErrors({ continue: "Authentication required" });
 				setTeamConfirmed(false);
-			} else if (apiError?.error?.code === "ALREADY_MEMBER") {
-				setErrors({ join: "You're already a member of this organization." });
+			} else if (apiError?.error?.code === "NOT_FOUND") {
+				setErrors({ continue: "Organization not found" });
 				setShowLoginPrompt(true);
 				setTeamConfirmed(false);
-			} else if (apiError?.error?.code === "ROLE_TAKEN") {
-				setErrors({ continue: "That role is already taken. Please choose another." });
-			} else if (apiError?.error?.message) {
-				setErrors({ continue: apiError.error.message });
 			} else {
-				setErrors({ continue: "Something went wrong." });
+				setErrors({ continue: "Something went wrong" });
 			}
 		} finally {
 			setIsLoading(false);
@@ -182,7 +172,7 @@ export function TeamSetup() {
 		},
 	];
 
-	// In create mode, the creator must be SM or PO — developer is not available.
+
 	const isRoleDisabled = (roleId: string) => {
 		if (teamMode === "create") {
 			return roleId  === "developer";
@@ -259,6 +249,7 @@ export function TeamSetup() {
 										>
 											Check code
 										</Button>
+
 										{errors.join && <ErrorText>{errors.join}</ErrorText>}
 										{showLoginPrompt && (
 											<Button

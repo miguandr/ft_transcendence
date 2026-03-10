@@ -271,7 +271,6 @@ export interface OrganizationMember {
 		title: string;
 		status: "todo" | "in_progress" | "completed";
 		priority: "low" | "medium" | "high";
-		//assignee_id: string;
 	}>;
 
 	tasks: Array<{
@@ -279,7 +278,6 @@ export interface OrganizationMember {
 		title: string;
 		status: "in_progress" | "completed";
 		ticket_id: string;
-		//assignee_id: string;
 	}>;
 
 	blockers: Array<{
@@ -287,7 +285,6 @@ export interface OrganizationMember {
 		description: string;
 		status: "open" | "resolved";
 		created_at: string;
-		created_by: string;
 	}>;
 }
 
@@ -354,6 +351,11 @@ export interface TicketResponse {
 		id: string;
 		description: string;
 		status: BlockerStatus;
+		created_by: {
+			id: string;
+			name: string;
+			avatar_url: string;
+		}
 	}>
 }
 
@@ -1321,7 +1323,7 @@ interface CreateBlockerResponse {
 	resolved_at: null;
 }
 
-interface BlockerListItem {
+export interface BlockerListItem {
 	id: string;
 	description: string;
 	status: "open" | "resolved";

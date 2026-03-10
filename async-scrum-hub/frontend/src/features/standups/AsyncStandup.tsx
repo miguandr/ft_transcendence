@@ -1,35 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Edit2, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button, ModalConfirmation, PageHeader, Avatar } from "../../components/custom";
-import type { User } from "../../services/api";
+import { useEffect, useState, useCallback } from "react";
+import { ModalConfirmation, PageHeader, Avatar, ErrorText } from "../../components/custom/index";
+import { useAuth } from "../../routes/useAuth";
+import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
 import {
 	createStandup,
 	listStandups,
 	editStandup,
 	deleteStandup,
-	getCurrentUser,
 } from "../../services/api";
+import type { APIError } from "../../utils/shared.types";
+import type { StandupListItem } from "../../services/api";
 
-interface Standup {
-	id: string;
-	created_at: string;
-	today: string;
-	yesterday: string | null;
-	blockers: {
-		id: string;
-		title: string;
-		ticket: {
-			id: string;
-			title: string;
-		};
-	}[];
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	};
-}
 
 export function AsyncStandup() {
 	//View/UI states
@@ -42,11 +25,17 @@ export function AsyncStandup() {
 		today: "",
 	});
 	//Auth states
-	const [orgId, setOrgId] = useState<string | null>(null);
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const { user: authUser } = useAuth();
+	const orgId = authUser?.organization_id ?? null;
+	const [errors, setErrors] = useState<{
+		fetchStandups?: string;
+		createStandup?: string;
+		editStandup?: string;
+		deleteStandup?: string;
+	}>({});
 	//Data states
-	const [standups, setStandups] = useState<Standup[]>([]);
-	const [editingStandup, setEditingStandup] = useState<Standup | null>(null);
+	const [standups, setStandups] = useState<StandupListItem[]>([]);
+	const [editingStandup, setEditingStandup] = useState<StandupListItem | null>(null);
 	// Routing states
 	const navigate = useNavigate();
 	//Communication states
@@ -54,83 +43,92 @@ export function AsyncStandup() {
 	const [isPosting, setIsPosting] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
-
-	const fetchStandups = async () => {
-		setIsLoading(true);
-		
-		try {
-			//Step 1: Get user's org_id
-			const user = await getCurrentUser();
-			setCurrentUser(user);
-			setOrgId(user.organization_id);
-
-			//Step 2: Fetch standups
-			if (user.organization_id) {
-				const standupsData = await listStandups(user.organization_id);
-				setStandups(standupsData);
-			}
-		} catch (error) {
-			if (!currentUser) {
-				console.error("API call failed:", error);
-			} else {
-				console.error("Failed to fetch standups:", error);
-			}
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchStandups();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	const handleCreateStandup = async () => {
-		if (!orgId) return;
-		setIsPosting(true);
-		try {
-			// Call API to create Standup
-			await createStandup(orgId!, {
-				today: standupForm.today,
-			});
-
-			// Resfreh standup list and cose modal
-			await fetchStandups();
-			setIsCreateStandupOpen(false);
-			setStandupForm({ today: "" }); // reset form
-		} catch (error) {
-			console.error("Failed top create standup", error);
-		} finally {
-			setIsPosting(false);
-		}
-	};
-
+	//Time helpers
 	const now = new Date();
 	const today = now.toISOString().split("T")[0];
 	const yesterdayDate = new Date();
 	yesterdayDate.setDate(now.getDate() - 1);
-	//const yesterday = yesterdayDate.toISOString().split('T')[0];
-
-	// Check if logged-in user submitted standup today
+	//Permissions helpers
+	const canEditStandup = (standup: StandupListItem) => {
+		return standup.created_by.id === authUser?.id
+		&& standup.created_at.startsWith(today);
+	};
 	const hasCreatedStandupToday = standups.some(
 		(currentStandup) =>
-			currentStandup.created_by.id === currentUser?.id &&
+			currentStandup.created_by.id === authUser?.id &&
 			currentStandup.created_at.startsWith(today)
 	);
-
-	// Gets the latest standup of the current user
-	const latestPerUser = standups
+	//Update helpers
+	const latestStandupPerUser = standups
 		.reduce((acc, s) => {
 			const existing = acc.find((x) => x.created_by.id === s.created_by.id);
 			if (!existing || s.created_at > existing.created_at) {
 				return [...acc.filter((x) => x.created_by.id !== s.created_by.id), s]; //We keep all other standups and replace only the one from the current user
 			}
 			return acc;
-		}, [] as Standup[])
+		}, [] as StandupListItem[])
 		.sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-	const canEditStandup = (standup: Standup) => {
-		return standup.created_by.id === currentUser?.id && standup.created_at.startsWith(today);
+
+	const fetchStandups = useCallback(async () => {
+		if (!orgId) return;
+		setIsLoading(true);
+
+		try {
+			const standupsData = await listStandups(orgId);
+			setStandups(standupsData);
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ fetchStandups: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ fetchStandups: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ fetchStandups: "Organization not found" });
+			} else {
+				setErrors({ fetchStandups: "Something went wrong" });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}, [orgId]);
+
+	useEffect(() => {
+		fetchStandups();
+	}, [fetchStandups]);
+
+	//Handlers
+	const handleCreateStandup = async () => {
+		if (!orgId) return;
+		setIsPosting(true);
+
+		try {
+			await createStandup(orgId!, {
+				today: standupForm.today,
+			});
+			await fetchStandups();
+			setIsCreateStandupOpen(false);
+			setStandupForm({ today: "" }); // reset form
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ createStandup: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ createStandup: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ createStandup: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ createStandup: "Organization not found" });
+			} else {
+				setErrors({ createStandup: "Something went wrong" });
+			}
+		} finally {
+			setIsPosting(false);
+		}
 	};
 
 	const handleEditStandup = async () => {
@@ -145,36 +143,67 @@ export function AsyncStandup() {
 			setIsEditStandupOpen(false);
 			setEditingStandup(null);
 			setStandupForm({ today: "" });
-		} catch (error) {
-			console.error("Failed to edit standup:", error);
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
+				setErrors({ editStandup: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ editStandup: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ editStandup: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "EDIT_WINDOW_EXPIRED") {
+				setErrors({ editStandup: "Standups can only be edited on the day they are created" });
+			} else {
+				setErrors({ editStandup: "Something went wrong" });
+			}
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const handleDeleteStandup = async () => {
-		if (confirmDelete) {
-			setIsDeleting(true);
-			try {
-				// Call API
-				await deleteStandup(confirmDelete);
+		if (!confirmDelete) return;
+		setIsDeleting(true);
 
-				// Refresh
-				await fetchStandups();
-				setConfirmDelete(null);
-			} catch (error) {
-				console.error("Failed to delete standup:", error);
-			} finally {
-				setIsDeleting(false);
+		try {
+			await deleteStandup(confirmDelete);
+			await fetchStandups();
+			setConfirmDelete(null);
+		} catch (error: unknown) {
+			console.error("API call failed:", error);
+
+			const apiError = error as APIError;
+			if (apiError.error?.code === "UNAUTHORIZED") {
+				setErrors({ deleteStandup: "Authentication required" });
+			} else if (apiError.error?.code === "FORBIDDEN") {
+				setErrors({ deleteStandup: "You do not have permission to perform this action" });
+			} else if (apiError.error?.code === "NOT_FOUND") {
+				setErrors({ deleteStandup: "Standup not found" });
+			} else {
+				setErrors({ deleteStandup: "Something went wrong" });
 			}
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
-	const openEditModal = (standup: Standup) => {
+	const openEditModal = (standup: StandupListItem) => {
 		setEditingStandup(standup);
 		setStandupForm({ today: standup.today });
 		setIsEditStandupOpen(true);
 	};
+
+	useOrgWebSocket(orgId, (msg) => {
+		const reFetchEvents = [
+			"standup.created",
+			"standup.updated",
+		]
+		if (reFetchEvents.includes(msg.event)) {
+			fetchStandups();
+		}
+	})
 
 	return (
 		<div className="p-8">
@@ -210,15 +239,17 @@ export function AsyncStandup() {
 					</div>
 				)}
 
-				{!isLoading && latestPerUser.length === 0 && (
+				{!isLoading && latestStandupPerUser.length === 0 && (
 					<div className="flex flex-col items-center justify-center py-16 text-center">
 						<p className="text-sm text-gray-400">No standups yet.</p>
 						<p className="text-xs text-gray-300 mt-1">Be the first to post an update.</p>
 					</div>
 				)}
 
+				{errors.fetchStandups && <ErrorText>{errors.fetchStandups}</ErrorText>}
+
 				{!isLoading &&
-					latestPerUser.map((s) => {
+					latestStandupPerUser.map((s) => {
 						if (!s.today) return null;
 						const canEdit = canEditStandup(s);
 
@@ -383,7 +414,7 @@ export function AsyncStandup() {
 									/>
 								</div>
 							</div>
-
+							{errors.createStandup && <ErrorText>{errors.createStandup}</ErrorText>}
 							<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
 								<button
 									onClick={() => setIsCreateStandupOpen(false)}
@@ -447,7 +478,7 @@ export function AsyncStandup() {
 									/>
 								</div>
 							</div>
-
+							{errors.editStandup && <ErrorText>{errors.editStandup}</ErrorText>}
 							<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
 								<button
 									onClick={() => setIsEditStandupOpen(false)}
@@ -469,6 +500,7 @@ export function AsyncStandup() {
 			)}
 
 			{/* Delete Confirmation Modal */}
+			{errors.deleteStandup && <ErrorText>{errors.deleteStandup}</ErrorText>}
 			<ModalConfirmation
 				isOpen={!!confirmDelete}
 				onClose={() => setConfirmDelete(null)}

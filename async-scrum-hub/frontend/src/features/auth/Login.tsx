@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../../services/api";
-import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
+import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom/index";
 import { motion } from "framer-motion";
 import { useAuth } from "../../routes/useAuth";
 import type { APIError } from "../../utils/shared.types";
@@ -12,7 +12,7 @@ export function Login() {
 	const { refreshUser } = useAuth();
 
 	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState(""); // Stores password
+	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
 	const [isExiting, setIsExiting] = useState(false); // Track fade-out animation
@@ -22,7 +22,6 @@ export function Login() {
 	const validateForm = (): boolean => {
 		const newErrors: { email?: string; password?: string } = {};
 
-		// Validate email
 		if (!email) {
 			newErrors.email = "Email is required";
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -30,7 +29,6 @@ export function Login() {
 			newErrors.email = "Email is invalid";
 		}
 
-		// Validate password
 		if (!password) {
 			newErrors.password = "Password is required";
 		} else if (password.length < 8) {
@@ -44,13 +42,7 @@ export function Login() {
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		// Validate form
-		if (!validateForm()) {
-			return;
-		}
-
-		// Start loading
+		if (!validateForm()) return;
 		setIsLoading(true);
 		setErrors({});
 
@@ -63,27 +55,27 @@ export function Login() {
 				setErrors({ email: "Unable to load user data after login." });
 				return;
 			}
-			//localStorage.setItem("token", response.access_token); DELETE LATER
-
 			// Trigger fade-out animation (navigation happens in onAnimationComplete)
 			setRedirectTo(currentUser.organization_id ? "/dashboard" : "/team-setup");
 			setIsExiting(true);
+
 		} catch (error: unknown) {
 			console.error("Login failed:", error);
 
 			// Type assertion for API error format
 			const apiError = error as APIError;
 			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
-			const errorMessage = apiError?.detail?.error?.message ?? apiError?.error?.message;
 
-			if (error instanceof TypeError && error.message === "Failed to fetch") {
-				setErrors({ email: "Unable to connect to the server. Check that the backend is running." });
+			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
+				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (errorCode === "INVALID_CREDENTIALS") {
 				setErrors({ email: "Email or password is incorrect" });
-			} else if (errorCode === "INVALID_INPUT") {
-				setErrors({ email: "Email or password is missing" });
-			} else if (errorMessage) {
-				setErrors({ email: errorMessage });
+			} else if (errorCode === "TEAM_SETUP_NOT_DONE") {
+				setErrors({ email: "Team setup is not done" });
+			} else if (error instanceof TypeError && error.message === "Failed to fetch") {
+				setErrors({ email: "Unable to connect to the server. Check that the backend is running." });
+			} else if (apiError?.error?.message) {
+				setErrors({ email: apiError.error.message });
 			} else {
 				setErrors({ email: "An unexpected error occurred." });
 			}

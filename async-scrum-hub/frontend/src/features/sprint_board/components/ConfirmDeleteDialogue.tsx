@@ -1,4 +1,4 @@
-import { ModalConfirmation } from "../../../components/custom";
+import { ModalConfirmation } from "../../../components/custom/index";
 
 interface Props {
 	confirmDelete: { type: "ticket" | "task"; id: string } | null;

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Columns, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button, IconBox } from "../../components/custom";
+import { Button, IconBox } from "../../components/custom/index";
 
 type Particle = {
 	start: { x: number; y: number };
@@ -198,7 +198,7 @@ export function WelcomeAnimation() {
 						<h1 className="text-5xl font-bold text-gray-900">ScrumHub</h1>
 					</motion.div>
 				)}
-				{/* Final Content - Exact replica of Welcome page */}
+				{/* Final Content - Welcome page */}
 				<motion.div
 					initial={{ opacity: 0 }}
 					animate={{ opacity: isExiting ? 0 : showContent ? 1 : 0 }}
