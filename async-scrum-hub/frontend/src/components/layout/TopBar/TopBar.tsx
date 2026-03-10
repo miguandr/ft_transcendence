@@ -68,20 +68,20 @@ export function TopBar() {
 							<p className="text-xs text-gray-500">{formattedScrumRole}</p>
 						</div>
 						{showDefaultAvatar ? (
-							<img
-								src={showImageAvatar}
-								alt={authUser?.name}
-								className="w-10 h-10 rounded-full object-cover"
-							/>
-						) : (
-							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
-								<Avatar
-									avatarUrl={authUser?.avatar_url}
-									name={authUser?.name}
-									userId={authUser?.id}
-									size="md"
+							<div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+								<img
+									src={showImageAvatar}
+									alt={authUser?.name}
+									className="w-full h-full object-cover"
 								/>
 							</div>
+						) : (
+							<Avatar
+								avatarUrl={authUser?.avatar_url}
+								name={authUser?.name}
+								userId={authUser?.id}
+								size="md"
+							/>
 						)}
 					</button>
 
@@ -230,15 +230,16 @@ export function TopBar() {
 
 									{expandedSection === "avatar" && (
 										<div className="px-4 pb-4 bg-gray-50 space-y-3">
-											<div className="flex justify-center">
+											<div className="flex justify-center overflow-hidden">
 												{showDefaultAvatar ? (
-													<img
-														src={showImageAvatar}
-														alt={authUser!.name}
-														className="w-20 h-20 rounded-full object-cover"
-													/>
+													<div className="w-20 h-20 rounded-full overflow-hidden shrink-0">
+														<img
+															src={showImageAvatar}
+															alt={authUser!.name}
+															className="w-full h-full object-cover"
+														/>
+													</div>
 												) : (
-													//<div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-blue-300 flex items-center justify-center">
 													<Avatar
 														avatarUrl={authUser?.avatar_url}
 														name={authUser?.name}
@@ -262,10 +263,10 @@ export function TopBar() {
 												</div>
 											</Label>
 
-											<p className="text-xs text-gray-500 text-center">
+											<div className="text-xs text-gray-500 text-center">
 												PNG/JPG up to 5 MB
 												{errors.avatar && <ErrorText>{errors.avatar}</ErrorText>}
-											</p>
+											</div>
 										</div>
 									)}
 								</div>

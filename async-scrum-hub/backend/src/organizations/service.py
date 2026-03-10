@@ -105,10 +105,6 @@ def select_role(
 	if not org:
 		raise _not_found()
 
-	# Only the creator can select a role via this endpoint
-	if org.created_by != user.id:
-		raise _forbidden("Only the organization creator can select a role.")
-
 	# If SM or PO, check no one else already holds that role in this org
 	if scrum_role in (ScrumRole.scrum_master, ScrumRole.product_owner):
 		taken = (

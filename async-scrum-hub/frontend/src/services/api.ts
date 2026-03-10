@@ -1,30 +1,71 @@
 // Mock API - simulates backend
 // Later, replace with real fetch calls to http://localhost:8000/api/v1
-export type TicketStatus = "todo" | "in_progress" | "completed";
-export type TaskStatus = "in_progress" | "completed";
-export type BlockerStatus = "open" | "resolved";
+import type{
+	User,
+	OrganizationMember,
+	SignUpRequest,
+	SignUpResponse,
+	CreateOrgRequest,
+	CreateOrgResponse,
+	JoinOrgRequest,
+	JoinOrgResponse,
+	SelectRoleResponse,
+	LoginRequest,
+	LoginResponse,
+	UpdateUserRequest,
+	AvatarRequest,
+	AvatarResponse,
+	InviteMemberRequest,
+	InviteMemberResponse,
+	DashboardData,
+	CreateTicketRequest,
+	TicketResponse,
+	ListTicketsBoardResponse,
+	UpdateTicketRequest,
+	MoveTicketRequest,
+	MoveTicketResponse,
+	CreateTaskRequest,
+	CreateTaskResponse,
+	ListTaskResponse,
+	TaskResponse,
+	UpdateTaskRequest,
+	CreateStandupRequest,
+	CreateStandupResponse,
+	StandupListItem,
+	EditStandupRequest,
+	EditStandupResponse,
+	CreateBlockerRequest,
+	CreateBlockerResponse,
+	BlockerListItem,
+	UpdateBlockerRequest,
+	UpdateBlockerResponse,
+	AnalitycsData,
+	LegalDocuments,
+} from "../types/api.types"
 
-const API_URL = "http://localhost:8000/api/v1";
+//const API_URL = "http://localhost:8000/api/v1";
 
-// const rawApiUrl = import.meta.env.VITE_API_URL;
-// if (!rawApiUrl) {
-// 	throw new Error(
-// 		"Missing VITE_API_URL. Set it in frontend/.env or frontend/.env.local (see frontend/.env.example)."
-// 	);
-// }
-// const API_URL = rawApiUrl.replace(/\/+$/, "");
+const rawApiUrl = import.meta.env.VITE_API_URL;
+if (!rawApiUrl) {
+	throw new Error(
+		"Missing VITE_API_URL. Set it in frontend/.env or frontend/.env.local (see frontend/.env.example)."
+	);
+}
+const API_URL = rawApiUrl.replace(/\/+$/, "");
 
 const CURRENT_USER_ID_KEY = "current_user_id";
 
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+// export type TicketStatus = "todo" | "in_progress" | "completed";
+// export type TaskStatus = "in_progress" | "completed";
+// export type BlockerStatus = "open" | "resolved";
 
 // =============================================================
 // MOCK DATA
 // =============================================================
 
-// Mock User database (in real backend, this is PostgreSQL)
+//Mock User database (in real backend, this is PostgreSQL)
 const mockUsers: Array<{
 	id: string;
 	email: string;
@@ -244,49 +285,50 @@ const mockAnalitycs : AnalitycsData = {
 	blockers_avg_cycle_time: 1.5,
 };
 
-///////////////////////////////////////////////////
-// API Response types (matches API_CONTRACTS.md) //
-///////////////////////////////////////////////////
-export interface User {
-	id: string;
-	email: string;
-	name: string;
-	avatar_url: string | null;
-	organization_id: string | null;
-	org_name: string | null;
-	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
-	org_role: "admin" | "member" | null;
-}
+// ///////////////////////////////////////////////////
+// // API Response types (matches API_CONTRACTS.md) //
+// ///////////////////////////////////////////////////
+// export interface User {
+// 	id: string;
+// 	email: string;
+// 	name: string;
+// 	avatar_url: string | null;
+// 	organization_id: string | null;
+// 	org_name: string | null;
+// 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+// 	org_role: "admin" | "member" | null;
+// }
 
 
-export interface OrganizationMember {
-	id: string;
-	name: string;
-	avatar_url: string | null;
-	org_role: "admin" | "member";
-	scrum_role: "scrum_master" | "product_owner" | "developer";
+// export interface OrganizationMember {
+// 	id: string;
+// 	name: string;
+// 	avatar_url: string | null;
+// 	org_role: "admin" | "member";
+// 	scrum_role: "scrum_master" | "product_owner" | "developer";
 
-	tickets: Array<{
-		id: string;
-		title: string;
-		status: "todo" | "in_progress" | "completed";
-		priority: "low" | "medium" | "high";
-	}>;
+// 	tickets: Array<{
+// 		id: string;
+// 		title: string;
+// 		status: "todo" | "in_progress" | "completed";
+// 		priority: "low" | "medium" | "high";
+// 	}>;
 
-	tasks: Array<{
-		id: string;
-		title: string;
-		status: "in_progress" | "completed";
-		ticket_id: string;
-	}>;
+// 	tasks: Array<{
+// 		id: string;
+// 		title: string;
+// 		status: "in_progress" | "completed";
+// 		ticket_id: string;
+// 	}>;
 
-	blockers: Array<{
-		id: string;
-		description: string;
-		status: "open" | "resolved";
-		created_at: string;
-	}>;
-}
+// 	blockers: Array<{
+// 		id: string;
+// 		description: string;
+// 		status: "open" | "resolved";
+// 		created_at: string;
+// 	}>;
+// }
+
 
 
 // =============================================================
@@ -315,176 +357,176 @@ function getCurrentUserRecord() {
 	return user;
 }
 
-// =============================================================
-// SPRINTBOARD - TICKETS
-// =============================================================
+// // =============================================================
+// // SPRINTBOARD - TICKETS
+// // =============================================================
 
-//Interfaces
-export interface CreateTicketRequest {
-	title: string;
-	description: string;
-	priority: "low" | "medium" | "high";
-	assignee_id: string | null;
-}
+// //Interfaces
+// export interface CreateTicketRequest {
+// 	title: string;
+// 	description: string;
+// 	priority: "low" | "medium" | "high";
+// 	assignee_id: string | null;
+// }
 
-export interface TicketResponse {
-	id: string;
-	title: string;
-	description: string | null;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	}
-	assignee_id: string | null;
-	organization_id: string;
-	created_at: string;
-	updated_at: string;
-	tasks: Array<{
-		id: string;
-		title: string;
-		status: TaskStatus;
-	}>
-	blockers: Array<{
-		id: string;
-		description: string;
-		status: BlockerStatus;
-		created_by: {
-			id: string;
-			name: string;
-			avatar_url: string;
-		}
-	}>
-}
+// export interface TicketResponse {
+// 	id: string;
+// 	title: string;
+// 	description: string | null;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	created_by: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	}
+// 	assignee_id: string | null;
+// 	organization_id: string;
+// 	created_at: string;
+// 	updated_at: string;
+// 	tasks: Array<{
+// 		id: string;
+// 		title: string;
+// 		status: TaskStatus;
+// 	}>
+// 	blockers: Array<{
+// 		id: string;
+// 		description: string;
+// 		status: BlockerStatus;
+// 		created_by: {
+// 			id: string;
+// 			name: string;
+// 			avatar_url: string;
+// 		}
+// 	}>
+// }
 
-export interface ListTicketsBoardResponse {
-	id: string;
-	title: string;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	assignee: {
-		id: string;
-		name: string;
-		avatar_url: string;
-	} | null;
-	created_at: string;
-	updated_at: string;
-}
+// export interface ListTicketsBoardResponse {
+// 	id: string;
+// 	title: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string;
+// 	} | null;
+// 	created_at: string;
+// 	updated_at: string;
+// }
 
-export interface UpdateTicketRequest {
-	title?: string;
-	description?: string;
-	priority?: "low" | "medium" | "high";
-	status?: "todo" | "in_progress" | "completed";
-	assignee_id?: string | null;
-}
+// export interface UpdateTicketRequest {
+// 	title?: string;
+// 	description?: string;
+// 	priority?: "low" | "medium" | "high";
+// 	status?: "todo" | "in_progress" | "completed";
+// 	assignee_id?: string | null;
+// }
 
-export interface MoveTicketRequest {
-	status: "todo" | "in_progress" | "completed";
-}
+// export interface MoveTicketRequest {
+// 	status: "todo" | "in_progress" | "completed";
+// }
 
-export interface MoveTicketResponse {
-	id: string;
-	status: "todo" | "in_progress" | "completed";
-	updated_at: string;
-}
-
-
-
-// =============================================================
-// SPRINTBOARD - TASKS
-// =============================================================
-
-//Interfaces
-export interface CreateTaskRequest {
-	title: string;
-	description: string | null;
-	assignee_id: string | null;
-}
-
-export interface CreateTaskResponse {
-	id: string;
-	title: string;
-	description: string | null;
-	status: "in_progress";
-	created_by: string;
-	assignee_id: string | null;
-	ticket_id: string;
-}
-
-export interface ListTaskResponse {
-	id: string;
-	title: string;
-	status: "in_progress" | "completed";
-}
-
-export interface TaskResponse {
-	id: string;
-	title: string;
-	description: string | null;
-	status: "in_progress" | "completed";
-	created_by: string;
-	assignee_id: string | null;
-	ticket_id: string;
-}
-
-export interface UpdateTaskRequest {
-	title?: string;
-	description?: string;
-	status?: "in_progress" | "completed";
-	assignee_id?: string | null;
-}
+// export interface MoveTicketResponse {
+// 	id: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	updated_at: string;
+// }
 
 
-// =============================================================
-// DASHBOARD
-// =============================================================
 
-//Interfaces
-export interface DashboardData {
-	summary: {
-		tasks_in_progress: number;
-		tickets_completed: number;
-		active_blockers: number;
-	};
-	recent_updates: Array<{
-		user: {
-			id: string
-			name: string;
-			avatar_url: string;
-		};
-		type: "task" | "ticket";
-		event: "created" | "completed";
-		title: string;
-		timestamp: string;
-	}>;
+// // =============================================================
+// // SPRINTBOARD - TASKS
+// // =============================================================
 
-}
+// //Interfaces
+// export interface CreateTaskRequest {
+// 	title: string;
+// 	description: string | null;
+// 	assignee_id: string | null;
+// }
+
+// export interface CreateTaskResponse {
+// 	id: string;
+// 	title: string;
+// 	description: string | null;
+// 	status: "in_progress";
+// 	created_by: string;
+// 	assignee_id: string | null;
+// 	ticket_id: string;
+// }
+
+// export interface ListTaskResponse {
+// 	id: string;
+// 	title: string;
+// 	status: "in_progress" | "completed";
+// }
+
+// export interface TaskResponse {
+// 	id: string;
+// 	title: string;
+// 	description: string | null;
+// 	status: "in_progress" | "completed";
+// 	created_by: string;
+// 	assignee_id: string | null;
+// 	ticket_id: string;
+// }
+
+// export interface UpdateTaskRequest {
+// 	title?: string;
+// 	description?: string;
+// 	status?: "in_progress" | "completed";
+// 	assignee_id?: string | null;
+// }
+
+// // =============================================================
+// // DASHBOARD
+// // =============================================================
+
+// //Interfaces
+// export interface DashboardData {
+// 	summary: {
+// 		tasks_in_progress: number;
+// 		tickets_completed: number;
+// 		active_blockers: number;
+// 	};
+// 	recent_updates: Array<{
+// 		user: {
+// 			id: string
+// 			name: string;
+// 			avatar_url: string;
+// 		};
+// 		type: "task" | "ticket";
+// 		event: "created" | "completed";
+// 		title: string;
+// 		timestamp: string;
+// 	}>;
+// }
+
+
 
 // =============================================================
 // ANALITYCS
 // =============================================================
 
-export interface AnalitycsData {
-	tasks: Array<{
-		week: string,
-		in_progress: number,
-		completed: number
-	}>;
+// export interface AnalitycsData {
+// 	tasks: Array<{
+// 		week: string,
+// 		in_progress: number,
+// 		completed: number
+// 	}>;
 
-	tickets: Array<{
-		week: string,
-		completed: number,
-	}>;
+// 	tickets: Array<{
+// 		week: string,
+// 		completed: number,
+// 	}>;
 
-	standups: {
-		posted: number,
-		total: number,
-	};
-	blockers_avg_cycle_time: number;
-}
+// 	standups: {
+// 		posted: number,
+// 		total: number,
+// 	};
+// 	blockers_avg_cycle_time: number;
+// }
 
 export async function getAnalitycsData(
 	org_id: string
@@ -509,12 +551,12 @@ export async function getAnalitycsData(
 // TERMS & POLICY
 // =============================================================
 
-export interface LegalDocuments {
-	key: string;
-	title: string;
-	content: string;
-	updated_at: string;
-}
+// export interface LegalDocuments {
+// 	key: string;
+// 	title: string;
+// 	content: string;
+// 	updated_at: string;
+// }
 
 export async function getLegalDocument(
 	key: "privacy" | "terms"
@@ -536,79 +578,79 @@ export async function getLegalDocument(
 // =============================================================
 
 //Interfaces
-interface UpdateUserRequest {
-	name: string;
-	email: string;
-}
+// interface UpdateUserRequest {
+// 	name: string;
+// 	email: string;
+// }
 
-interface AvatarRequest {
-	file: File;
-}
+// interface AvatarRequest {
+// 	file: File;
+// }
 
-interface AvatarResponse {
-	avatar_url: string;
-}
+// interface AvatarResponse {
+// 	avatar_url: string;
+// }
 
-interface InviteMemberRequest {
-	name: string;
-	email: string;
-}
+// interface InviteMemberRequest {
+// 	name: string;
+// 	email: string;
+// }
 
-interface InviteMemberResponse {
-	email: string;
-}
+// interface InviteMemberResponse {
+// 	email: string;
+// }
 
 
-// Update user information
-export async function updateUser(
-	data: UpdateUserRequest
-) : Promise<User> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Update user information
+// export async function updateUser(
+// 	data: UpdateUserRequest
+// ) : Promise<User> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	//1. VALIDATION
-	//Check if name isnt empty
-	if (!data.name.trim()) {
-		createApiError("INVALID_INPUT", "Name cant be empty");
-	}
-	//Check if email is valid
-	if (!/\S+@\S+\.\S+/.test(data.email)) {
-		createApiError("INVALID_INPUT", "Email format is invalid");
-	}
-	//Check if email already exists
-	const existingEmail = mockUsers.find((e) => e.email === data.email && e.id != currentUser.id);
-	if (existingEmail) {
-		createApiError("INVALID_INPUT", "This email is already in use");
-	}
+// 	//1. VALIDATION
+// 	//Check if name isnt empty
+// 	if (!data.name.trim()) {
+// 		createApiError("INVALID_INPUT", "Name cant be empty");
+// 	}
+// 	//Check if email is valid
+// 	if (!/\S+@\S+\.\S+/.test(data.email)) {
+// 		createApiError("INVALID_INPUT", "Email format is invalid");
+// 	}
+// 	//Check if email already exists
+// 	const existingEmail = mockUsers.find((e) => e.email === data.email && e.id != currentUser.id);
+// 	if (existingEmail) {
+// 		createApiError("INVALID_INPUT", "This email is already in use");
+// 	}
 
-	//2. UPDATE DATA
-	currentUser.name = data.name;
-	currentUser.email = data.email;
+// 	//2. UPDATE DATA
+// 	currentUser.name = data.name;
+// 	currentUser.email = data.email;
 
-	//3. RETURN RESPONSE SHAPE
-	return (currentUser);
-}
+// 	//3. RETURN RESPONSE SHAPE
+// 	return (currentUser);
+// }
 
-// Upload Avatar
-export async function uploadAvatar(
-	data: AvatarRequest
-) : Promise<AvatarResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Upload Avatar
+// export async function uploadAvatar(
+// 	data: AvatarRequest
+// ) : Promise<AvatarResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	//1. VALIDATION
-	//Check if user provided a file
-	if (!data.file) {
-		createApiError("INVALID_INPUT", "No file provided");
-	}
+// 	//1. VALIDATION
+// 	//Check if user provided a file
+// 	if (!data.file) {
+// 		createApiError("INVALID_INPUT", "No file provided");
+// 	}
 
-	//2. UPLOAD FILE
-	const mockUrl = `mock-avatar-${Date.now()}.jpg`;
-	currentUser.avatar_url = mockUrl;
+// 	//2. UPLOAD FILE
+// 	const mockUrl = `mock-avatar-${Date.now()}.jpg`;
+// 	currentUser.avatar_url = mockUrl;
 
-	//3. RETURN RESPONSE SHAPE
-	return { avatar_url: mockUrl };
-}
+// 	//3. RETURN RESPONSE SHAPE
+// 	return { avatar_url: mockUrl };
+// }
 
 //Invite Member to organization
 export async function inviteMember(
@@ -648,39 +690,40 @@ export async function inviteMember(
 	return { email: data.email };
 }
 
-// =============================================================
-// MOCK TEAM SETUP
-// =============================================================
+// // =============================================================
+// // MOCK TEAM SETUP
+// // =============================================================
 
-//Interfaces
-interface CreateOrgRequest {
-	name: string;
-}
+// //Interfaces
+// interface CreateOrgRequest {
+// 	name: string;
+// }
 
-interface CreateOrgResponse {
-	id: string;
-	name: string;
-	join_code: string;
-	created_by: string;
-}
+// interface CreateOrgResponse {
+// 	id: string;
+// 	name: string;
+// 	join_code: string;
+// 	created_by: string;
+// }
 
-interface JoinOrgRequest {
-	join_code: string;
-}
+// interface JoinOrgRequest {
+// 	join_code: string;
+// }
 
-interface JoinOrgResponse {
-	organization_id: string;
-	org_role: "admin" | "member";
-	available_scrum_role: Array <{
-		role: "scrum_master" | "product_owner" | "developer";
-	}>;
-}
+// interface JoinOrgResponse {
+// 	organization_id: string;
+// 	org_role: "admin" | "member";
+// 	available_scrum_role: Array <{
+// 		role: "scrum_master" | "product_owner" | "developer";
+// 	}>;
+// }
 
-interface SelectRoleResponse {
-	organization_id: string,
-	scrum_role: "scrum_master" | "product_owner" | "developer"
-}
+// interface SelectRoleResponse {
+// 	organization_id: string,
+// 	scrum_role: "scrum_master" | "product_owner" | "developer"
+// }
 
+//existe?
 // interface OrganizationInfo {
 // 	id: string;
 // 	name: string;
@@ -689,101 +732,101 @@ interface SelectRoleResponse {
 // }
 
 
-// Create Organization
-export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Create Organization
+// export async function createOrganization(data: CreateOrgRequest): Promise<CreateOrgResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	//Check if user sent empty name
-	if (!data.name.trim()) {
-		createApiError("INVALID_INPUT", "Organization name is required");
-	}
+// 	//Check if user sent empty name
+// 	if (!data.name.trim()) {
+// 		createApiError("INVALID_INPUT", "Organization name is required");
+// 	}
 
-	//Check if organization already exists
-	//find() assigns to org the values in mockOrganizations to compare
-	const existingOrg = mockOrganizations.find((org) => org.name === data.name);
-	if (existingOrg) {
-		createApiError("ORG_EXISTS", "An organization with this name already exists");
-	}
+// 	//Check if organization already exists
+// 	//find() assigns to org the values in mockOrganizations to compare
+// 	const existingOrg = mockOrganizations.find((org) => org.name === data.name);
+// 	if (existingOrg) {
+// 		createApiError("ORG_EXISTS", "An organization with this name already exists");
+// 	}
 
-	//Create new organization
-	const newOrg = {
-		id: `id-${Date.now()}`,
-		name: data.name,
-		join_code: `SCR-${Math.floor(100 + Math.random() * 900)}`,
-		created_by: currentUser.id,
-	};
+// 	//Create new organization
+// 	const newOrg = {
+// 		id: `id-${Date.now()}`,
+// 		name: data.name,
+// 		join_code: `SCR-${Math.floor(100 + Math.random() * 900)}`,
+// 		created_by: currentUser.id,
+// 	};
 
-	//Update user data
-	currentUser.organization_id = newOrg.id;
-	currentUser.org_role = "admin";
+// 	//Update user data
+// 	currentUser.organization_id = newOrg.id;
+// 	currentUser.org_role = "admin";
 
-	//Add to mock database
-	mockOrganizations.push(newOrg);
+// 	//Add to mock database
+// 	mockOrganizations.push(newOrg);
 
-	//Return response
-	return {
-		id: newOrg.id,
-		name: newOrg.name,
-		join_code: newOrg.join_code,
-		created_by: newOrg.created_by,
-	};
-}
-
-
-// Join Organization
-export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
-
-	if (!data.join_code.trim()) {
-		throw createApiError("INVALID_CODE", "Team code is required");
-	}
-
-	const matchingOrg = mockOrganizations.find((org) => org.join_code === data.join_code);
-	if (!matchingOrg) {
-		throw createApiError("CODE_NOT_FOUND", "Team code not found");
-	}
-
-	if (currentUser.organization_id === matchingOrg.id) {
-		throw createApiError("ALREADY_MEMBER", "User is already a member of this organization");
-	}
-
-	const takenRoles = mockUsers
-		.filter((u) => u.organization_id === matchingOrg.id && u.scrum_role !== null)
-		.map((u) => u.scrum_role as "scrum_master" | "product_owner" | "developer");
-
-	const allRoles: Array<"scrum_master" | "product_owner" | "developer"> = ["scrum_master", "product_owner", "developer"];
-	const available_scrum_role = allRoles
-		.filter((r) => r === "developer" || !takenRoles.includes(r))
-		.map((r) => ({ role: r }));
-
-	return {
-		organization_id: matchingOrg.id,
-		org_role: "member",
-		available_scrum_role,
-	};
-}
+// 	//Return response
+// 	return {
+// 		id: newOrg.id,
+// 		name: newOrg.name,
+// 		join_code: newOrg.join_code,
+// 		created_by: newOrg.created_by,
+// 	};
+// }
 
 
-// Set User Role
-export async function setUserRole(data: {
-	organization_id: string;
-	scrum_role: "scrum_master" | "product_owner" | "developer";
-}): Promise<{ success: boolean }> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
+// // Join Organization
+// export async function joinOrganization(data: JoinOrgRequest): Promise<JoinOrgResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	const org = mockOrganizations.find((o) => o.id === data.organization_id);
-	if (!org) createApiError("NOT_FOUND", "Organization not found");
+// 	if (!data.join_code.trim()) {
+// 		throw createApiError("INVALID_CODE", "Team code is required");
+// 	}
 
-	currentUser.organization_id = data.organization_id;
-	currentUser.org_name = org.name;
-	currentUser.org_role = "admin";
-	currentUser.scrum_role = data.scrum_role;
+// 	const matchingOrg = mockOrganizations.find((org) => org.join_code === data.join_code);
+// 	if (!matchingOrg) {
+// 		throw createApiError("CODE_NOT_FOUND", "Team code not found");
+// 	}
 
-	return { success: true };
-}
+// 	if (currentUser.organization_id === matchingOrg.id) {
+// 		throw createApiError("ALREADY_MEMBER", "User is already a member of this organization");
+// 	}
+
+// 	const takenRoles = mockUsers
+// 		.filter((u) => u.organization_id === matchingOrg.id && u.scrum_role !== null)
+// 		.map((u) => u.scrum_role as "scrum_master" | "product_owner" | "developer");
+
+// 	const allRoles: Array<"scrum_master" | "product_owner" | "developer"> = ["scrum_master", "product_owner", "developer"];
+// 	const available_scrum_role = allRoles
+// 		.filter((r) => r === "developer" || !takenRoles.includes(r))
+// 		.map((r) => ({ role: r }));
+
+// 	return {
+// 		organization_id: matchingOrg.id,
+// 		org_role: "member",
+// 		available_scrum_role,
+// 	};
+// }
+
+
+// // Set User Role
+// export async function setUserRole(data: {
+// 	organization_id: string;
+// 	scrum_role: "scrum_master" | "product_owner" | "developer";
+// }): Promise<{ success: boolean }> {
+// 	await delay(300);
+// 	const currentUser = getCurrentUserRecord();
+
+// 	const org = mockOrganizations.find((o) => o.id === data.organization_id);
+// 	if (!org) createApiError("NOT_FOUND", "Organization not found");
+
+// 	currentUser.organization_id = data.organization_id;
+// 	currentUser.org_name = org.name;
+// 	currentUser.org_role = "admin";
+// 	currentUser.scrum_role = data.scrum_role;
+
+// 	return { success: true };
+// }
 
 
 export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
@@ -830,127 +873,127 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 }
 
 
-// =============================================================
-// MOCK LOGIN
-// =============================================================
+// // =============================================================
+// // MOCK LOGIN
+// // =============================================================
 
-// Interfaces
-interface LoginRequest {
-	email: string;
-	password: string;
-}
+// // Interfaces
+// interface LoginRequest {
+// 	email: string;
+// 	password: string;
+// }
 
-interface LoginResponse {
-	access_token: string;
-	token_type: string;
-}
+// interface LoginResponse {
+// 	access_token: string;
+// 	token_type: string;
+// }
 
 
-// Login
-export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-	// Simulate network delay (500ms)
-	await delay(500);
+// // Login
+// export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+// 	// Simulate network delay (500ms)
+// 	await delay(500);
 
-	// Find user by email
-	const user = mockUsers.find((u) => u.email === credentials.email);
+// 	// Find user by email
+// 	const user = mockUsers.find((u) => u.email === credentials.email);
 
-	// Check if user exists and password matches
-	if (!user || user.password !== credentials.password) {
-		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
-	}
+// 	// Check if user exists and password matches
+// 	if (!user || user.password !== credentials.password) {
+// 		createApiError("INVALID_CREDENTIALS", "Email or password is incorrect");
+// 	}
 
-	// Generate fake JWT token
-	const response: LoginResponse = {
-		access_token: `mock-jwt-token-${Date.now()}`,
-		token_type: "bearer",
-	};
+// 	// Generate fake JWT token
+// 	const response: LoginResponse = {
+// 		access_token: `mock-jwt-token-${Date.now()}`,
+// 		token_type: "bearer",
+// 	};
 
-	// Store token in localStorage
-	localStorage.setItem("token", response.access_token);
-	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
+// 	// Store token in localStorage
+// 	localStorage.setItem("token", response.access_token);
+// 	localStorage.setItem(CURRENT_USER_ID_KEY, user.id);
 
-	return response;
-}
+// 	return response;
+// }
 
-// =============================================================
-// MOCK SIGNUP
-// =============================================================
+// // =============================================================
+// // MOCK SIGNUP
+// // =============================================================
 
-//Interfaces
-interface SignUpRequest {
-	name: string;
-	email: string;
-	password: string;
-}
+// //Interfaces
+// interface SignUpRequest {
+// 	name: string;
+// 	email: string;
+// 	password: string;
+// }
 
-interface SignUpResponse {
-	id: string;
-	name: string;
-	email: string;
-}
+// interface SignUpResponse {
+// 	id: string;
+// 	name: string;
+// 	email: string;
+// }
 
-// Mock signup function
-export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
-	// Simulate network delay
-	await delay(800);
+// // Mock signup function
+// export async function signup(data: SignUpRequest): Promise<SignUpResponse> {
+// 	// Simulate network delay
+// 	await delay(800);
 
-	// Check if user already exists
-	const existingUser = mockUsers.find((u) => u.email === data.email);
-	if (existingUser) {
-		createApiError("USER_EXISTS", "An account with this email already exists");
-	}
+// 	// Check if user already exists
+// 	const existingUser = mockUsers.find((u) => u.email === data.email);
+// 	if (existingUser) {
+// 		createApiError("USER_EXISTS", "An account with this email already exists");
+// 	}
 
-	// Validate email format
-	if (!/\S+@\S+\.\S+/.test(data.email)) {
-		createApiError("INVALID_INPUT", "Email format is invalid");
-	}
+// 	// Validate email format
+// 	if (!/\S+@\S+\.\S+/.test(data.email)) {
+// 		createApiError("INVALID_INPUT", "Email format is invalid");
+// 	}
 
-	// Create new user
-	const newUser = {
-		id: `user-${Date.now()}`,
-		email: data.email,
-		password: data.password,
-		name: data.name,
-		org_name: null,
-		organization_id: null,
-		scrum_role: null,
-		org_role: null,
-		avatar_url: null,
-	};
+// 	// Create new user
+// 	const newUser = {
+// 		id: `user-${Date.now()}`,
+// 		email: data.email,
+// 		password: data.password,
+// 		name: data.name,
+// 		org_name: null,
+// 		organization_id: null,
+// 		scrum_role: null,
+// 		org_role: null,
+// 		avatar_url: null,
+// 	};
 
-	// Add to mock database
-	mockUsers.push(newUser);
+// 	// Add to mock database
+// 	mockUsers.push(newUser);
 
-	// Simulate auto-login after signup
-	localStorage.setItem("token", `mock-jwt-token-${Date.now()}`);
-	localStorage.setItem(CURRENT_USER_ID_KEY, newUser.id);
+// 	// Simulate auto-login after signup
+// 	localStorage.setItem("token", `mock-jwt-token-${Date.now()}`);
+// 	localStorage.setItem(CURRENT_USER_ID_KEY, newUser.id);
 
-	// Return response (excluding password)
-	return {
-		id: newUser.id,
-		name: newUser.name,
-		email: newUser.email,
-	};
-}
+// 	// Return response (excluding password)
+// 	return {
+// 		id: newUser.id,
+// 		name: newUser.name,
+// 		email: newUser.email,
+// 	};
+// }
 
-// =============================================================
-// MOCK USER
-// =============================================================
+// // =============================================================
+// // MOCK USER
+// // =============================================================
 
-//Mock getCurrentUser function
-export async function getCurrentUser() : Promise<User> {
-	await delay(300);
+// //Mock getCurrentUser function
+// export async function getCurrentUser() : Promise<User> {
+// 	await delay(300);
 
-	// Simulate checking the JWT token
-	const token = localStorage.getItem("token");
+// 	// Simulate checking the JWT token
+// 	const token = localStorage.getItem("token");
 
-	if (!token) {
-		createApiError("UNAUTHORIZED", "Missing token");
-	}
+// 	if (!token) {
+// 		createApiError("UNAUTHORIZED", "Missing token");
+// 	}
 
-	// Return mock user data
-	return getCurrentUserRecord();
-}
+// 	// Return mock user data
+// 	return getCurrentUserRecord();
+// }
 
 
 // Mock removeMember function
@@ -992,56 +1035,56 @@ export async function removeMember(
 	return { success: true };
 }
 
-// =============================================================
-// STANDUPS
-// =============================================================
+// // =============================================================
+// // STANDUPS
+// // =============================================================
 
-// Interfaces
-interface CreateStandupRequest {
-	today: string;
-}
+// // Interfaces
+// interface CreateStandupRequest {
+// 	today: string;
+// }
 
-interface CreateStandupResponse {
-	id: string;
-	created_at: string;
-	today: string;
-	yesterday: string | null;
-	blocker_ids: string[];
-	created_by: {
-		name: string;
-		id: string;
-		avatar_url: string | null;
-	}
-};
+// interface CreateStandupResponse {
+// 	id: string;
+// 	created_at: string;
+// 	today: string;
+// 	yesterday: string | null;
+// 	blocker_ids: string[];
+// 	created_by: {
+// 		name: string;
+// 		id: string;
+// 		avatar_url: string | null;
+// 	}
+// };
 
-export interface StandupListItem {
-	id: string;
-	created_at: string;
-	today: string;
-	yesterday: string | null;
-	blockers: {
-		id: string;
-		title: string;
-		ticket: {
-			id: string;
-			title: string;
-		}
-	} [];
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	}
-}
+// export interface StandupListItem {
+// 	id: string;
+// 	created_at: string;
+// 	today: string;
+// 	yesterday: string | null;
+// 	blockers: {
+// 		id: string;
+// 		title: string;
+// 		ticket: {
+// 			id: string;
+// 			title: string;
+// 		}
+// 	} [];
+// 	created_by: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	}
+// }
 
-interface EditStandupRequest {
-	today?: string;
-}
+// interface EditStandupRequest {
+// 	today?: string;
+// }
 
-interface EditStandupResponse {
-	id: string;
-	today: string;
-}
+// interface EditStandupResponse {
+// 	id: string;
+// 	today: string;
+// }
 
 
 // Create Standup
@@ -1894,7 +1937,7 @@ export async function getDashboardData(org_id: string): Promise<DashboardData> {
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
 
-/*
+
 // 1.1 REGISTER NEW USER
 export async function signup(data:
 	SignUpRequest
@@ -1989,13 +2032,15 @@ export async function uploadAvatar(
 ) : Promise<AvatarResponse> {
 	const token = localStorage.getItem("token");
 
+	const formData = new FormData();
+	formData.append("file", data.file);
+
 	const response = await fetch(`${API_URL}/users/me/avatar`, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
 			'Authorization': `Bearer ${token}`
 		},
-		body: JSON.stringify(data)
+		body: formData
 	});
 
 	if (!response.ok) {
@@ -2032,10 +2077,9 @@ export async function createOrganization(data:
 
 // 3.2 SELECT ROLE
 export async function setUserRole(data: {
-	org_id: string;
+	org_id: string,
 	scrum_role: "scrum_master" | "product_owner" | "developer"
-}): Promise<{SelectRoleResponse}>
-{
+}): Promise<SelectRoleResponse>{
 	const token = localStorage.getItem("token");
 
 	const response = await fetch(`${API_URL}/organizations/${data.org_id}`, {
@@ -2052,9 +2096,9 @@ export async function setUserRole(data: {
 		throw errorData;
 	}
 
-	return { success: true };
+	return response.json();//{ success: true };
 }
-
+/*
 // 3.3 GET ORGANIZATION MEMBERS
 export async function getOrganizationMembers(
 	org_id: string
@@ -2122,7 +2166,7 @@ export async function removeMember(
 
 	return response.json();
 }
-
+*/
 // 3.6 JOIN ORGANIZATION BY CODE
 export async function joinOrganization(data:
 	JoinOrgRequest
@@ -2146,8 +2190,8 @@ export async function joinOrganization(data:
 	return response.json();
 }
 
-
-// 4.1 CREATE TCIKETS
+/*
+// 4.1 CREATE TICKETS
 export async function createTicket(
 	org_id: string,
 	data: CreateTicketRequest
@@ -2656,8 +2700,4 @@ export async function getDashboardData(
 
 	return response.json();
 }
-
-
-
-
 */

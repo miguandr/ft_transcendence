@@ -14,7 +14,7 @@ import {
 	Line,
 	Legend,
 } from "recharts";
-import type { AnalitycsData } from "../../services/api"
+import type { AnalitycsData } from "../../types/api.types";
 import type { APIError } from "../../utils/shared.types";
 
 

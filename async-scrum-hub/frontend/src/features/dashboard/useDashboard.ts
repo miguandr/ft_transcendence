@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getDashboardData } from "../../services/api";
-import type { DashboardData } from "../../services/api";
+import type { DashboardData } from "../../types/api.types";
 import { useAuth } from "../../routes/useAuth";
 import type { APIError } from "../../utils/shared.types";
 

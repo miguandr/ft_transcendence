@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Sidebar } from "./components/layout/SideBar/Sidebar";
 import { TopBar } from "./components/layout/TopBar/TopBar";
 import { WelcomeAnimation } from "./features/auth/WelcomeAnimation";
-//import { Welcome } from "./features/auth/Welcome";
+import { Welcome } from "./features/auth/Welcome";
 import { Login } from "./features/auth/Login";
 import { SignUp } from "./features/auth/SignUp";
 import { TeamSetup } from "./features/auth/TeamSetup";
@@ -27,6 +27,7 @@ function AppLayout() {
 		return (
 			<Routes>
 				<Route path="/" element={<WelcomeAnimation />} />
+				<Route path="/welcome" element={<Welcome />} />
 				<Route path="/login" element={<Login />} />
 				<Route path="/signup" element={<SignUp />} />
 				<Route path="/team-setup" element={<TeamSetup />} />

@@ -17,10 +17,10 @@ import {
 	listBlockers,
 	updateBlocker,
 	resolveBlocker,
-	listTickets,
+	listTickets, //listTicketsBoard
 	getOrganizationMembers,
 } from "../../services/api";
-import type { TicketListItem, OrganizationMember, BlockerListItem } from "../../services/api";
+import type { ListTicketsBoardResponse, OrganizationMember, BlockerListItem } from "../../types/api.types";
 import type { APIError } from "../..//utils/shared.types";
 
 
@@ -46,7 +46,7 @@ export function Blockers() {
 	}>({});
 	// Data states
 	const [blockers, setBlockers] = useState<BlockerListItem[]>([]);
-	const [ticketList, setTicketList] = useState<TicketListItem[]>([]);
+	const [ticketList, setTicketList] = useState<ListTicketsBoardResponse[]>([]);
 	const [teamMembers, setTeamMembers] = useState<OrganizationMember[]>([]);
 	//Routing states
 	const location = useLocation();
