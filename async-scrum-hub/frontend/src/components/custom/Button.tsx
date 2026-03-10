@@ -22,7 +22,8 @@ export function Button({
 	disabled,
 	...props
 }: ButtonProps) {
-	const baseStyles = "font-medium rounded-xl transition-all focus:outline-none inline-flex items-center justify-center gap-2";
+	const baseStyles =
+		"font-medium rounded-xl transition-all focus:outline-none inline-flex items-center justify-center gap-2";
 
 	const variantStyles = {
 		primary: "text-white bg-cyan-600 hover:bg-cyan-700",
@@ -38,7 +39,8 @@ export function Button({
 		lg: "px-6 py-3 text-sm",
 	};
 
-	const disabledStyles = isLoading || disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
+	const disabledStyles =
+		isLoading || disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
 
 	// Active state for toggle buttons (overrides variant styles)
 	const activeStyles = isActive ? "!border-cyan-300 !bg-cyan-50 !text-cyan-700" : "";

@@ -1,20 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../../services/api";
-import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom";
+import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom/index";
+import { motion } from "framer-motion";
+import { useAuth } from "../../routes/useAuth";
+import type { APIError } from "../../utils/shared.types";
+
 
 export function Login() {
 	const navigate = useNavigate();
+	const { refreshUser } = useAuth();
 
-	const [email, setEmail] = useState(""); // Stores email
-	const [password, setPassword] = useState(""); // Stores password
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
+	const [isExiting, setIsExiting] = useState(false); // Track fade-out animation
+	const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
 
 	const validateForm = (): boolean => {
 		const newErrors: { email?: string; password?: string } = {};
 
-		// Validate email
 		if (!email) {
 			newErrors.email = "Email is required";
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -22,7 +29,6 @@ export function Login() {
 			newErrors.email = "Email is invalid";
 		}
 
-		// Validate password
 		if (!password) {
 			newErrors.password = "Password is required";
 		} else if (password.length < 8) {
@@ -36,56 +42,61 @@ export function Login() {
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		// Validate form
-		if (!validateForm()) {
-			return; //Stops here if validation fails
-		}
-
-		// Start loading
+		if (!validateForm()) return;
 		setIsLoading(true);
-		setErrors({}); // clear any previous errors
+		setErrors({});
 
 		try {
-			// Call API
-			const response = await login({ email, password }); // await is non-blocking waiting
-
+			const response = await login({ email, password });
 			console.log("Login successful!", response);
-			// Save token to localStorage (browser storage persists until logout)
-			localStorage.setItem("token", response.access_token);
 
-			// Navigate to dashboard
-			navigate("/");
-		} catch (error: any) {
-			// Handle API Errors
+			const currentUser = await refreshUser();
+			if (!currentUser) {
+				setErrors({ email: "Unable to load user data after login." });
+				return;
+			}
+			// Trigger fade-out animation (navigation happens in onAnimationComplete)
+			setRedirectTo(currentUser.organization_id ? "/dashboard" : "/team-setup");
+			setIsExiting(true);
+
+		} catch (error: unknown) {
 			console.error("Login failed:", error);
 
-			// Check for our API error format { error: { code, message } } using optional chaining
-			if (error?.error?.code === "INVALID_CREDENTIALS") {
-				// Only runs if error.error.code exists AND equals "INVALID_CREDENTIALS"
-				setErrors({ email: "Email or password is incorrect." });
-			} else if (error?.error?.code === "INVALID_INPUT") {
-				// Only runs if error.error.code exists AND equals "UNAUTHORIZED"
-				setErrors({ email: "Email or password is missing." });
-			} else if (error?.error?.message) {
-				// Only runs if error.error.message exists (Use the API's error message)
-				setErrors({ email: error.error.message });
-			} else if (error instanceof Error) {
-				// Handles standard JavaScript Error objects
-				setErrors({ email: error.message });
+			// Type assertion for API error format
+			const apiError = error as APIError;
+			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
+
+			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
+				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error" });
+			} else if (errorCode === "INVALID_CREDENTIALS") {
+				setErrors({ email: "Email or password is incorrect" });
+			} else if (errorCode === "TEAM_SETUP_NOT_DONE") {
+				setErrors({ email: "Team setup is not done" });
+			} else if (error instanceof TypeError && error.message === "Failed to fetch") {
+				setErrors({ email: "Unable to connect to the server. Check that the backend is running." });
+			} else if (apiError?.error?.message) {
+				setErrors({ email: apiError.error.message });
 			} else {
-				// Handles completely unknown errors
 				setErrors({ email: "An unexpected error occurred." });
 			}
 		} finally {
-			// Stop loading (runs weather success or failure)
 			setIsLoading(false);
 		}
 	};
 
 	return (
 		<PageContainer>
-			<div className="w-full max-w-md">
+			<motion.div
+				className="w-full max-w-md"
+				initial={{ opacity: 0 }}
+				animate={{ opacity: isExiting ? 0 : 1 }}
+				transition={{ duration: 0.4, ease: "easeOut" }}
+				onAnimationComplete={() => {
+					if (isExiting && redirectTo) {
+						navigate(redirectTo);
+					}
+				}}
+			>
 				<div className="text-center mb-8">
 					<h1 className="text-3xl text-gray-900 mb-2">ScrumHub</h1>
 					<p className="text-sm text-gray-500">Log in to your account</p>
@@ -149,7 +160,7 @@ export function Login() {
 						</p>
 					</div>
 				</form>
-			</div>
+			</motion.div>
 		</PageContainer>
 	);
 }

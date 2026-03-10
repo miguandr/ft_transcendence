@@ -20,7 +20,9 @@ export function Badge({ children, variant = "default", size = "sm", className = 
 	};
 
 	return (
-		<span className={`inline-flex items-center rounded-lg font-medium ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
+		<span
+			className={`inline-flex items-center rounded-lg font-medium ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+		>
 			{children}
 		</span>
 	);

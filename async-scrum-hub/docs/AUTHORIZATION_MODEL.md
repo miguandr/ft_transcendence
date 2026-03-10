@@ -21,19 +21,20 @@ This document focuses exclusively on:
 
 ## 1. Authorization Scope
 
-Authorization is always evaluated within a **specific context**:
+Every endpoint has one of three authorization scopes:
 
-- Organization
-- Resource belonging to an organization
+- **Public** – No JWT required (register, login, legal documents)
+- **Global** – JWT required, no organization membership required (create org, join org, user profile)
+- **Org** – JWT required + organization membership required (all resource endpoints: tickets, tasks, standups, blockers, analytics)
 
-There is **no global authorization scope**.
-All permissions are organization-scoped.
+All resource-level permissions are organization-scoped.
+Public and global endpoints do not involve role or ownership checks.
 
 ---
 
 ## 2. Authorization Prerequisites
 
-Authorization is evaluated **only after**:
+For **org-scoped** endpoints, authorization is evaluated only after:
 
 1. The request is authenticated (valid JWT)
 2. The target resource exists
@@ -51,9 +52,9 @@ For every protected request, the backend must resolve:
 - `organization_id` from:
   - request path
   - resource ownership
-- user membership in that organization
+- user belongs to that organization (via `user.organization_id`)
 
-If the user is not a member of the organization,
+If the user does not belong to the organization,
 authorization immediately fails.
 
 ---
@@ -85,7 +86,7 @@ Each user has **two independent roles** within an organization:
 - **Scrum role** (scrum_master | product_owner | developer)
 
 Roles are **never inferred**.
-They must be explicitly retrieved from persistence.
+They are stored directly on the User model (`user.org_role`, `user.scrum_role`).
 
 ---
 

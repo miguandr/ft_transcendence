@@ -7,6 +7,8 @@ interface PageContainerProps {
 
 export function PageContainer({ children, className = "" }: PageContainerProps) {
 	return (
-		<div className={`min-h-screen bg-white flex items-center justify-center p-8 ${className}`}>{children}</div>
+		<div className={`min-h-screen bg-white flex items-center justify-center p-8 ${className}`}>
+			{children}
+		</div>
 	);
 }

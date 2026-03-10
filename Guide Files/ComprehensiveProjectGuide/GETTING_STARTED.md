@@ -159,7 +159,7 @@ docker-compose up
 - Miguel (Frontend Lead)
 - Daniela (Backend Lead)
 - Freddy (Product Owner)
-- Malu (Real-Time Specialist)
+- Maria Luiza (Real-Time Specialist)
 
 ## Tech Stack
 
@@ -200,7 +200,7 @@ git checkout -b feat/[your-area]
 # - feat/design-system (Alice)
 # - feat/backend-scaffolding (Daniel)
 # - feat/user-stories (Freddy)
-# - feat/docker-setup (Malu)
+# - feat/docker-setup (Maria Luiza)
 
 # Post in Discord:
 echo "✅ Cloned repo and created feature branch"
@@ -578,7 +578,7 @@ echo "✅ User stories documented!"
 echo "See docs/USER_STORIES.md"
 ```
 
-#### Malu: Docker Setup
+#### Maria Luiza: Docker Setup
 
 ```bash
 cd async-scrum-hub
@@ -788,7 +788,7 @@ By afternoon, everyone should have:
 - Daniela: Implement auth endpoints
 - Miguel: Create login/signup forms
 - Freddy: Test registration flow
-- Malu: WebSocket placeholder
+- Maria Luiza: WebSocket placeholder
 
 ### Friday: Demo Day
 - All code merged to dev

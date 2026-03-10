@@ -13,43 +13,55 @@ Responsibilities:
 
 Expected inputs:
 - `action`: permission action string (e.g. "tickets:update")
-- `user`: authenticated user object (or None for public endpoints)
+- `user`: authenticated user object (or None for public endpoints).
+		  Contains `org_role` and `scrum_role` directly.
 - `org_id`: organization context when available
-- `resource`: domain resource object (e.g. ticket) that contains all its variables 
+- `resource`: domain resource object (e.g. ticket) that contains all its variables
 			(when ownership/assignment checks are required)
-- `membership`: User’s organization membership information (e.g. `org_role`, `scrum_role`).
 
 Raises:
-	HTTPException: 401 si falta autenticación, 403 si no está autorizado
+	HTTPException: 401 if authentication is missing, 403 if not authorized
 """
 
-from typing import Optional
+import uuid
+from typing import Optional, Protocol
 from fastapi import HTTPException
 from .permissions import PERMISSIONS
+from src.database.models import User
 import logging
 logger = logging.getLogger("authz")
 
+"""
+Protocol defining the required attributes for resources that can be authorized.
+Any ORM model (Ticket, Task, Standup, Blocker) that implements these attributes
+will be compatible with the authorize() function.
+See ARCHITECTURE.md section 9.1 for details.
+"""
+class AuthorizableResource(Protocol):
+	organization_id: uuid.UUID
+	created_by: uuid.UUID
+	assignee_id: Optional[uuid.UUID]
+
 def authorize(
 	action: str,
-	user: Optional[dict] = None,
-	org_id: Optional[str] = None,
-	resource: Optional[dict] = None,
-	membership: Optional[dict] = None,
+	user: Optional[User] = None,
+	org_id: Optional[uuid.UUID] = None,
+	resource: Optional[AuthorizableResource] = None,
 ) -> None:
-	
+
 	if action not in PERMISSIONS:
 		raise HTTPException(500, f"Unknown permission action: {action}")
 
 	permission = PERMISSIONS[action]
 	scope = permission["scope"]
 
-	# PUBLIC: no JWT, no membership, no roles/owner/assignee checks
+	# PUBLIC: no JWT, no roles, no owner/assignee checks
 	if scope == "public":
 		return
 
 	# GLOBAL and ORG: JWT required.
 	if user is None:
-		raise HTTPException(401, "Authentication required")
+		raise HTTPException(401, {"error": {"code": "UNAUTHORIZED", "message": "Authentication required"}})
 
 	# GLOBAL
 	if scope == "global":
@@ -58,40 +70,35 @@ def authorize(
 	# ORG
 	if scope == "org":
 		if org_id is None:
-			if resource and resource.get("organization_id"):
-				org_id = resource["organization_id"]
+			if resource and resource.organization_id:
+				org_id = resource.organization_id
 			else:
 				raise HTTPException(500, "Organization context missing")
-		
-		if membership is None:
-			raise HTTPException(403, "Not a member of this organization")
-		
-		if not membership.get("org_role") or not membership.get("scrum_role"):
-			raise HTTPException(500, "Invalid membership structure")
 
-		# Admin override 
-		if membership.get("org_role") == "admin":
+		if not user.org_role or not user.scrum_role:
+			raise HTTPException(500, "User missing role information")
+
+		# Admin override
+		if user.org_role == "admin":
 			return
 
 		# Role-based permission
-		if membership.get("scrum_role") in permission["roles"]:
+		if user.scrum_role in permission["roles"]:
 			return
-		
-		# Ownership check (si aplica)
+
+		# Ownership check
 		if permission["owner_allowed"] == True:
 			if resource is None:
 				raise HTTPException(500, "resource context missing")
-			if resource.get("created_by") == user["id"]:
+			if resource.created_by == user.id:
 				return
 
-		# Assignee check (si aplica)
+		# Assignee check
 		if permission["assignee_allowed"] == True:
 			if resource is None:
 				raise HTTPException(500, "resource context missing")
-			if resource.get("assignee_id") == user["id"]:
+			if resource.assignee_id == user.id:
 				return
-			
-		logger.warning("DENIED | user=%s | action=%s | org=%s", user.get("id"), action, org_id ) #debuging		
-		raise HTTPException(403, "Insufficient permissions")
 
-
+		logger.warning("DENIED | user=%s | action=%s | org=%s", user.id, action, org_id)
+		raise HTTPException(403, {"error": {"code": "FORBIDDEN", "message": "You do not have permission to perform this action"}})

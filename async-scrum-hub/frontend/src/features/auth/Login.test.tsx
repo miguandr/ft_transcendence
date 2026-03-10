@@ -191,7 +191,7 @@ describe("Login Component", () => {
 				password: "password123",
 			});
 			expect(localStorageMock.getItem("token")).toBe("mock-token-123");
-			expect(mockNavigate).toHaveBeenCalledWith("/");
+			expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
 		});
 	});
 
@@ -200,7 +200,7 @@ describe("Login Component", () => {
 		mockLogin.mockRejectedValueOnce({
 			error: {
 				code: "INVALID_CREDENTIALS",
-				message: "Invalid email or password",
+				message: "Email or password is incorrect",
 			},
 		});
 
@@ -219,34 +219,7 @@ describe("Login Component", () => {
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
-			expect(screen.getByText("Invalid email or password")).toBeInTheDocument();
-		});
-	});
-
-	it("shows error for unauthorized access", async () => {
-		mockLogin.mockRejectedValueOnce({
-			error: {
-				code: "UNAUTHORIZED",
-				message: "Unauthorized access",
-			},
-		});
-
-		render(
-			<BrowserRouter>
-				<Login />
-			</BrowserRouter>
-		);
-
-		const emailInput = screen.getByLabelText(/email/i);
-		const passwordInput = screen.getByLabelText(/password/i);
-		const submitButton = screen.getByRole("button", { name: /log in/i });
-
-		fireEvent.change(emailInput, { target: { value: "john@example.com" } });
-		fireEvent.change(passwordInput, { target: { value: "password123" } });
-		fireEvent.click(submitButton);
-
-		await waitFor(() => {
-			expect(screen.getByText("Session expired. Please login again.")).toBeInTheDocument();
+			expect(screen.getByText("Email or password is incorrect")).toBeInTheDocument();
 		});
 	});
 

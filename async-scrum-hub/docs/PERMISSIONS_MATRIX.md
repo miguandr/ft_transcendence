@@ -19,15 +19,19 @@
 4. [Standups](#4-standups)
 5. [Blockers](#5-blockers)
 6. [Users](#6-users)
-7. [Special Permission Legend](#special_permission_legend)
-8. [Special Rules per Resource](#special_rules_per_resource)
+7. [Legal](#7-legal)
+8. [Analytics](#8-analytics)
+9. [Dashboard](#9-dashboard)
+10. [Special Permission Legend](#special-permission-legend)
+10. [Special Rules per Resource](#special-rules-per-resource)
+11. [Common Error Codes](#common-error-codes)
 
 ---
 
 ## 1. Organizations
 
-| Action                                | Organization Admin   | Scrum Master  | Product Owner   | Developer
-|---------------------------------------|----------------------|---------------|-----------------|----------------
+| Action                                | Organization Admin   | Scrum Master    | Product Owner    | Developer
+|---------------------------------------|----------------------|-----------------|------------------|----------------
 | **Create organization**               | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
 | **Select Role**                       | ✅ (any user)        | ✅ (any user)  | ✅ (any user)   | ✅ (any user)
 | **View organization members**         | ✅                   | ✅             | ✅              | ✅
@@ -47,8 +51,8 @@
 
 ## 2. Tickets
 
-| Action                     | Organization Admin | Scrum Master         | Product Owner  | Developer
-|----------------------------|--------------------|----------------------|----------------|------------
+| Action                     | Organization Admin | Scrum Master          | Product Owner  | Developer
+|----------------------------|--------------------|-----------------------|----------------|------------
 | **Create ticket**          | ✅                 | ✅                   | ✅             | ❌
 | **List tickets**           | ✅                 | ✅        		   | ✅             | ✅
 | **Get ticket details**     | ✅                 | ✅   			       | ✅             | ✅
@@ -87,13 +91,13 @@
 
 ## 4. Standups
 
-| Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
-|--------------------------|--------------------|-----------------|----------------|------------------
+| Action                   | Organization Admin | Scrum Master      | Product Owner  | Developer
+|--------------------------|--------------------|-------------------|----------------|------------------
 | **Create standup**       | ✅                 | ✅               | ✅             | ✅
 | **List standups**        | ✅                 | ✅               | ✅             | ✅
 | **Get standup details**  | ✅                 | ✅               | ✅             | ✅
-| **Update standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
-| **Delete standup**       | ✅                 | ✅               | ✅             | ✅ (owner only)
+| **Update standup**       | ✅                 | ❌               | ❌             | ✅ (owner only)
+| **Delete standup**       | ✅                 | ❌               | ❌             | ✅ (owner only)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/standups` - Create standup
@@ -108,11 +112,11 @@
 
 | Action                   | Organization Admin | Scrum Master    | Product Owner  | Developer
 |--------------------------|--------------------|-----------------|----------------|------------------------
-| **Create blocker**       | ✅                 | ✅               | ✅             | ✅
-| **List blocker**         | ✅                 | ✅               | ✅             | ✅
-| **Get blocker details**  | ✅                 | ✅               | ✅             | ✅
-| **Update blocker**       | ✅                 | ✅               | ✅             | ✅ (owner only)
-| **Resolve blocker**      | ✅                 | ✅               | ✅             | ✅ (owner or assignee)
+| **Create blocker**       | ✅                 | ✅             | ✅             | ✅
+| **List blocker**         | ✅                 | ✅             | ✅             | ✅
+| **Get blocker details**  | ✅                 | ✅             | ✅             | ✅
+| **Update blocker**       | ✅                 | ✅             | ✅             | ✅ (owner only)
+| **Resolve blocker**      | ✅                 | ✅             | ✅             | ✅ (owner or assignee)
 
 **Endpoints:**
 - `POST /organizations/{org_id}/blockers` - Create blocker
@@ -125,18 +129,53 @@
 
 ## 6. Users
 
-| Action	                | All Roles	 | Notes
+| Action	              | All Roles	 | Notes
 |-------------------------|--------------|-----------
 | **Register**            | ✅           | Public endpoint
 | **Login**               | ✅           | Public endpoint
 | **Get own profile**     | ✅           | Authenticated user only
 | **Update own profile**  | ✅           | Authenticated user only
+| **Upload avatar**       | ✅           | Authenticated user only
 
 **Endpoints:**
 - `POST /auth/register` - Register
 - `POST /auth/login` - Login
 - `GET /users/me` - Get current user
 - `PATCH /users/me` - Update current user
+- `POST /users/me/avatar` - Upload avatar
+
+---
+
+## 7. Legal
+
+| Action	              | All Roles	 | Notes
+|-------------------------|--------------|-----------
+| **Get legal document**  | ✅           | Public endpoint
+
+**Endpoints:**
+- `GET /legal/documents/{key}` - Get legal document (key = `privacy` | `terms`)
+
+---
+
+## 8. Analytics
+
+| Action                          | All Roles  | Notes
+|---------------------------------|------------|----------------------------
+| **Get organization analytics**  | ✅         | Any organization member
+
+**Endpoints:**
+- `GET /organizations/{org_id}/analytics` - Get analytics
+
+---
+
+## 9. Dashboard
+
+| Action                          | All Roles  | Notes
+|---------------------------------|------------|----------------------------
+| **Get organization dashboard**  | ✅         | Any organization member
+
+**Endpoints:**
+- `GET /organizations/{org_id}/dashboard` - Get dashboard
 
 ---
 
@@ -202,7 +241,7 @@
 ---
 
 ### ✅ Tasks
-- Default status: `in_process`
+- Default status: `in_progress`
 - Only one transition: `in_progress` → `completed`
 - Must belong to a ticket
 
@@ -218,7 +257,7 @@
 ### 🚧 Blockers
 - Cannot be deleted, only resolved
 - Status: open → resolved (irreversible)
-- Optional relation to a task
+- Optional relation to a ticket
 
 ---
 
@@ -230,7 +269,7 @@ Organization
  │   └─ Task
  ├─ Standup
  └─ Blocker
-	 └─ (optional) Task
+	 └─ (optional) Ticket
 ```
 
 ---
@@ -247,18 +286,20 @@ Organization
 
 | HTTP Status | Error Code                 | Description
 |-------------|----------------------------|------------------------------------
-| 400         | `INVALID_INPUT`            | Invalid request data
-| 400         | `INVALID_ROLE`             | Invalid role
-| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role
+| 400         | `INVALID_INPUT`            | Invalid request data (validation error)
+| 400         | `INVALID_ASSIGNEE`         | Invalid assignee role (must be Developer)
+| 400         | `INVALID_FILE_TYPE`        | Invalid file type for upload
+| 400         | `FILE_TOO_LARGE`           | File exceeds maximum size limit
 | 401         | `UNAUTHORIZED`             | Missing or invalid JWT
-| 401         | `INVALID_CREDENTIALS`      | Invalid credentials
+| 401         | `INVALID_TOKEN`            | JWT token has invalid or missing subject claim
+| 401         | `INVALID_CREDENTIALS`      | Invalid email or password
 | 403         | `FORBIDDEN`                | Insufficient permissions
+| 403         | `NO_ORGANIZATION`          | User is not part of any organization
 | 404         | `NOT_FOUND`                | Resource not found
-| 409         | `USER_EXISTS`              | User already exists
-| 409         | `ALREADY_MEMBER`           | User already a member
-| 409         | `STANDUP_ALREADY_EXISTS`   | Standup already created
-| 409         | `EDIT_WINDOW_EXPIRED`      | Standup edit window expired
-| 409         | `BLOCKER_ALREADY_RESOLVED` | Blocker already resolved
+| 409         | `USER_EXISTS`              | User with this email already exists
+| 409         | `STANDUP_ALREADY_EXISTS`   | User already created a standup today
+| 409         | `EDIT_WINDOW_EXPIRED`      | Standup can only be edited on creation day
+| 409         | `BLOCKER_ALREADY_RESOLVED` | Blocker has already been resolved
 
 ---
 

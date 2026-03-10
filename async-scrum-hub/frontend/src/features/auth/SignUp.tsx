@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../../services/api";
-import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom";
+import { login, signup } from "../../services/api";
+import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom/index";
+import { useAuth } from "../../routes/useAuth";
+import type { APIError } from "../../utils/shared.types";
+
 
 export function SignUp() {
-	const navigate = useNavigate(); // Hook to programmatically navigate between pages
+	const navigate = useNavigate();
+	const { refreshUser } = useAuth();
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -12,7 +16,6 @@ export function SignUp() {
 		confirmPassword: "",
 	});
 	const [errors, setErrors] = useState<{
-		// error(getter/read) setErrors(setter/write)
 		name?: string;
 		email?: string;
 		password?: string;
@@ -62,18 +65,11 @@ export function SignUp() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		//Validate form
-		if (!validateForm()) {
-			return;
-		}
-
-		//Start loading
+		if (!validateForm()) return;
 		setIsLoading(true);
-		setErrors({}); // clear any previous errors
+		setErrors({});
 
 		try {
-			//Call API (only sends name, email and password (not confirmation password) to database via API.
 			const response = await signup({
 				name: formData.name,
 				email: formData.email,
@@ -82,31 +78,35 @@ export function SignUp() {
 
 			console.log("Sign up successful!", response);
 
-			//Navigate to role selection if sign up was successful
+			await login({
+				email: formData.email,
+				password: formData.password,
+			});
+
+			const currentUser = await refreshUser();
+
+			if (!currentUser) {
+				setErrors({ email: "Unable to load user data after sign up." });
+				return;
+			}
+
 			navigate("/team-setup");
-		} catch (error: any) {
-			//Handle API errors
+		} catch (error: unknown) {
 			console.error("Sign up failed:", error);
 
-			//Check for our API error format using optional chaining
-			if (error?.error?.code === "USER_EXISTS") {
-				// Only runs if error.error.code exists AND equals "USER_EXISTS"
+			const apiError = error as APIError;
+			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
+
+			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
+				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error message" });
+			} else if (errorCode === "USER_EXISTS") {
 				setErrors({ email: "An account with this email already exists" });
-			} else if (error?.error?.code === "INVALID_INPUT") {
-				// Only runs if error.error.code exists AND equals "INVALID_EMAIL"
-				setErrors({ email: "Email format is invalid" });
-			} else if (error?.error?.message) {
-				// Only runs if error.error.message exists (Use the API's error message)
-				setErrors({ email: error.error.message });
-			} else if (error instanceof Error) {
-				// Handles standard JavaScript Error objects
-				setErrors({ email: error.message });
+			} else if (apiError?.error?.message) {
+				setErrors({ email: apiError.error.message });
 			} else {
-				// Handles completely unknown errors
 				setErrors({ email: "An unexpected error occurred." });
 			}
 		} finally {
-			// Stop loading (runs whether success or failure)
 			setIsLoading(false);
 		}
 	};

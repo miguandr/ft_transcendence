@@ -5,9 +5,12 @@
 # - GLOBAL: JWT required, no organization membership required
 # - ORG: JWT required + organization membership required
 #
-# Convention (only for scope=global/org):
+# Convention (only for scope=org):
 # - Organization admins are NOT listed in roles (admin override in authorize()).
 # - roles=[]  means "admin only" (no non-admin role can perform this action).
+# Convention (for scope=global):
+# - roles is ignored by authorize() — any authenticated user can perform the action.
+# - roles=[] to reflect that no role restriction applies.
 
 PERMISSIONS = {
 	#--User--
@@ -28,14 +31,29 @@ PERMISSIONS = {
 	"users:me:details":
 	{
 		"scope": "global",
-		"roles": ["scrum_master", "product_owner", "developer"],
+		"roles": [],
 		"owner_allowed": False,
 		"assignee_allowed": False,
 	},
 	"users:me:update":
 	{
 		"scope": "global",
-		"roles": ["scrum_master", "product_owner", "developer"],
+		"roles": [],
+		"owner_allowed": False,
+		"assignee_allowed": False,
+	},
+	"users:me:avatar":
+	{
+		"scope": "global",
+		"roles": [],
+		"owner_allowed": False,
+		"assignee_allowed": False,
+	},
+	#--Legal--
+	"legal:document:get":
+	{
+		"scope": "public",
+		"roles": [],
 		"owner_allowed": False,
 		"assignee_allowed": False,
 	},
@@ -189,14 +207,14 @@ PERMISSIONS = {
 	"standups:update":
 	{
 		"scope": "org",
-		"roles": ["scrum_master", "product_owner"],
+		"roles": [],
 		"owner_allowed": True,
 		"assignee_allowed": False,
 	},
 	"standups:delete":
 	{
 		"scope": "org",
-		"roles": ["scrum_master", "product_owner"],
+		"roles": [],
 		"owner_allowed": True,
 		"assignee_allowed": False,
 	},
@@ -235,5 +253,13 @@ PERMISSIONS = {
 		"roles": ["scrum_master", "product_owner"],
 		"owner_allowed": True,
 		"assignee_allowed": True,
-	}
+	},
+	#--Dashboard--
+	"organizations:dashboard:get":
+	{
+		"scope": "org",
+		"roles": ["scrum_master", "product_owner", "developer"],
+		"owner_allowed": False,
+		"assignee_allowed": False,
+	},
 }

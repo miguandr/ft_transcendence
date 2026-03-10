@@ -82,11 +82,12 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 - `200 OK` - Request successful
 - `201 Created` - Resource created successfully
 - `204 No Content` – Request successful, no response body
-- `400 Bad Request` - Invalid request data
+- `400 Bad Request` - Invalid request data (business logic errors)
 - `401 Unauthorized` - Authentication required or invalid
-- `403 Forbidden` - Insufficient permissions
+- `403 Forbidden` - Insufficient permissions or prerequisite setup not completed
 - `404 Not Found` - Resource not found
 - `409 Conflict` - Resource conflict (e.g., duplicate)
+- `422 Unprocessable Entity` - Validation error (missing or invalid fields)
 ---
 
 ## 1. Authentication & Authorization
@@ -119,13 +120,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input (example: validation error)
+`422 Unprocessable Entity` - Invalid input (example: validation error)
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -166,13 +171,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input (example: missing fields)
+`422 Unprocessable Entity` - Invalid input (example: missing fields)
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "Email or password is missing"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 `401 Unauthorized` - Invalid credentials
@@ -181,6 +190,15 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "error": {
 	"code": "INVALID_CREDENTIALS",
 	"message": "Email or password is incorrect"
+  }
+}
+```
+`403 Forbidden` - Team setup not completed
+```json
+{
+  "error": {
+	"code": "TEAM_SETUP_NOT_DONE",
+	"message": "Team setup is not done"
   }
 }
 ```
@@ -205,11 +223,13 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
-  "current_organization_id": "uuid | null",
+  "org_name": "string",
+  "avatar_url": "string | null",
+  "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
 }
-```
+``````
 
 **Error Responses:**
 
@@ -238,7 +258,8 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
-  "name": "string"
+	"name": "string (optional)",
+	"email": "string (optional)"
 }
 ```
 
@@ -248,7 +269,9 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "id": "uuid",
   "email": "string",
   "name": "string",
-  "current_organization_id": "uuid | null",
+  "org_name": "string",
+  "avatar_url": "string | null",
+  "organization_id": "uuid | null",
   "scrum_role": "scrum_master | product_owner | developer | null",
   "org_role": "admin | member | null"
 }
@@ -256,12 +279,78 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
+```json
+{
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
+}
+```
+
+`401 Unauthorized` - Authentication required
 ```json
 {
   "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+---
+
+### 2.3 Upload Avatar
+
+**Endpoint:** `POST /users/me/avatar`
+
+**Description:** Uploads or updates the avatar image for the currently authenticated user.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- The authenticated user
+
+**Rules:**
+- Accepted formats: JPEG, PNG, GIF, WebP
+- Maximum file size: 5MB
+- Images are automatically resized to 256x256 pixels
+- Previous avatar is replaced when a new one is uploaded
+
+**Request Body:** `multipart/form-data`
+```
+file: binary (image file)
+```
+
+**Success Response:** `200 OK`
+```json
+{
+  "avatar_url": "string (URL to the uploaded avatar)"
+}
+```
+
+**Error Responses:**
+
+`400 Bad Request` - Invalid file type
+```json
+{
+  "error": {
+	"code": "INVALID_FILE_TYPE",
+	"message": "Only JPEG, PNG, GIF, and WebP images are allowed"
+  }
+}
+```
+
+`400 Bad Request` - File too large
+```json
+{
+  "error": {
+	"code": "FILE_TOO_LARGE",
+	"message": "File size exceeds the maximum limit of 5MB"
   }
 }
 ```
@@ -315,13 +404,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -339,8 +432,8 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "error": {
-    "code": "ORG_EXISTS",
-    "message": "An organization with this name already exists."
+	"code": "ORG_EXISTS",
+	"message": "An organization with this name already exists."
   }
 }
 ```
@@ -349,15 +442,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Endpoint:** `PATCH /organizations/{org_id}`
 
-**Description:** Select the rol inside the organization.
+**Description:** Select the role inside the organization.
 
 **Authentication:** Required (JWT)
 
 **Permissions:**
 - The authenticated user
 
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
 **Rules:**
-- The creator must choose an initial scrum role: `scrum_master` or `product_owner`.
 - Only one `scrum_master` and one `product_owner` can exist per organization.
 - Scrum roles are assigned only during organization creation and when joining an organization.
 - Once both scrum roles are assigned, new members can only join as `developer`.
@@ -365,14 +460,15 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+	"organization_id": "uuid",
+	"scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -384,6 +480,16 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
   "error": {
 	"code": "UNAUTHORIZED",
 	"message": "Authentication required"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
   }
 }
 ```
@@ -409,6 +515,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 	{
 		"id": "uuid",
 		"name": "string",
+		"avatar_url": "string | null",
 		"org_role": "admin | member",
 		"scrum_role": "scrum_master | product_owner | developer",
 
@@ -492,6 +599,7 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
+  "name": "string",
   "email": "string"
 }
 ```
@@ -505,13 +613,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -613,13 +725,16 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Permissions:**
 - The authenticated user
 
+**Notes**
+- `available_scrum_role` only includes roles not yet taken in the org. `developer` is always present. 
+The frontend should use this list to show role options before calling `PATCH /organizations/{org_id}` (3.2).
+
 **Authentication:** Required (JWT)
 
 **Request Body:**
 ```json
 {
   "join_code": "SCR-493",
-  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -627,8 +742,12 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "organization_id": "uuid",
-  "org_role": "member | admin", //first one is admin. then all other member that joins are just members
-  "scrum_role": "scrum_master | product_owner | developer"
+  "org_role": "member",
+  "available_scrum_role": [
+	{ "role": "scrum_master" },
+	{ "role": "product_owner" },
+	{ "role": "developer" }
+  ]
 }
 ```
 
@@ -637,8 +756,8 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 ```json
 {
   "error": {
-    "code": "INVALID_CODE",
-    "message": "Invalid code."
+	"code": "INVALID_CODE",
+	"message": "Invalid code."
   }
 }
 ```
@@ -704,13 +823,17 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -791,7 +914,11 @@ Used to render the organization board.
 		"title": "string",
 		"status": "todo | in_progress | completed",
 		"priority": "low | medium | high",
-		"assignee_id": "uuid | null",
+		"assignee": {
+			"id": "uuid",
+			"name": "string",
+			"avatar_url": "string | null"
+		},
 		"created_at": "timestamp",
 		"updated_at": "timestamp"
 	}
@@ -848,17 +975,35 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | completed",
-	"priority": "low | medium | high",
-	"created_by": "uuid",
-	"assignee_id": "uuid | null",
-	"organization_id": "uuid",
-	"created_at": "timestamp",
-	"updated_at": "timestamp"
+    "id": "uuid",
+    "title": "string",
+    "description": "string | null",
+    "status": "todo | in_progress | completed",
+    "priority": "low | medium | high",
+    "created_by": "UserBrief",
+    "assignee_id": "uuid | null",
+    "organization_id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+	"tasks": [
+			 {
+                "id": "uuid",
+                "title": "string",
+                "status": "in_progress | completed"
+                
+            }
+			],
+
+"blockers": [
+            {
+                "id": "uuid",
+                "description": "string",
+                "status": "open | resolved",
+                
+            }
+			]
 }
+
 ```
 
 **Error Responses:**
@@ -944,13 +1089,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1028,13 +1177,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1164,13 +1317,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1388,13 +1545,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1530,19 +1691,27 @@ Used to render the organization board.
 	"today": "string",
 	"yesterday": "string | null",
 	"blocker_ids": ["uuid"],
-	"created_by": "uuid (owner)"
+	"created_by": {
+		"id": "uuid (owner)",
+		"name": "string",
+		"avatar_url": "string",
+	},
 }
 ```
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1613,8 +1782,20 @@ Used to render the organization board.
 		"created_at": "timestamp(today)",
 		"today": "string",
 		"yesterday": "string | null",
-		"blocker_ids": ["uuid"],
-		"created_by": "uuid (owner)"
+		"blockers": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"ticket" {
+					"id":  "uuid",
+					"title": "string",
+				}
+		}],
+		"created_by": {
+			"id": "uuid (owner)",
+			"name": "string",
+			"avatar_url": "string | null"
+		}
 	}
 ]
 ```
@@ -1669,8 +1850,6 @@ Used to render the organization board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
-- Product Owner
 - Developer (Standup owner)
 
 **URL Parameters:**
@@ -1686,24 +1865,43 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"created_at": "timestamp (today)",
-	"today": "string",
-	"yesterday": "string | null",
-	"blockers": "string",
-	"created_by": "uuid (owner)"
+	{
+		"id": "uuid",
+		"created_at": "timestamp(today)",
+		"today": "string",
+		"yesterday": "string | null",
+		"blockers": [
+			{
+				"id": "uuid",
+				"title": "string",
+				"ticket" {
+					"id":  "uuid",
+					"title": "string",
+				}
+			}
+		],
+		"created_by": {
+			"id": "uuid (owner)",
+			"name": "string",
+			"avatar_url": "string | null"
+		}
+	}
 }
 ```
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1757,8 +1955,6 @@ Used to render the organization board.
 **Authentication:** Required (JWT)
 
 **Permissions:**
-- Scrum Master
-- Product Owner
 - Developer (Standup owner)
 
 **URL Parameters:**
@@ -1824,7 +2020,7 @@ Used to render the organization board.
 ```json
 {
 	"description": "string",
-	"task_id": "uuid | null",
+	"ticket_id": "uuid | null",
 	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
@@ -1837,7 +2033,7 @@ Used to render the organization board.
 	"status": "open",
 	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
-	"task_id": "uuid | null",
+	"ticket_id": "uuid | null",
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
@@ -1845,13 +2041,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -1923,11 +2123,21 @@ Used to render the organization board.
 [
 	{
 		"id": "uuid",
-		"created_by": "uuid (owner)",
+		"created_by": {
+			"id": "uuid",
+			"name": "string",
+			"avatar_url": "string | null"
+		},
 		"description": "string",
 		"status": "open | resolved",
-		"assignee_id": "uuid | null"
-		"task_id": "uuid | null",
+		"assignee": {
+			"id": "uuid",
+			"name": "string",
+		} | null,
+		"ticket": {
+			"id": "uuid",
+			"title": "string"
+		},
 		"created_at": "timestamp (today)",
 		"resolved_at": "timestamp | null"
 	}
@@ -1983,7 +2193,7 @@ Used to render the organization board.
 **Permissions:**
 - Scrum Master
 - Product Owner
-- Developer (Task owner)
+- Developer (Ticket owner)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker
@@ -1992,7 +2202,7 @@ Used to render the organization board.
 ```json
 {
 	"description": "string (optional)",
-	"task_id": "uuid | null (optional)",
+	"ticket_id": "uuid | null (optional)",
 	"assignee_id": "uuid | null (optional)"  // Must be a user with Developer role
 }
 ```
@@ -2001,11 +2211,21 @@ Used to render the organization board.
 ```json
 {
 	"id": "uuid",
+	"created_by": {
+		"id": "uuid",
+		"name": "string",
+		"avatar_url": "string | null"
+	},
 	"description": "string",
 	"status": "open | resolved",
-	"created_by": "uuid (owner)",
-	"assignee_id": "uuid | null",
-	"task_id": "uuid | null",
+	"assignee": {
+		"id": "uuid",
+		"name": "string",
+	} | null,
+	"ticket": {
+		"id": "uuid",
+		"title": "string"
+	},
 	"created_at": "timestamp (today)",
 	"resolved_at": "timestamp | null"
 }
@@ -2013,13 +2233,17 @@ Used to render the organization board.
 
 **Error Responses:**
 
-`400 Bad Request` - Invalid input
+`422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "error": {
-	"code": "INVALID_INPUT",
-	"message": "validation error message"
-  }
+  "detail": [
+	{
+	  "type": "string",
+	  "loc": ["body", "field_name"],
+	  "msg": "validation error message",
+	  "input": "invalid_value"
+	}
+  ]
 }
 ```
 
@@ -2078,7 +2302,7 @@ Used to render the organization board.
 **Permissions:**
 - Scrum Master
 - Product Owner
-- Developer (Task owner/assignee)
+- Developer (Ticket owner/assignee)
 
 **URL Parameters:**
 - `blocker_id` - UUID of the Blocker
@@ -2128,4 +2352,188 @@ Used to render the organization board.
 ```
 ---
 
+## 8. Legal
+
+### 8.1 Get Legal Document
+
+**Endpoint:** `GET /legal/documents/{key}`
+
+**Description:** Returns a legal document by its key.
+
+**Authentication:** Public
+
+**URL Parameters:**
+- `key` - Document identifier: `privacy` | `terms`
+
+**Notes:**
+- Documents are stored as Markdown in the repository (`legal/privacy.md`, `legal/terms.md`)
+- Content is returned as raw Markdown plain text; the frontend is responsible for rendering
+
+**Success Response:** `200 OK`
+```json
+{
+  "key": "privacy",
+  "title": "Privacy Policy",
+  "content": "# Privacy Policy\n\n...",
+  "updated_at": "timestamp"
+}
+```
+
+**Error Responses:**
+
+`404 Not Found` - Document not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Legal document not found"
+  }
+}
+```
+---
+
+## 9. Analytics
+
+### 9.1 Get Organization analytics
+
+**Endpoint:** `GET /organizations/{org_id}/analytics`
+
+**Description:** Returns a the analytics for the organization.
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "tasks":[ 							//line chart
+	{ "week": "Week 1", "active": "int", "resolved": "int"},
+	{ "week": "Week 2", "active": "int", "resolved": "int"},
+	{ "week": "Week 3", "active": "int", "resolved": "int"},
+	{ "week": "Week 4", "active": "int", "resolved": "int"}
+  ],
+  "tickets":[							//bar chart
+	{ "week": "Week 1", "completed": "int"},
+	{ "week": "Week 2", "completed": "int"},
+	{ "week": "Week 3", "completed": "int"},
+	{ "week": "Week 4", "completed": "int"}
+  ],
+  "standups": {							//numeric cards
+	"posted": "int",
+	"total": "int" 
+  },
+  "blockers_avg_cycle_time": "float"    //numeric cards
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - Insufficient permissions
+```json
+{
+  "error": {
+	"code": "FORBIDDEN",
+	"message": "You do not have permission to perform this action"
+  }
+}
+```
+
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
+
+## 10. Dashboard
+
+### 10.1 Get Organization Dashboard
+
+**Endpoint:** `GET /organizations/{org_id}/dashboard`
+
+**Description:** Returns summary counts for the value cards and a feed of the 6 most recent activity events (tickets/tasks created or completed) from the last 7 days.
+
+**Notes:**
+- `recent_updates` only includes events from the last 7 days.
+- A completed item uses `updated_at` as its timestamp; a created item uses `created_at`.
+- `timestamp` is returned as a UTC datetime string — the frontend is responsible for formatting it as a relative time (e.g. "48 min ago", "2 days ago").
+
+**Authentication:** Required (JWT)
+
+**Permissions:**
+- Any organization member.
+
+**URL Parameters:**
+- `org_id` - UUID of the organization
+
+**Success Response:** `200 OK`
+```json
+{
+  "summary": {
+	"tasks_in_progress": "int",
+	"tickets_completed": "int",
+	"active_blockers": "int"
+  },
+  "recent_updates": [
+	{
+	  "type": "task | ticket",
+	  "event": "created | completed",
+	  "title": "string",
+	  "timestamp": "ISO 8601 datetime (UTC)",
+	  "created_by": "UserBrief"
+	}
+  ]
+}
+```
+
+**Error Responses:**
+
+`401 Unauthorized` - Authentication required
+```json
+{
+  "error": {
+	"code": "UNAUTHORIZED",
+	"message": "Authentication required"
+  }
+}
+```
+
+`403 Forbidden` - User is not part of any organization
+```json
+{
+  "error": {
+	"code": "NO_ORGANIZATION",
+	"message": "User is not part of any organization."
+  }
+}
+```
+`404 Not Found` - Organization not found
+```json
+{
+  "error": {
+	"code": "NOT_FOUND",
+	"message": "Organization not found"
+  }
+}
+```
+---
 **End of Document**

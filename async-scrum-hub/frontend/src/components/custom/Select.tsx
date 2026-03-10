@@ -4,10 +4,17 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 	label?: string;
 	error?: string;
 	helperText?: string;
-	options: Array<{ value: string; label: string }>;
+	options: Array<{ value: string | null; label: string }>;
 }
 
-export function Select({ label, error, helperText, options, className = "", ...props }: SelectProps) {
+export function Select({
+	label,
+	error,
+	helperText,
+	options,
+	className = "",
+	...props
+}: SelectProps) {
 	const hasError = !!error;
 
 	return (
