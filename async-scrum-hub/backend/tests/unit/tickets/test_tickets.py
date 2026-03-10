@@ -664,7 +664,8 @@ class TestGetTicketDetailRoute:
 		assert task["status"] == "in_progress"
 
 	def test_detail_includes_blockers(self, client, db_setup, sample_ticket, sample_blocker):
-		"""Returns blockers linked to the ticket with id, description, status."""
+		"""Returns blockers linked to the ticket with id, description, status, created_by."""
+		user, org, session = db_setup
 		response = client.get(DETAIL_URL.format(ticket_id=sample_ticket.id))
 		data = response.json()
 		assert len(data["blockers"]) == 1
@@ -672,6 +673,10 @@ class TestGetTicketDetailRoute:
 		assert blocker["id"] == str(sample_blocker.id)
 		assert blocker["description"] == sample_blocker.description
 		assert blocker["status"] == "open"
+		assert "created_by" in blocker
+		assert blocker["created_by"]["id"] == str(user.id)
+		assert blocker["created_by"]["name"] == user.name
+		assert "avatar_url" in blocker["created_by"]
 
 	def test_detail_includes_tasks_and_blockers(self, client, db_setup, sample_ticket, sample_task, sample_blocker):
 		"""Returns both tasks and blockers when ticket has both."""
@@ -735,7 +740,7 @@ class TestUpdateTicketRoute:
 		assert response.json()["assignee_id"] == str(developer_user.id)
 
 	def test_update_response_has_all_fields(self, client, db_setup, sample_ticket):
-		"""Response includes all UpdateTicketResponse fields."""
+		"""Response includes all UpdateTicketResponse fields including tasks and blockers."""
 		user, org, session = db_setup
 		response = client.patch(
 			UPDATE_URL.format(ticket_id=sample_ticket.id),
@@ -751,6 +756,39 @@ class TestUpdateTicketRoute:
 		assert "organization_id" in data
 		assert "created_at" in data
 		assert "updated_at" in data
+		assert "tasks" in data
+		assert "blockers" in data
+
+	def test_update_response_includes_tasks(self, client, db_setup, sample_ticket, sample_task):
+		"""Update response includes tasks linked to the ticket."""
+		response = client.patch(
+			UPDATE_URL.format(ticket_id=sample_ticket.id),
+			json={"title": "With tasks"},
+		)
+		data = response.json()
+		assert len(data["tasks"]) == 1
+		task = data["tasks"][0]
+		assert task["id"] == str(sample_task.id)
+		assert task["title"] == sample_task.title
+		assert task["status"] == "in_progress"
+
+	def test_update_response_includes_blockers_with_created_by(self, client, db_setup, sample_ticket, sample_blocker):
+		"""Update response includes blockers with created_by UserBrief."""
+		user, org, session = db_setup
+		response = client.patch(
+			UPDATE_URL.format(ticket_id=sample_ticket.id),
+			json={"title": "With blockers"},
+		)
+		data = response.json()
+		assert len(data["blockers"]) == 1
+		blocker = data["blockers"][0]
+		assert blocker["id"] == str(sample_blocker.id)
+		assert blocker["description"] == sample_blocker.description
+		assert blocker["status"] == "open"
+		assert "created_by" in blocker
+		assert blocker["created_by"]["id"] == str(user.id)
+		assert blocker["created_by"]["name"] == user.name
+		assert "avatar_url" in blocker["created_by"]
 
 	def test_update_empty_body_returns_200(self, client, db_setup, sample_ticket):
 		"""Empty body is valid — all fields are optional."""
