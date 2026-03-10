@@ -14,6 +14,7 @@ from src.blockers.schemas import (
 	BlockerUpdateRequest,
 	BlockerResponse,
 )
+from src.realtime.connection_manager import manager
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ def get_blocker_loader(blocker_id: uuid.UUID, db: Session = Depends(get_db)) -> 
 	response_model=BlockerResponse,
 	status_code=status.HTTP_201_CREATED,
 )
-def create_blocker(
+async def create_blocker(
 	org_id: uuid.UUID,
 	body: BlockerCreateRequest,
 	db: Session = Depends(get_db),
@@ -41,6 +42,23 @@ def create_blocker(
 		)
 
 	blocker = service.create_blocker(db, org_id, current_user, body.description, body.ticket_id, body.assignee_id)
+	await manager.broadcast(
+		str(org_id),
+		"blocker.created",
+		{
+			"id": str(blocker.id),
+			"description": blocker.description,
+			"status": blocker.status.value if hasattr(blocker.status, "value") else blocker.status,
+			"created_by": {
+				"id": str(blocker.creator.id),
+				"name": blocker.creator.name,
+				"avatar_url": blocker.creator.avatar_url,
+			},
+			"assignee": {"id": str(blocker.assignee.id), "name": blocker.assignee.name} if blocker.assignee else None,
+			"ticket": {"id": str(blocker.ticket.id), "title": blocker.ticket.title} if blocker.ticket else None,
+			"created_at": blocker.created_at.isoformat(),
+		},
+	)
 	return BlockerResponse(
 		id=blocker.id,
 		description=blocker.description,
@@ -98,13 +116,23 @@ def list_blockers(
 	response_model=BlockerResponse,
 	status_code=status.HTTP_200_OK,
 )
-def update_blocker(
+async def update_blocker(
 	body: BlockerUpdateRequest,
 	db: Session = Depends(get_db),
 	blocker: Blocker = Depends(require_resource_permission("blockers:update", get_blocker_loader)),
 ):
 	updates = body.model_dump(exclude_unset=True)
 	updated = service.update_blocker(db, blocker, updates)
+	await manager.broadcast(
+		str(updated.organization_id),
+		"blocker.updated",
+		{
+			"id": str(updated.id),
+			"description": updated.description,
+			"assignee": {"id": str(updated.assignee.id), "name": updated.assignee.name} if updated.assignee else None,
+			"ticket": {"id": str(updated.ticket.id), "title": updated.ticket.title} if updated.ticket else None,
+		},
+	)
 	return BlockerResponse(
 		id=updated.id,
 		description=updated.description,
@@ -121,8 +149,16 @@ def update_blocker(
 	"/blockers/{blocker_id}/resolve",
 	status_code=status.HTTP_204_NO_CONTENT,
 )
-def resolve_blocker(
+async def resolve_blocker(
 	db: Session = Depends(get_db),
 	blocker: Blocker = Depends(require_resource_permission("blockers:resolve", get_blocker_loader)),
 ):
 	service.resolve_blocker(db, blocker)
+	await manager.broadcast(
+		str(blocker.organization_id),
+		"blocker.resolved",
+		{
+			"id": str(blocker.id),
+			"resolved_at": blocker.resolved_at.isoformat(),
+		},
+	)

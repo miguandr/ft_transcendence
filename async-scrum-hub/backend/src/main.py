@@ -80,8 +80,10 @@ def api_info():
 
 
 from src.api.routes import api_router
+from src.realtime import routes as ws_routes
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(ws_routes.router, tags=["realtime"])
 
 os.makedirs("/app/static/avatars", exist_ok=True)
 app.mount("/static", StaticFiles(directory="/app/static"), name="static")

@@ -34,6 +34,7 @@ from src.database.models.enums import TaskStatus
 from src.api.deps import get_current_user, require_resource_permission
 from src.tasks import service
 from src.schemas.common import UserBrief
+from src.realtime.connection_manager import manager
 from src.tasks.schemas import (
 	CreateTaskRequest,
 	CreateTaskResponse,
@@ -71,7 +72,7 @@ def get_task_loader(task_id: uuid.UUID, db: Session = Depends(get_db)) -> Task:
 	response_model=CreateTaskResponse,
 	status_code=status.HTTP_201_CREATED,
 )
-def create_task(
+async def create_task(
 	body: CreateTaskRequest,
 	db: Session = Depends(get_db),
 	ticket: Ticket = Depends(require_resource_permission("tickets:tasks:create", get_ticket_loader)),
@@ -84,6 +85,21 @@ def create_task(
 		title=body.title,
 		description=body.description,
 		assignee_id=body.assignee_id,
+	)
+	await manager.broadcast(
+		str(ticket.organization_id),
+		"task.created",
+		{
+			"id": str(task.id),
+			"title": task.title,
+			"status": task.status.value if hasattr(task.status, "value") else task.status,
+			"ticket_id": str(task.ticket_id),
+			"assignee_id": str(task.assignee_id) if task.assignee_id else None,
+			"created_by": {
+				"id": str(task.creator.id),
+				"name": task.creator.name,
+			},
+		},
 	)
 	return CreateTaskResponse(
 		id=task.id,
@@ -141,7 +157,7 @@ def get_task_detail(
 	response_model=UpdateTaskResponse,
 	status_code=status.HTTP_200_OK,
 )
-def update_task(
+async def update_task(
 	body: UpdateTaskRequest,
 	db: Session = Depends(get_db),
 	task: Task = Depends(require_resource_permission("tasks:update", get_task_loader)),
@@ -151,6 +167,17 @@ def update_task(
 		db=db,
 		task=task,
 		updates=updates,
+	)
+	await manager.broadcast(
+		str(updated_task.organization_id),
+		"task.updated",
+		{
+			"id": str(updated_task.id),
+			"title": updated_task.title,
+			"status": updated_task.status.value if hasattr(updated_task.status, "value") else updated_task.status,
+			"assignee_id": str(updated_task.assignee_id) if updated_task.assignee_id else None,
+			"ticket_id": str(updated_task.ticket_id),
+		},
 	)
 	return UpdateTaskResponse(
 		id=updated_task.id,
@@ -167,8 +194,19 @@ def update_task(
 	"/tasks/{task_id}",
 	status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_task(
+async def delete_task(
 	db: Session = Depends(get_db),
 	task: Task = Depends(require_resource_permission("tasks:delete", get_task_loader)),
 ):
+	org_id = str(task.organization_id)
+	task_id = str(task.id)
+	ticket_id = str(task.ticket_id)
 	service.delete_task(db=db, task=task)
+	await manager.broadcast(
+		org_id,
+		"task.deleted",
+		{
+			"id": task_id,
+			"ticket_id": ticket_id,
+		},
+	)

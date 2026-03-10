@@ -460,14 +460,15 @@ file: binary (image file)
 **Request Body:**
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "scrum_role": "scrum_master | product_owner"
+	"organization_id": "uuid",
+	"scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -724,13 +725,16 @@ file: binary (image file)
 **Permissions:**
 - The authenticated user
 
+**Notes**
+- `available_scrum_role` only includes roles not yet taken in the org. `developer` is always present. 
+The frontend should use this list to show role options before calling `PATCH /organizations/{org_id}` (3.2).
+
 **Authentication:** Required (JWT)
 
 **Request Body:**
 ```json
 {
   "join_code": "SCR-493",
-  "scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -738,8 +742,12 @@ file: binary (image file)
 ```json
 {
   "organization_id": "uuid",
-  "org_role": "member | admin", //first one is admin. then all other member that joins are just members
-  "scrum_role": "scrum_master | product_owner | developer"
+  "org_role": "member",
+  "available_scrum_role": [
+	{ "role": "scrum_master" },
+	{ "role": "product_owner" },
+	{ "role": "developer" }
+  ]
 }
 ```
 
@@ -967,17 +975,35 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-	"id": "uuid",
-	"title": "string",
-	"description": "string | null",
-	"status": "todo | in_progress | completed",
-	"priority": "low | medium | high",
-	"created_by": "uuid",
-	"assignee_id": "uuid | null",
-	"organization_id": "uuid",
-	"created_at": "timestamp",
-	"updated_at": "timestamp"
+    "id": "uuid",
+    "title": "string",
+    "description": "string | null",
+    "status": "todo | in_progress | completed",
+    "priority": "low | medium | high",
+    "created_by": "UserBrief",
+    "assignee_id": "uuid | null",
+    "organization_id": "uuid",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+	"tasks": [
+			 {
+                "id": "uuid",
+                "title": "string",
+                "status": "in_progress | completed"
+                
+            }
+			],
+
+"blockers": [
+            {
+                "id": "uuid",
+                "description": "string",
+                "status": "open | resolved",
+                
+            }
+			]
 }
+
 ```
 
 **Error Responses:**
@@ -2463,17 +2489,18 @@ Used to render the organization board.
 ```json
 {
   "summary": {
-    "tasks_in_progress": "int",
-    "tickets_completed": "int",
-    "active_blockers": "int"
+	"tasks_in_progress": "int",
+	"tickets_completed": "int",
+	"active_blockers": "int"
   },
   "recent_updates": [
-    {
-      "type": "task | ticket",
-      "event": "created | completed",
-      "title": "string",
-      "timestamp": "ISO 8601 datetime (UTC)"
-    }
+	{
+	  "type": "task | ticket",
+	  "event": "created | completed",
+	  "title": "string",
+	  "timestamp": "ISO 8601 datetime (UTC)",
+	  "created_by": "UserBrief"
+	}
   ]
 }
 ```
