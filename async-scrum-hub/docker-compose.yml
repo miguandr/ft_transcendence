@@ -64,7 +64,7 @@ services:
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 587
       SMTP_USER: justspamandegg@gmail.com
-      SMTP_PASSWORD: wxhd chxp uumx qqns
+      #SMTP_PASSWORD: vgki qgrc bxbd tgpe
       SMTP_FROM_EMAIL: Async Scrum Hub
 
       # Application settings
