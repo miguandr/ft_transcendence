@@ -24,6 +24,15 @@ JOIN_CODE = "TST-001"
 class TestLiveSendInviteEmail:
     """Send real invite emails to justspamandegg@gmail.com."""
 
+    def test_smtp_is_configured(self):
+        """Fail fast if SMTP env vars are missing (container likely needs recreating)."""
+        from src.config.email import _smtp_configured
+
+        assert _smtp_configured(), (
+            "SMTP is not configured — SMTP_HOST, SMTP_USER, and SMTP_PASSWORD "
+            "must be set. Try: docker compose up -d --force-recreate backend"
+        )
+
     def test_send_invite_email_delivers_successfully(self):
         """Sends a real invite email and expects no exception to be raised."""
         from src.config.email import send_invite_email
