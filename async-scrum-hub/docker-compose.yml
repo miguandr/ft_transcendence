@@ -61,11 +61,11 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
 
       # SMTP / Email settings
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-your-email@gmail.com}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-your-app-password}
-      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}  # Falls back to SMTP_USER if not set
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: justspamandegg@gmail.com
+      SMTP_PASSWORD: wxhd chxp uumx qqns
+      SMTP_FROM_EMAIL: Async Scrum Hub
 
       # Application settings
       PYTHONUNBUFFERED: 1  # Show Python output in real-time
