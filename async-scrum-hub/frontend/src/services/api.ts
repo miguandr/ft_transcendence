@@ -528,24 +528,24 @@ function getCurrentUserRecord() {
 // 	blockers_avg_cycle_time: number;
 // }
 
-export async function getAnalitycsData(
-	org_id: string
-) : Promise<AnalitycsData> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
+// export async function getAnalitycsData(
+// 	org_id: string
+// ) : Promise<AnalitycsData> {
+// 	await delay(300);
+// 	const currentUser = getCurrentUserRecord();
 
-	if (!org_id) {
-		createApiError("NOT_FOUND", "Organization not found");
-	}
-	if (!currentUser) {
-		createApiError("UNAUTHORIZED", "Authentication required");
-	}
-	if (org_id !== currentUser.organization_id) {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
+// 	if (!org_id) {
+// 		createApiError("NOT_FOUND", "Organization not found");
+// 	}
+// 	if (!currentUser) {
+// 		createApiError("UNAUTHORIZED", "Authentication required");
+// 	}
+// 	if (org_id !== currentUser.organization_id) {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
 
-	return (mockAnalitycs);
-}
+// 	return (mockAnalitycs);
+// }
 
 // =============================================================
 // TERMS & POLICY
@@ -558,19 +558,19 @@ export async function getAnalitycsData(
 // 	updated_at: string;
 // }
 
-export async function getLegalDocument(
-	key: "privacy" | "terms"
-) : Promise<LegalDocuments> {
-	await delay(200);
+// export async function getLegalDocument(
+// 	key: "privacy" | "terms"
+// ) : Promise<LegalDocuments> {
+// 	await delay(200);
 
-	const document = mockLegalDocuments[key];
+// 	const document = mockLegalDocuments[key];
 
-	if (!document) {
-		createApiError("NOT_FOUND", "Legal document not found");
-	}
+// 	if (!document) {
+// 		createApiError("NOT_FOUND", "Legal document not found");
+// 	}
 
-	return (document);
-}
+// 	return (document);
+// }
 
 
 // =============================================================
@@ -829,48 +829,48 @@ export async function inviteMember(
 // }
 
 
-export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
-	await delay(300);
+// export async function getOrganizationMembers(org_id: string): Promise<OrganizationMember[]> {
+// 	await delay(300);
 
-	if (!org_id) {
-		createApiError("NOT_FOUND", "No members found in this organization");
-	}
+// 	if (!org_id) {
+// 		createApiError("NOT_FOUND", "No members found in this organization");
+// 	}
 
-	const orgMembers = mockUsers
-		.filter((user) => user.organization_id === org_id && user.org_role !== null && user.scrum_role !== null)
-		.map((user) => {
-			const userTickets = mockTickets
-				.filter((t) => t.assignee_id === user.id)
-				.map(({ id, title, status, priority }) => ({ id, title, status, priority }));
+// 	const orgMembers = mockUsers
+// 		.filter((user) => user.organization_id === org_id && user.org_role !== null && user.scrum_role !== null)
+// 		.map((user) => {
+// 			const userTickets = mockTickets
+// 				.filter((t) => t.assignee_id === user.id)
+// 				.map(({ id, title, status, priority }) => ({ id, title, status, priority }));
 
-			const userTasks = mockTasks
-				.filter((t) => t.assignee_id === user.id)
-				.map(({ id, title, status, ticket_id }) => ({ id, title, status, ticket_id }));
+// 			const userTasks = mockTasks
+// 				.filter((t) => t.assignee_id === user.id)
+// 				.map(({ id, title, status, ticket_id }) => ({ id, title, status, ticket_id }));
 
-			const userBlockers = mockBlockers
-				.filter((b) => b.created_by.id === user.id)
-				.map((b) => ({
-					id: b.id,
-					description: b.description,
-					status: b.status,
-					created_at: b.created_at,
-					created_by: b.created_by.id,
-				}));
+// 			const userBlockers = mockBlockers
+// 				.filter((b) => b.created_by.id === user.id)
+// 				.map((b) => ({
+// 					id: b.id,
+// 					description: b.description,
+// 					status: b.status,
+// 					created_at: b.created_at,
+// 					created_by: b.created_by.id,
+// 				}));
 
-			return {
-				id: user.id,
-				name: user.name,
-				avatar_url: user.avatar_url,
-				org_role: user.org_role as "admin" | "member",
-				scrum_role: user.scrum_role as "scrum_master" | "product_owner" | "developer",
-				tickets: userTickets,
-				tasks: userTasks,
-				blockers: userBlockers,
-			};
-		});
+// 			return {
+// 				id: user.id,
+// 				name: user.name,
+// 				avatar_url: user.avatar_url,
+// 				org_role: user.org_role as "admin" | "member",
+// 				scrum_role: user.scrum_role as "scrum_master" | "product_owner" | "developer",
+// 				tickets: userTickets,
+// 				tasks: userTasks,
+// 				blockers: userBlockers,
+// 			};
+// 		});
 
-	return orgMembers;
-}
+// 	return orgMembers;
+// }
 
 
 // // =============================================================
@@ -997,43 +997,43 @@ export async function getOrganizationMembers(org_id: string): Promise<Organizati
 
 
 // Mock removeMember function
-export async function removeMember(
-	org_id: string,
-	member_id: string
-): Promise<{ success: boolean }> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// export async function removeMember(
+// 	org_id: string,
+// 	member_id: string
+// ): Promise<{ success: boolean }> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Step 1: Check if current user is an admin
-	if (currentUser.org_role !== "admin") {
-		createApiError("FORBIDDEN", "Only admins can remove members");
-	}
+// 	// Step 1: Check if current user is an admin
+// 	if (currentUser.org_role !== "admin") {
+// 		createApiError("FORBIDDEN", "Only admins can remove members");
+// 	}
 
-	// Step 2: Check if current user belongs to this organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Step 2: Check if current user belongs to this organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	// Step 3: Find the member to remove
-	const memberToRemove = mockUsers.find(
-		(u) => u.id === member_id && u.organization_id === org_id
-	);
-	if (!memberToRemove) {
-		createApiError("NOT_FOUND", "Member not found in this organization");
-	}
+// 	// Step 3: Find the member to remove
+// 	const memberToRemove = mockUsers.find(
+// 		(u) => u.id === member_id && u.organization_id === org_id
+// 	);
+// 	if (!memberToRemove) {
+// 		createApiError("NOT_FOUND", "Member not found in this organization");
+// 	}
 
-	// Step 4: Prevent removing admin users
-	if (memberToRemove.org_role === "admin") {
-		createApiError("FORBIDDEN", "Cannot remove admin members");
-	}
+// 	// Step 4: Prevent removing admin users
+// 	if (memberToRemove.org_role === "admin") {
+// 		createApiError("FORBIDDEN", "Cannot remove admin members");
+// 	}
 
-	// Step 5: Remove the member (set their org fields to null)
-	memberToRemove.organization_id = null;
-	memberToRemove.org_role = null;
-	memberToRemove.scrum_role = null;
+// 	// Step 5: Remove the member (set their org fields to null)
+// 	memberToRemove.organization_id = null;
+// 	memberToRemove.org_role = null;
+// 	memberToRemove.scrum_role = null;
 
-	return { success: true };
-}
+// 	return { success: true };
+// }
 
 // // =============================================================
 // // STANDUPS
@@ -1892,7 +1892,7 @@ export async function deleteTask(task_id: string): Promise<void> {
 // =============================================================
 // MOCK DASHBOARD
 // =============================================================
-
+/*
 export async function getDashboardData(org_id: string): Promise<DashboardData> {
 	await delay(400);
 
@@ -1932,7 +1932,7 @@ export async function getDashboardData(org_id: string): Promise<DashboardData> {
 		],
 	};
 }
-
+*/
 // =============================================================
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
@@ -2098,7 +2098,7 @@ export async function setUserRole(data: {
 
 	return response.json();//{ success: true };
 }
-/*
+
 // 3.3 GET ORGANIZATION MEMBERS
 export async function getOrganizationMembers(
 	org_id: string
@@ -2120,7 +2120,7 @@ export async function getOrganizationMembers(
 
 	return response.json();
 }
-
+/*
 // 3.4 INVITE MEMBERS TO ORGANIZATION
 export async function inviteMember(
 	org_id: string,
@@ -2144,7 +2144,7 @@ export async function inviteMember(
 
 	return response.json();
 }
-
+*/
 // 3.5 REMOVE MEMBER FROM ORGANIZATION
 export async function removeMember(
 	org_id: string,
@@ -2164,9 +2164,9 @@ export async function removeMember(
 		throw errorData;
 	}
 
-	return response.json();
+	return { success: true };
 }
-*/
+
 // 3.6 JOIN ORGANIZATION BY CODE
 export async function joinOrganization(data:
 	JoinOrgRequest
@@ -2184,7 +2184,7 @@ export async function joinOrganization(data:
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw errorData; // Contains { error: { code, message } }
+		throw errorData;
 	}
 
 	return response.json();
@@ -2631,7 +2631,7 @@ export async function resolveBlocker(
 		throw errorData;
 	}
 }
-
+*/
 
 // 8.1 GET LEGAL DOCUMENT
 export async function getLegalDocument(
@@ -2700,4 +2700,4 @@ export async function getDashboardData(
 
 	return response.json();
 }
-*/
+

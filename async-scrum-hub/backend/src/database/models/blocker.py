@@ -98,7 +98,7 @@ class Blocker(Base):
 	)
 
 	status: Mapped[BlockerStatus] = mapped_column(
-		SQLEnum(BlockerStatus, name="blocker_status", create_type=True),
+		SQLEnum(BlockerStatus, name="blocker_status", create_type=True, values_callable=lambda x: [e.value for e in x]),
 		nullable=False,
 		default=BlockerStatus.OPEN,
 		server_default="open",
