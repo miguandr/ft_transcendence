@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { formatScrumRole } from "../../utils/formatters";
 import { getOrganizationMembers, removeMember } from "../../services/api";
 import type { OrganizationMember } from "../../types/api.types"
-import { useAuth } from "../../routes/useAuth";
+import { useAuth, } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
 import {
 	PageHeader,
@@ -24,7 +24,7 @@ import type { APIError } from "../../utils/shared.types";
 
 
 export function Info() {
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 
 	const currentUser = authUser?.org_role ? authUser.org_role : null;
 	const orgId = authUser?.organization_id ?? null;
@@ -75,7 +75,7 @@ export function Info() {
 		fetchMembers();
 	}, [fetchMembers]);
 
-	const isAdmin = currentUser === "Admin";
+	const isAdmin = currentUser === "admin";
 
 	const handleRemoveMember = async () => {
 		setIsRemoving(true);
@@ -86,8 +86,7 @@ export function Info() {
 
 				// Ipdate UI by removing member from state
 				setMembers(members.filter((m) => m.id !== confirmDelete));
-
-				// Close modal
+				await refreshUser();
 				setConfirmDelete(null);
 			} catch (error) {
 				console.error("API call failed:", error);
