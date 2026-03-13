@@ -17,7 +17,6 @@ from pydantic import Field
 class Settings(BaseSettings):
 	jwt_secret_key: str = Field(..., alias="JWT_SECRET_KEY")
 	jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
-	access_token_expire_minutes: int = Field(30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
 
 	# SMTP / Email settings (optional — invite emails are skipped when not configured)
 	smtp_host: Optional[str] = Field(None, alias="SMTP_HOST")
