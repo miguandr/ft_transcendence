@@ -295,7 +295,7 @@ export function TeamSetup() {
 								<div className="flex items-center justify-between mb-2 w-full">
 									<div>
 										<p className="text-base text-gray-500 text-center">
-											Pick your role to join: {confirmedTeamName ?? teamCode}
+											Pick your role to join the team
 										</p>
 									</div>
 									<Check className="w-5 h-5 text-emerald-600" />
