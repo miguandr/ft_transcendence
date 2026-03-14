@@ -37,7 +37,7 @@ export function Blockers() {
 		assignee_id: "",
 	});
 	// Auth states
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const [errors, setErrors] = useState<{
 		fetchBlocker?: string;
 		createBlocker?: string;
@@ -96,6 +96,7 @@ export function Blockers() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchBlocker: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ fetchBlocker: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -139,6 +140,7 @@ export function Blockers() {
 				setErrors({ createBlocker: "Only users with Developer role can be assigned to blockers" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ createBlocker: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ createBlocker: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -174,6 +176,7 @@ export function Blockers() {
 				setErrors({ editBlocker: "Only users with Developer role can be assigned to blockers" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ editBlocker: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ editBlocker: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -202,6 +205,7 @@ export function Blockers() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ resolveBlocker: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ resolveBlocker: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {

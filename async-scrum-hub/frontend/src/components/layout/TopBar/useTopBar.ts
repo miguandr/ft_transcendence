@@ -84,6 +84,7 @@ export function useTopBar() {
 				setErrors({ user: "Email is incorrect" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ user: "Authentication required" });
+				refreshUser();
 			} else {
 				setErrors({ user: "Something went wrong" });
 			}
@@ -121,6 +122,7 @@ export function useTopBar() {
 				setErrors({ avatar: "File size exceeds the maximum limit of 5MB" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ avatar: "Authentication required" });
+				refreshUser();
 			} else {
 				setErrors({ avatar: "Something went wrong" });
 			}
@@ -155,6 +157,7 @@ export function useTopBar() {
 				setErrors({ invite: "Email is incorrect" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ invite: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ invite: "Only admin can perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {

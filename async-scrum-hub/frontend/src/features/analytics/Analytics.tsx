@@ -22,7 +22,7 @@ export function Analytics() {
 	//Data states
 	const [analytics, setAnalytics] = useState<AnalitycsData | null>(null);
 	//Auth states
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const [errors, setErrors] = useState<{ analytics?: string }>({});
 	//Communication states
 	const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +44,7 @@ export function Analytics() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ analytics: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ analytics: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {

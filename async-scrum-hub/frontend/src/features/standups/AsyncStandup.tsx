@@ -25,7 +25,7 @@ export function AsyncStandup() {
 		today: "",
 	});
 	//Auth states
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const orgId = authUser?.organization_id ?? null;
 	const [errors, setErrors] = useState<{
 		fetchStandups?: string;
@@ -83,6 +83,7 @@ export function AsyncStandup() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchStandups: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ fetchStandups: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -119,6 +120,7 @@ export function AsyncStandup() {
 				setErrors({ createStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ createStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ createStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -151,6 +153,7 @@ export function AsyncStandup() {
 				setErrors({ editStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ editStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ editStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "EDIT_WINDOW_EXPIRED") {
@@ -177,6 +180,7 @@ export function AsyncStandup() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ deleteStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ deleteStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {

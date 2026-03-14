@@ -1278,20 +1278,20 @@ export async function inviteMember(
 // TICKETS
 // =============================================================
 
-// Interfaces
-export interface TicketListItem {
-	id: string;
-	title: string;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	assignee: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	} | null;
-	created_at: string;
-	updated_at: string;
-}
+// // Interfaces
+// export interface TicketListItem {
+// 	id: string;
+// 	title: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	} | null;
+// 	created_at: string;
+// 	updated_at: string;
+// }
 
 export async function listTickets(org_id: string): Promise<TicketListItem[]> {
 	await delay(500);
