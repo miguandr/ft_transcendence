@@ -90,7 +90,10 @@ export function SprintBoard() {
 
 			{/* Board Header */}
 			<BoardHeader
-				onCreateTicket={() => setIsCreateTicketOpen(true)}
+				onCreateTicket={() => {
+					setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
+					setIsCreateTicketOpen(true)
+				}}
 				canCreateTicket={isLeadRole}
 			/>
 

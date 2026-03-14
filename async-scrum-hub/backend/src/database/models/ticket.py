@@ -134,5 +134,6 @@ class Ticket(Base):
 	blockers: Mapped[list["Blocker"]] = relationship(
 		"Blocker",
 		back_populates="ticket",
+		cascade="all, delete-orphan",
 		passive_deletes=True,
 	)

@@ -15,7 +15,7 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 			status_code=status.HTTP_403_FORBIDDEN,
 			detail={"error": {"code": "NO_ORGANIZATION", "message": "User is not part of any organization."}},
 		)
-	
+
 	# --- tasks (line chart) ---
 	now = datetime.now(timezone.utc)
 	tasks_data = []
@@ -40,7 +40,7 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 		).count()
 
 		tasks_data.append(TaskWeekData(week=label, in_progress=active, completed=resolved))
-		
+
 	# --- tickets (bar chart) ---
 	tickets_data = []
 	for i in range(3, -1, -1):
@@ -65,7 +65,7 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 		Standup.standup_date == today
 	).count()
 
-	standp_data = StandupParticipation(posted=posted, total=total) 
+	standp_data = StandupParticipation(posted=posted, total=total)
 
 	# --- Blockers (numeric card) ---
 	start_4_weeks_ago = now - timedelta(weeks=4)
@@ -82,10 +82,10 @@ def get_analytics(db: Session, user: User) -> AnalyticsResponse:
 			Blocker.resolved_at < now
 		).scalar()
 	)
-	avg_cycle_time = avg_cycle_time or 0.0
+	avg_cycle_time = round((avg_cycle_time or 0.0) / 86400, 2)
 
 	return AnalyticsResponse(
-		tasks=tasks_data, 
+		tasks=tasks_data,
 		tickets=tickets_data,
 		standups=standp_data,
 		blockers_avg_cycle_time= avg_cycle_time

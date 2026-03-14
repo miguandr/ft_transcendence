@@ -653,42 +653,42 @@ function getCurrentUserRecord() {
 // }
 
 //Invite Member to organization
-export async function inviteMember(
-	org_id: string,
-	data: InviteMemberRequest
-) : Promise<InviteMemberResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// export async function inviteMember(
+// 	org_id: string,
+// 	data: InviteMemberRequest
+// ) : Promise<InviteMemberResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	const org_info = mockOrganizations
-		.find((c) => c.id === org_id);
-	//	.find((c) => c.join_code);
+// 	const org_info = mockOrganizations
+// 		.find((c) => c.id === org_id);
+// 	//	.find((c) => c.join_code);
 
-	//1. VALIDATION
-	//Checl if organization exists
-	if (!org_info?.id) {
-		createApiError("NOT_FOUND", "Organization not found");
-	}
-	//Check user's permission
-	if (currentUser.org_role !== "admin") {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
-	//Check if name isnt empty
-	if (!data.name.trim()) {
-		createApiError("INVALID_INPUT", "Name cant be empty");
-	}
-	//Check if email is valid
-	if (!/\S+@\S+\.\S+/.test(data.email)) {
-		createApiError("INVALID_INPUT", "Email format is invalid");
-	}
-	//Check if email already exists in the organization
-	const existingEmail = mockUsers.find((e) => e.email === data.email);
-	if (existingEmail) {
-		createApiError("ALREADY_MEMBER", "User is already a member of this organization");
-	}
+// 	//1. VALIDATION
+// 	//Checl if organization exists
+// 	if (!org_info?.id) {
+// 		createApiError("NOT_FOUND", "Organization not found");
+// 	}
+// 	//Check user's permission
+// 	if (currentUser.org_role !== "admin") {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
+// 	//Check if name isnt empty
+// 	if (!data.name.trim()) {
+// 		createApiError("INVALID_INPUT", "Name cant be empty");
+// 	}
+// 	//Check if email is valid
+// 	if (!/\S+@\S+\.\S+/.test(data.email)) {
+// 		createApiError("INVALID_INPUT", "Email format is invalid");
+// 	}
+// 	//Check if email already exists in the organization
+// 	const existingEmail = mockUsers.find((e) => e.email === data.email);
+// 	if (existingEmail) {
+// 		createApiError("ALREADY_MEMBER", "User is already a member of this organization");
+// 	}
 
-	return { email: data.email };
-}
+// 	return { email: data.email };
+// }
 
 // // =============================================================
 // // MOCK TEAM SETUP
@@ -1944,7 +1944,7 @@ async function apiFetch(
 	options?: RequestInit
 ) : Promise<Response> {
 	const response = await fetch(url, options);
-	if (response.status === 401) {
+	if (response.status === 401 && !url.includes("/auth/")) {
 		localStorage.removeItem("token");
 		window.location.href = "/login";
 	}
@@ -2134,7 +2134,7 @@ export async function getOrganizationMembers(
 
 	return response.json();
 }
-/*
+
 // 3.4 INVITE MEMBERS TO ORGANIZATION
 export async function inviteMember(
 	org_id: string,
@@ -2158,7 +2158,7 @@ export async function inviteMember(
 
 	return response.json();
 }
-*/
+
 // 3.5 REMOVE MEMBER FROM ORGANIZATION
 export async function removeMember(
 	org_id: string,
