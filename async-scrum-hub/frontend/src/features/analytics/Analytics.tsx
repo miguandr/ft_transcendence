@@ -56,7 +56,7 @@ export function Analytics() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchAnalitycs();

@@ -68,6 +68,7 @@ async def create_standup(
 	response = StandupCreateResponse(
 		id=standup.id,
 		created_at=standup.created_at,
+		standup_date=standup.standup_date,
 		today=standup.today,
 		yesterday=standup.yesterday,
 		blocker_ids=standup.blocker_ids,
@@ -116,6 +117,7 @@ def list_standups(
 		result.append(StandupResponse(
 			id=standup.id,
 			created_at=standup.created_at,
+			standup_date=standup.standup_date,
 			today=standup.today,
 			yesterday=standup.yesterday,
 			blockers=blockers,
@@ -152,6 +154,7 @@ async def update_standup(
 	return StandupResponse(
 		id=updated.id,
 		created_at=updated.created_at,
+		standup_date=updated.standup_date,
 		today=updated.today,
 		yesterday=updated.yesterday,
 		blockers=blockers,

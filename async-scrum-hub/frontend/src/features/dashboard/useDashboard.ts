@@ -41,7 +41,7 @@ export function useDashboard() {
 		};
 
 		fetchData();
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	return {
 		authUser,

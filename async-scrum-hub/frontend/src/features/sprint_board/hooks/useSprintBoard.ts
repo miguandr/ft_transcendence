@@ -136,7 +136,7 @@ export function useSprintBoard() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchTicketBoard();

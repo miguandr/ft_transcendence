@@ -70,7 +70,7 @@ export function Info() {
 				setErrors({ fetchMember: "Something went wrong" });
 			}
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchMembers();
