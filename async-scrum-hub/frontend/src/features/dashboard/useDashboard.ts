@@ -5,7 +5,7 @@ import { useAuth } from "../../routes/useAuth";
 import type { APIError } from "../../utils/shared.types";
 
 export function useDashboard() {
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const orgId = authUser?.organization_id ?? null;
 	const [data, setData] = useState<DashboardData | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +27,7 @@ export function useDashboard() {
 				const apiError = error as APIError;
 				if (apiError.error?.code === "UNAUTHORIZED") {
 					setErrors({ dashboard: "Authentication required" });
+					refreshUser();
 				} else if (apiError.error?.code === "NO_ORGANIZATION") {
 					setErrors({ dashboard: "User is not part of any organization." });
 				} else if (apiError.error?.code === "NOT_FOUND") {
@@ -40,7 +41,7 @@ export function useDashboard() {
 		};
 
 		fetchData();
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	return {
 		authUser,

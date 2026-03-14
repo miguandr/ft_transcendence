@@ -4,15 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { ModalConfirmation, PageHeader, Avatar, ErrorText } from "../../components/custom/index";
 import { useAuth } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
-import {
-	createStandup,
-	listStandups,
-	editStandup,
-	deleteStandup,
-} from "../../services/api";
+import { createStandup, listStandups, editStandup, deleteStandup } from "../../services/api";
 import type { APIError } from "../../utils/shared.types";
 import type { StandupListItem } from "../../types/api.types";
-
 
 export function AsyncStandup() {
 	//View/UI states
@@ -25,7 +19,7 @@ export function AsyncStandup() {
 		today: "",
 	});
 	//Auth states
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const orgId = authUser?.organization_id ?? null;
 	const [errors, setErrors] = useState<{
 		fetchStandups?: string;
@@ -46,29 +40,35 @@ export function AsyncStandup() {
 	//Time helpers
 	const now = new Date();
 	const today = now.toLocaleDateString("en-CA");
-	const yesterdayDate = new Date();
-	yesterdayDate.setDate(now.getDate() - 1);
+	const yesterdayDateObj = new Date(now);
+	yesterdayDateObj.setDate(now.getDate() - 1);
+	const yesterday = yesterdayDateObj.toLocaleDateString("en-CA");
 	//Permissions helpers
 	const canEditStandup = (standup: StandupListItem) => {
-		return standup.created_by.id === authUser?.id
-		&& standup.standup_date === today;
+		return standup.created_by.id === authUser?.id && standup.standup_date === today;
 	};
 	const hasCreatedStandupToday = standups.some(
 		(currentStandup) =>
-			currentStandup.created_by.id === authUser?.id &&
-			currentStandup.standup_date === today
+			currentStandup.created_by.id === authUser?.id && currentStandup.standup_date === today
 	);
-	//Update helpers
-	const latestStandupPerUser = standups
-		.reduce((acc, s) => {
-			const existing = acc.find((x) => x.created_by.id === s.created_by.id);
-			if (!existing || s.created_at > existing.created_at) {
-				return [...acc.filter((x) => x.created_by.id !== s.created_by.id), s]; //We keep all other standups and replace only the one from the current user
-			}
-			return acc;
-		}, [] as StandupListItem[])
-		.sort((a, b) => b.created_at.localeCompare(a.created_at));
-
+	//Update helpers — one card per user: today's if it exists, otherwise yesterday's
+	const visibleStandups = Object.values(
+		standups
+			.filter((s) => s.standup_date === today || s.standup_date === yesterday)
+			.reduce(
+				(acc, s) => {
+					const userId = s.created_by.id;
+					if (!acc[userId] || s.standup_date > acc[userId].standup_date) {
+						acc[userId] = s;
+					}
+					return acc;
+				},
+				{} as Record<string, StandupListItem>
+			)
+	).sort(
+		(a, b) =>
+			b.standup_date.localeCompare(a.standup_date) || b.created_at.localeCompare(a.created_at)
+	);
 
 	const fetchStandups = useCallback(async () => {
 		if (!orgId) return;
@@ -83,6 +83,7 @@ export function AsyncStandup() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchStandups: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ fetchStandups: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -93,7 +94,7 @@ export function AsyncStandup() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchStandups();
@@ -119,6 +120,7 @@ export function AsyncStandup() {
 				setErrors({ createStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ createStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ createStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -151,10 +153,13 @@ export function AsyncStandup() {
 				setErrors({ editStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ editStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ editStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "EDIT_WINDOW_EXPIRED") {
-				setErrors({ editStandup: "Standups can only be edited on the day they are created" });
+				setErrors({
+					editStandup: "Standups can only be edited on the day they are created",
+				});
 			} else {
 				setErrors({ editStandup: "Something went wrong" });
 			}
@@ -177,6 +182,7 @@ export function AsyncStandup() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ deleteStandup: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ deleteStandup: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -196,14 +202,11 @@ export function AsyncStandup() {
 	};
 
 	useOrgWebSocket(orgId, (msg) => {
-		const reFetchEvents = [
-			"standup.created",
-			"standup.updated",
-		]
+		const reFetchEvents = ["standup.created", "standup.updated"];
 		if (reFetchEvents.includes(msg.event)) {
 			fetchStandups();
 		}
-	})
+	});
 
 	return (
 		<div className="p-8">
@@ -232,24 +235,25 @@ export function AsyncStandup() {
 					</button>
 				)}
 
-
 				{isLoading && (
 					<div className="flex items-center justify-center py-16 text-gray-400 text-sm">
 						Loading standups...
 					</div>
 				)}
 
-				{!isLoading && latestStandupPerUser.length === 0 && (
+				{!isLoading && visibleStandups.length === 0 && (
 					<div className="flex flex-col items-center justify-center py-16 text-center">
 						<p className="text-sm text-gray-400">No standups yet.</p>
-						<p className="text-xs text-gray-300 mt-1">Be the first to post an update.</p>
+						<p className="text-xs text-gray-300 mt-1">
+							Be the first to post an update.
+						</p>
 					</div>
 				)}
 
 				{errors.fetchStandups && <ErrorText>{errors.fetchStandups}</ErrorText>}
 
 				{!isLoading &&
-					latestStandupPerUser.map((s) => {
+					visibleStandups.map((s) => {
 						if (!s.today) return null;
 						const canEdit = canEditStandup(s);
 
@@ -276,26 +280,18 @@ export function AsyncStandup() {
 								</div>
 
 								<div className="space-y-4">
-									{/* Yesterday Section */}
-									{s.yesterday && (
-										<div className="pb-4 border-b border-gray-100">
-											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-												Yesterday
-											</h4>
-											<p className="text-sm text-gray-600">{s.yesterday}</p>
-										</div>
-									)}
-
 									{/* Today Section */}
 									<div
-										className="pb-4 border-b border-gray-100 relative"
+										className="pb-4 relative"
 										onMouseEnter={() => setHoveredStandup(s.id)}
 										onMouseLeave={() => setHoveredStandup(null)}
 									>
 										<div className="flex items-start justify-between gap-3">
 											<div className="flex-1">
 												<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
-													Today
+													{s.standup_date === today
+														? "Today" 
+														: "Yesterday"}
 												</h4>
 												<p className="text-sm text-gray-600">{s.today}</p>
 											</div>
@@ -320,6 +316,16 @@ export function AsyncStandup() {
 											)}
 										</div>
 									</div>
+
+									{/* Yesterday Section */}
+									{s.yesterday && (
+										<div className="pb-4">
+											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+												Yesterday
+											</h4>
+											<p className="text-sm text-gray-600">{s.yesterday}</p>
+										</div>
+									)}
 
 									{/* Blockers Section */}
 									{s.blockers.length > 0 && (

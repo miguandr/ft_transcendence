@@ -100,6 +100,7 @@ export function TeamSetup() {
 				setErrors({ create: apiError.detail[0]?.msg ?? "Validation error message" });
 			} else if (apiError?.error?.code === "UNAUTHORIZED") {
 				setErrors({ create: "Authentication required" });
+				refreshUser();
 			} else if (apiError?.error?.code === "ORG_EXISTS") {
 				setErrors({ create: "An organization with this name already exists." });
 			} else if (apiError?.error?.message) {
@@ -139,6 +140,7 @@ export function TeamSetup() {
 			if (apiError?.error?.code === "UNAUTHORIZED") {
 				setErrors({ continue: "Authentication required" });
 				setTeamConfirmed(false);
+				refreshUser();
 			} else if (apiError?.error?.code === "NOT_FOUND") {
 				setErrors({ continue: "Organization not found" });
 				setShowLoginPrompt(true);
