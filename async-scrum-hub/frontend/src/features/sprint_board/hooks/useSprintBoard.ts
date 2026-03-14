@@ -106,7 +106,10 @@ export function useSprintBoard() {
 		authUser?.scrum_role === "product_owner" ||
 		authUser?.scrum_role === "scrum_master" ||
 		task.assignee_id === authUser?.id;
-	const developerMembers = teamMembers.filter((m) => m.scrum_role === "developer");
+	const developerMembers = teamMembers.filter((m) =>
+		m.scrum_role === "developer" &&
+		m.id !== authUser?.id
+	);
 
 
 	const fetchTicketBoard = useCallback(async () => {

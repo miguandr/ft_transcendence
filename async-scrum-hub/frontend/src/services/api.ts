@@ -1944,7 +1944,7 @@ async function apiFetch(
 	options?: RequestInit
 ) : Promise<Response> {
 	const response = await fetch(url, options);
-	if (response.status === 401) {
+	if (response.status === 401 && !url.includes("/auth/")) {
 		localStorage.removeItem("token");
 		window.location.href = "/login";
 	}
