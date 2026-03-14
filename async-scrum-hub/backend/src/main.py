@@ -25,6 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Frontend dev server
+        "http://localhost:5174",  # Frontend dev server (alternate port)
         "http://localhost:3000",  # Alternative frontend port
         "http://frontend:5173",   # Docker service name
     ],
