@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by miguandr, dtorret, mrablo-, afoth.*
+*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrablo-, afoth.*
 
 ---
 
@@ -73,7 +73,6 @@ The application will be available at:
 |-------------------------------|------------------------------------
 | `DATABASE_URL`                | PostgreSQL connection string 
 | `SECRET_KEY`                  | JWT signing secret key 
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT expiration time in minutes 
 | `ALLOWED_ORIGINS`             | CORS allowed origins (frontend URL) 
 
 ---
@@ -389,6 +388,7 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Designed and built the custom component design system (`components/custom/`).
 - Implemented API client (`services/api.ts`) with typed request functions.
 - Maintained frontend tooling (Vite, TypeScript config, ESLint).
+- Implemented drag & drop interface on the sprint board.
 
 ### Freddy — Developer & Backend Feature Domains
 - Implemented `organizations/` domain (create, join, member management).
@@ -396,7 +396,6 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `tasks/` domain.
 - Built database models: `ticket.py`, `task.py`.
 - Wrote backend tests for organizations and tickets domains.
-- Implemented drag & drop interface on the sprint board.
 
 ### Maria Luiza — Product Owner & DevOps
 - Implemented `standups/` domain (create, auto-fill, update, list).
