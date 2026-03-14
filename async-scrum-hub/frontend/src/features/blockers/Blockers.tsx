@@ -17,7 +17,7 @@ import {
 	listBlockers,
 	updateBlocker,
 	resolveBlocker,
-	listTickets, //listTicketsBoard
+	listTicketsBoard,
 	getOrganizationMembers,
 } from "../../services/api";
 import type { ListTicketsBoardResponse, OrganizationMember, BlockerListItem } from "../../types/api.types";
@@ -67,7 +67,6 @@ export function Blockers() {
 	// Permission helpers
 	const canEditBlocker = (blocker: BlockerListItem) =>
 		blocker.created_by.id === authUser?.id ||
-		blocker.assignee?.id === authUser?.id ||
 		authUser?.scrum_role === "scrum_master" ||
 		authUser?.scrum_role === "product_owner";
 
@@ -84,7 +83,7 @@ export function Blockers() {
 
 		try {
 			const blockersData = await listBlockers(orgId);
-			const ticketsData = await listTickets(orgId);
+			const ticketsData = await listTicketsBoard(orgId);
 			const membersData = await getOrganizationMembers(orgId);
 			setBlockers(blockersData);
 			setTicketList(ticketsData);
@@ -628,6 +627,7 @@ export function Blockers() {
 					</div>
 
 					{(authUser?.scrum_role === "scrum_master" ||
+						authUser?.scrum_role === "product_owner" ||
 						selectedBlocker?.created_by.id === authUser?.id) && (
 						<div>
 							<Label htmlFor="edit-assignee">Assignee (optional)</Label>
