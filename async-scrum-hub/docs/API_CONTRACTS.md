@@ -1701,6 +1701,7 @@ Used to render the organization board.
 {
 	"id": "uuid",
 	"created_at": "timestamp (today)",
+	"standup_date": "date (YYYY-MM-DD)",
 	"today": "string",
 	"yesterday": "string | null",
 	"blocker_ids": ["uuid"],
@@ -1793,6 +1794,7 @@ Used to render the organization board.
 	{
 		"id": "uuid",
 		"created_at": "timestamp(today)",
+		"standup_date": "date (YYYY-MM-DD)",
 		"today": "string",
 		"yesterday": "string | null",
 		"blockers": [
@@ -1881,6 +1883,7 @@ Used to render the organization board.
 	{
 		"id": "uuid",
 		"created_at": "timestamp(today)",
+		"standup_date": "date (YYYY-MM-DD)",
 		"today": "string",
 		"yesterday": "string | null",
 		"blockers": [

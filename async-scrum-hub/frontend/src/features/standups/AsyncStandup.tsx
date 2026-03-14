@@ -45,18 +45,18 @@ export function AsyncStandup() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	//Time helpers
 	const now = new Date();
-	const today = now.toISOString().split("T")[0];
+	const today = now.toLocaleDateString("en-CA");
 	const yesterdayDate = new Date();
 	yesterdayDate.setDate(now.getDate() - 1);
 	//Permissions helpers
 	const canEditStandup = (standup: StandupListItem) => {
 		return standup.created_by.id === authUser?.id
-		&& standup.created_at.startsWith(today);
+		&& standup.standup_date === today;
 	};
 	const hasCreatedStandupToday = standups.some(
 		(currentStandup) =>
 			currentStandup.created_by.id === authUser?.id &&
-			currentStandup.created_at.startsWith(today)
+			currentStandup.standup_date === today
 	);
 	//Update helpers
 	const latestStandupPerUser = standups

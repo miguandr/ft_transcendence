@@ -261,6 +261,7 @@ export interface CreateStandupRequest {
 export interface CreateStandupResponse {
 	id: string;
 	created_at: string;
+	standup_date: string;
 	today: string;
 	yesterday: string | null;
 	blocker_ids: string[];
@@ -274,6 +275,7 @@ export interface CreateStandupResponse {
 export interface StandupListItem {
 	id: string;
 	created_at: string;
+	standup_date: string;
 	today: string;
 	yesterday: string | null;
 	blockers: {

@@ -1,5 +1,5 @@
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -35,6 +35,7 @@ class BlockerBriefInStandup(BaseModel):
 class StandupCreateResponse(BaseModel):
 	id: UUID
 	created_at: datetime
+	standup_date: date
 	today: str
 	yesterday: Optional[str]
 	blocker_ids: Optional[list[UUID]]
@@ -46,6 +47,7 @@ class StandupCreateResponse(BaseModel):
 class StandupResponse(BaseModel):
 	id: UUID
 	created_at: datetime
+	standup_date: date
 	today: str
 	yesterday: Optional[str]
 	blockers: list[BlockerBriefInStandup]

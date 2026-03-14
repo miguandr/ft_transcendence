@@ -4,5 +4,5 @@ interface ErrorTextProps {
 }
 
 export function ErrorText({ children, className = "" }: ErrorTextProps) {
-	return <p className={`text-red-500 text-sm mt-1 ${className}`}>{children}</p>;
+	return <p className={`text-red-500 text-sm text-center mb-4 ${className}`}>{children}</p>;
 }

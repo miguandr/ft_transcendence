@@ -1087,191 +1087,191 @@ export async function inviteMember(
 // }
 
 
-// Create Standup
-export async function createStandup(
-	org_id: string,
-	data: CreateStandupRequest
-) : Promise<CreateStandupResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Create Standup
+// export async function createStandup(
+// 	org_id: string,
+// 	data: CreateStandupRequest
+// ) : Promise<CreateStandupResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	if (!data.today.trim()) {
-		createApiError("INVALID_INPUT", "Entry is required");
-	}
+// 	if (!data.today.trim()) {
+// 		createApiError("INVALID_INPUT", "Entry is required");
+// 	}
 
-	// ---DATE SETUP---
-	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
-	const now = new Date();
-	const today = now.toISOString().split('T')[0];
+// 	// ---DATE SETUP---
+// 	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+// 	const now = new Date();
+// 	const today = now.toISOString().split('T')[0];
 
-	//Calculate yesterday
-	const yesterdayDate = new Date();
-	yesterdayDate.setDate(now.getDate() - 1);
-	const yesterday = yesterdayDate.toISOString().split('T')[0];
+// 	//Calculate yesterday
+// 	const yesterdayDate = new Date();
+// 	yesterdayDate.setDate(now.getDate() - 1);
+// 	const yesterday = yesterdayDate.toISOString().split('T')[0];
 
-	// Check if this user already has a standup starting with that date string
-	const alreadySubmitted = mockStandups.some(s =>
-		s.created_by.id ===currentUser.id &&
-		s.created_at.startsWith(today)
-	);
-	if (alreadySubmitted) {
-		createApiError("STANDUP_ALREADY_EXISTS", "You have already created a standup for today");
-	}
+// 	// Check if this user already has a standup starting with that date string
+// 	const alreadySubmitted = mockStandups.some(s =>
+// 		s.created_by.id ===currentUser.id &&
+// 		s.created_at.startsWith(today)
+// 	);
+// 	if (alreadySubmitted) {
+// 		createApiError("STANDUP_ALREADY_EXISTS", "You have already created a standup for today");
+// 	}
 
-	// ---FILTERED BLOCKERS---
-	// Get active blockers
-	const openBlockerIds = mockBlockers
-	.filter(blockers => {
-		const isOpen = blockers.status === "open";
-		const creator = mockUsers.find(u => u.id === blockers.created_by.id);
-		return isOpen && creator?.organization_id == org_id;
-	})
-	.map(blocker => blocker.id);
+// 	// ---FILTERED BLOCKERS---
+// 	// Get active blockers
+// 	const openBlockerIds = mockBlockers
+// 	.filter(blockers => {
+// 		const isOpen = blockers.status === "open";
+// 		const creator = mockUsers.find(u => u.id === blockers.created_by.id);
+// 		return isOpen && creator?.organization_id == org_id;
+// 	})
+// 	.map(blocker => blocker.id);
 
-	// Get the standup created on the prebious calender date
-	const YesterdayStandup = mockStandups.find(s =>
-		s.created_by.id == currentUser.id &&
-		s.created_at.startsWith(yesterday)
-	);
+// 	// Get the standup created on the prebious calender date
+// 	const YesterdayStandup = mockStandups.find(s =>
+// 		s.created_by.id == currentUser.id &&
+// 		s.created_at.startsWith(yesterday)
+// 	);
 
-	// Create new standup
-	const newStandup = {
-		id: `standup-${Date.now()}`,
-		created_at: now.toISOString(),
-		today: data.today,
-		yesterday: YesterdayStandup?.today || null,
-		blocker_ids: openBlockerIds,
-		created_by: {
-			id: currentUser.id,
-			name: currentUser.name,
-			avatar_url: currentUser.avatar_url,
-		}
-	};
+// 	// Create new standup
+// 	const newStandup = {
+// 		id: `standup-${Date.now()}`,
+// 		created_at: now.toISOString(),
+// 		today: data.today,
+// 		yesterday: YesterdayStandup?.today || null,
+// 		blocker_ids: openBlockerIds,
+// 		created_by: {
+// 			id: currentUser.id,
+// 			name: currentUser.name,
+// 			avatar_url: currentUser.avatar_url,
+// 		}
+// 	};
 
-	mockStandups.push(newStandup);
-	return (newStandup);
-}
+// 	mockStandups.push(newStandup);
+// 	return (newStandup);
+// }
 
-//List Standups
-export async function listStandups(
-	org_id: string,
-): Promise<StandupListItem[]> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
+// //List Standups
+// export async function listStandups(
+// 	org_id: string,
+// ): Promise<StandupListItem[]> {
+// 	await delay(300);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Validate user belongs to organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Validate user belongs to organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	const filteredStandups = mockStandups.filter((standups) => {
-		const creator = mockUsers.find((u) => u.id === standups.created_by.id);
+// 	const filteredStandups = mockStandups.filter((standups) => {
+// 		const creator = mockUsers.find((u) => u.id === standups.created_by.id);
 
-		return creator?.organization_id === org_id;
-	});
+// 		return creator?.organization_id === org_id;
+// 	});
 
-	return filteredStandups.map((s) => ({
-		id: s.id,
-		created_at: s.created_at,
-		today: s.today,
-		yesterday: s.yesterday,
-		blockers: s.blocker_ids
-		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
-		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
-		.map((b) => ({ // map the data how we need it
-			id: b.id,
-			title: b.description,
-			ticket: {
-				id: b.ticket.id,
-				title: b.ticket.title,
-			},
-		})),
-		created_by: s.created_by,
-	}));
-}
+// 	return filteredStandups.map((s) => ({
+// 		id: s.id,
+// 		created_at: s.created_at,
+// 		today: s.today,
+// 		yesterday: s.yesterday,
+// 		blockers: s.blocker_ids
+// 		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
+// 		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
+// 		.map((b) => ({ // map the data how we need it
+// 			id: b.id,
+// 			title: b.description,
+// 			ticket: {
+// 				id: b.ticket.id,
+// 				title: b.ticket.title,
+// 			},
+// 		})),
+// 		created_by: s.created_by,
+// 	}));
+// }
 
-// Edit Standup
-export async function editStandup(
-	standup_id: string,
-	data: EditStandupRequest
-): Promise<EditStandupResponse> {
-	await delay(500);
+// // Edit Standup
+// export async function editStandup(
+// 	standup_id: string,
+// 	data: EditStandupRequest
+// ): Promise<EditStandupResponse> {
+// 	await delay(500);
 
-	const currentUser = getCurrentUserRecord();
-	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+// 	const currentUser = getCurrentUserRecord();
+// 	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
 
-	// Find standup
-	const standup = mockStandups.find((b) => b.id === standup_id);
-	if (!standup) {
-		createApiError("NOT_FOUND", "Standup not found");
-	}
+// 	// Find standup
+// 	const standup = mockStandups.find((b) => b.id === standup_id);
+// 	if (!standup) {
+// 		createApiError("NOT_FOUND", "Standup not found");
+// 	}
 
-	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
-	const todayDate = new Date().toISOString().split('T')[0];
-	const createDate = standup.created_at.split('T')[0];
+// 	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+// 	const todayDate = new Date().toISOString().split('T')[0];
+// 	const createDate = standup.created_at.split('T')[0];
 
-	// Check if this user already has a standup starting with that date string
-	if (todayDate !== createDate) {
-		createApiError("EDIT_WINDOW_EXPIRED", "Standups can only be edited on the day they are created");
-	}
+// 	// Check if this user already has a standup starting with that date string
+// 	if (todayDate !== createDate) {
+// 		createApiError("EDIT_WINDOW_EXPIRED", "Standups can only be edited on the day they are created");
+// 	}
 
-	// Check permissions
-	const isOwner = standup.created_by.id === currentUser.id;
-	const admin = (await orgMembers).find((u) => u.org_role === "admin");
-	const isAdmin = admin?.id === currentUser.id;
+// 	// Check permissions
+// 	const isOwner = standup.created_by.id === currentUser.id;
+// 	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+// 	const isAdmin = admin?.id === currentUser.id;
 
-	if (!isOwner && !isAdmin) {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
+// 	if (!isOwner && !isAdmin) {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
 
-	// Edit Standup field
-	if (data.today !== undefined) {
-		if (!data.today.trim()) {
-			createApiError("INVALID_INPUT", "Entry cannot be empty");
-		}
-		standup.today = data.today;
-	}
+// 	// Edit Standup field
+// 	if (data.today !== undefined) {
+// 		if (!data.today.trim()) {
+// 			createApiError("INVALID_INPUT", "Entry cannot be empty");
+// 		}
+// 		standup.today = data.today;
+// 	}
 
-	return {
-		id: standup.id,
-		today: standup.today,
-	};
-}
+// 	return {
+// 		id: standup.id,
+// 		today: standup.today,
+// 	};
+// }
 
-// Delete Standup
-export async function deleteStandup(
-	standup_id: string
-): Promise<void> {
-	await delay(500);
+// // Delete Standup
+// export async function deleteStandup(
+// 	standup_id: string
+// ): Promise<void> {
+// 	await delay(500);
 
-	const currentUser = getCurrentUserRecord();
-	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+// 	const currentUser = getCurrentUserRecord();
+// 	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
 
-	// Find index of the standup in mock array
-	const standupIndex = mockStandups.findIndex((u) => u.id === standup_id);
-	if (standupIndex === -1) {
-		createApiError("NOT_FOUND", "Standup not found");
-	}
+// 	// Find index of the standup in mock array
+// 	const standupIndex = mockStandups.findIndex((u) => u.id === standup_id);
+// 	if (standupIndex === -1) {
+// 		createApiError("NOT_FOUND", "Standup not found");
+// 	}
 
-	// Find standup to delete
-	const standupToDelete = mockStandups[standupIndex];
+// 	// Find standup to delete
+// 	const standupToDelete = mockStandups[standupIndex];
 
-	// Check permissions
-	const isOwner = standupToDelete.created_by.id === currentUser.id;
-	const admin = (await orgMembers).find((u) => u.org_role === "admin");
-	const isAdmin = admin?.id === currentUser.id;
+// 	// Check permissions
+// 	const isOwner = standupToDelete.created_by.id === currentUser.id;
+// 	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+// 	const isAdmin = admin?.id === currentUser.id;
 
-	if (!isOwner && !isAdmin) {
-		createApiError("FORBIDDEN", "You dont own permission to delete this standup");
-	}
+// 	if (!isOwner && !isAdmin) {
+// 		createApiError("FORBIDDEN", "You dont own permission to delete this standup");
+// 	}
 
-	// Remove Standup from the array
-	mockStandups.splice(standupIndex, 1);
-}
+// 	// Remove Standup from the array
+// 	mockStandups.splice(standupIndex, 1);
+// }
 
 
 // =============================================================
@@ -1933,9 +1933,11 @@ export async function getDashboardData(org_id: string): Promise<DashboardData> {
 	};
 }
 */
+///////////////////////////////////////////////////////////////
 // =============================================================
 // REAL FETCH VERSIONS - Replace mock functions with these
 // =============================================================
+////////////////////////////////////////////////////////////////
 
 
 // 1.1 REGISTER NEW USER
@@ -2448,7 +2450,7 @@ export async function deleteTask(
 		throw errorData;
 	}
 }
-
+*/
 
 // 6.1 CREATE STANDUP
 export async function createStandup(
@@ -2538,7 +2540,7 @@ export async function deleteStandup(
 	}
 }
 
-
+/*
 // 7.1 CREATE BLOCKER
 export async function createBlocker(
 	org_id: string,
