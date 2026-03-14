@@ -60,11 +60,11 @@ services:
       JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
 
       # SMTP / Email settings
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_USER: justspamandegg@gmail.com
-      #SMTP_PASSWORD: vgki qgrc bxbd tgpe
-      SMTP_FROM_EMAIL: Async Scrum Hub
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-Async Scrum Hub}
 
       # Application settings
       PYTHONUNBUFFERED: 1  # Show Python output in real-time
