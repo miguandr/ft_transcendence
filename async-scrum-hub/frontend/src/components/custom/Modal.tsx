@@ -43,7 +43,7 @@ export function Modal({
 					<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
 						<div>
 							<h2 className="text-2xl text-gray-900">{title}</h2>
-							{subtitle && <p className="text-xs text-gray-500 mt-1.5">{subtitle}</p>}
+							{subtitle && <div className="text-xs text-gray-500 mt-1.5">{subtitle}</div>}
 						</div>
 						<button
 							className="p-2 hover:bg-gray-50 rounded-lg transition-colors"

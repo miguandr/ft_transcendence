@@ -528,7 +528,7 @@ export function Blockers() {
 							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
 						>
 							<option value="">Select a ticket</option>
-							{ticketList.map((ticket) => (
+							{ticketList.filter((t) => t.status !== "completed").map((ticket) => (
 								<option key={ticket.id} value={ticket.id}>
 									{ticket.title}
 								</option>
@@ -618,7 +618,7 @@ export function Blockers() {
 							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
 						>
 							<option value="">Select a ticket</option>
-							{ticketList.map((ticket) => (
+							{ticketList.filter((t) => t.status !== "completed").map((ticket) => (
 								<option key={ticket.id} value={ticket.id}>
 									{ticket.title}
 								</option>

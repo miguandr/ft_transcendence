@@ -1,6 +1,6 @@
-import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom/index"
-import { Trash2 } from "lucide-react"
-import type { Task, UserRef } from "../../types/sprint.types"
+import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom/index";
+import { Trash2 } from "lucide-react";
+import type { Task, UserRef } from "../../types/sprint.types";
 
 interface Props {
 	onClose: () => void;
@@ -11,63 +11,48 @@ interface Props {
 	error?: string;
 }
 
-export function TaskDetailModal({
-	onClose,
-	onDelete,
-	task,
-	teamMembers,
-	canDelete,
-	error,
-
-}: Props) {
-	const assignee = teamMembers.find(m => m.id === task.assignee_id)
+export function TaskDetailModal({ onClose, onDelete, task, teamMembers, canDelete, error }: Props) {
+	const assignee = teamMembers.find((m) => m.id === task.assignee_id);
 
 	return (
-		<Modal
-			isOpen={true}
-			onClose={onClose}
-			title={task.title}
-			size="md"
-		>
+		<Modal isOpen={true} onClose={onClose} title={task.title} size="md">
 			<span
-				className={`text-xs px-2 py-1 rounded-lg ${
+				className={`inline-block text-xs py-1 px-2 rounded-lg mb-4 ${
 					task.status === "completed"
 						? "bg-emerald-100 text-emerald-700"
 						: "bg-gray-100 text-gray-700"
 				}`}
 			>
-				{task.status === "completed"
-					? "Completed"
-					: "In Progress"}
+				{task.status === "completed" ? "Completed" : "In Progress"}
 			</span>
 
 			<div>
-				<h4 className="text-sm text-gray-700 mb-2">Description</h4>
-				<p className="text-sm text-gray-600">
+				{/* <h4 className="text-sm text-gray-700 ">Description</h4> */}
+				<p className="text-sm py-2 mb-10 text-gray-600">
 					{task.description || "No description provided"}
 				</p>
 			</div>
 
 			<div>
-				<h4 className="text-sm text-gray-700 mb-2">Assignee</h4>
-					<div className="flex items-center gap-2">
-						{assignee && (
-							<>
-								<Avatar
-									avatarUrl={assignee.avatar_url}
-									name={assignee.name}
-									userId={assignee.id}
-									size="sm"
-									className="text-sm"
-								/>
-								<span className="text-sm text-gray-700">{assignee.name}</span>
-							</>
-						)}
+				{/* <h4 className="text-sm text-gray-700 mb-2">Assignee</h4> */}
+				<div className="flex items-center gap-2">
+					{assignee && (
+						<>
+							<Avatar
+								avatarUrl={assignee.avatar_url}
+								name={assignee.name}
+								userId={assignee.id}
+								size="sm"
+								className="text-sm"
+							/>
+							<span className="text-sm text-gray-700">{assignee.name}</span>
+						</>
+					)}
 				</div>
 			</div>
 
 			{error && <ErrorText>{error}</ErrorText>}
-			<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+			<div className="flex items-center justify-end gap-3 -mx-6 px-6 py-4 -mb-4 border-t border-gray-100">
 				{canDelete ? (
 					<Button
 						variant="secondary"
@@ -94,14 +79,10 @@ export function TaskDetailModal({
 						</div>
 					</div>
 				)}
-				<Button
-					variant="secondary"
-					size="sm"
-					onClick={onClose}
-				>
+				<Button variant="secondary" size="sm" onClick={onClose}>
 					Close
 				</Button>
 			</div>
 		</Modal>
-	)
+	);
 }

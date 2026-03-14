@@ -62,14 +62,14 @@ export function Dashboard() {
 							className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
 						>
 							<Avatar
-								name={update.user.name}
-								userId={update.user.id}
-								avatarUrl={update.user.avatar_url}
+								name={update.created_by.name}
+								userId={update.created_by.id}
+								avatarUrl={update.created_by.avatar_url}
 								size="md"
 							/>
 							<div className="flex-1 min-w-0">
 								<div className="flex items-baseline gap-2 mb-1">
-									<span className="text-sm text-gray-900">{update.user.name}</span>
+									<span className="text-sm text-gray-900">{update.created_by.name}</span>
 									<span className="text-xs text-gray-400">{formatRelativeTime(update.timestamp)}</span>
 								</div>
 								<p className="text-sm text-gray-500 capitalize">
