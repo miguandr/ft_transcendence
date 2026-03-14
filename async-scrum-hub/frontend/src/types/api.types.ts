@@ -128,10 +128,10 @@ export interface DashboardData {
 		active_blockers: number;
 	};
 	recent_updates: Array<{
-		user: {
-			id: string
+		created_by: {
+			id: string;
 			name: string;
-			avatar_url: string;
+			avatar_url: string | null;
 		};
 		type: "task" | "ticket";
 		event: "created" | "completed";

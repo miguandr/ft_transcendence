@@ -31,6 +31,7 @@ export function SprintBoard() {
 		isLoading,
 		isSaving,
 		isDeleting,
+		developerMembers,
 
 		// Setters
 		setIsCreateTicketOpen,
@@ -207,7 +208,7 @@ export function SprintBoard() {
 					onClose={() => setIsCreateBlockerOpen(false)}
 					ticket={selectedTicketDetail}
 					form={blockerForm}
-					teamMembers={teamMembers}
+					teamMembers={developerMembers}
 					setForm={setBlockerForm}
 					onSubmit={handleCreateBlocker}
 					isSaving={isSaving}

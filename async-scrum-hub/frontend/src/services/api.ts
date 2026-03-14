@@ -65,225 +65,225 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // MOCK DATA
 // =============================================================
 
-//Mock User database (in real backend, this is PostgreSQL)
-const mockUsers: Array<{
-	id: string;
-	email: string;
-	password: string; // In real backend, this would be hashed!
-	name: string;
-	avatar_url: string | null;
-	org_name: string | null;
-	organization_id: string | null;
-	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
-	org_role: "admin" | "member" | null;
-}> = [
-	{
-		id: "1",
-		email: "miguel@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Miguel Andrade",
-		avatar_url: null,
-		org_name: "Las Empanadas",
-		organization_id: "2",
-		scrum_role: "scrum_master",
-		org_role: "admin",
-	},
-	{
-		id: "2",
-		email: "pedro@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Pedro Perez",
-		avatar_url: null,
-		org_name: "Las Arepas",
-		organization_id: "2",
-		scrum_role: "product_owner",
-		org_role: "member",
-	},
-	{
-		id: "3",
-		email: "pepa@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Pepa Perez",
-		avatar_url: null,
-		org_name: "Las Cachapas",
-		organization_id: "2",
-		scrum_role: "developer",
-		org_role: "member",
-	},
-];
+// //Mock User database (in real backend, this is PostgreSQL)
+// const mockUsers: Array<{
+// 	id: string;
+// 	email: string;
+// 	password: string; // In real backend, this would be hashed!
+// 	name: string;
+// 	avatar_url: string | null;
+// 	org_name: string | null;
+// 	organization_id: string | null;
+// 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+// 	org_role: "admin" | "member" | null;
+// }> = [
+// 	{
+// 		id: "1",
+// 		email: "miguel@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Miguel Andrade",
+// 		avatar_url: null,
+// 		org_name: "Las Empanadas",
+// 		organization_id: "2",
+// 		scrum_role: "scrum_master",
+// 		org_role: "admin",
+// 	},
+// 	{
+// 		id: "2",
+// 		email: "pedro@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Pedro Perez",
+// 		avatar_url: null,
+// 		org_name: "Las Arepas",
+// 		organization_id: "2",
+// 		scrum_role: "product_owner",
+// 		org_role: "member",
+// 	},
+// 	{
+// 		id: "3",
+// 		email: "pepa@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Pepa Perez",
+// 		avatar_url: null,
+// 		org_name: "Las Cachapas",
+// 		organization_id: "2",
+// 		scrum_role: "developer",
+// 		org_role: "member",
+// 	},
+// ];
 
-const mockOrganizations = [
-	{
-		id: "2",
-		name: "TeamX",
-		join_code: "SRC-444",
-		created_by: "user_0",
-	},
-];
+// const mockOrganizations = [
+// 	{
+// 		id: "2",
+// 		name: "TeamX",
+// 		join_code: "SRC-444",
+// 		created_by: "user_0",
+// 	},
+// ];
 
-const mockTickets: Array<{
-	id: string;
-	title: string;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	assignee_id: string;
-}> = [
-	{
-		id: "10",
-		title: "Update dashboard charts",
-		status: "todo",
-		priority: "medium",
-		assignee_id: "1",
-	},
-];
+// const mockTickets: Array<{
+// 	id: string;
+// 	title: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	assignee_id: string;
+// }> = [
+// 	{
+// 		id: "10",
+// 		title: "Update dashboard charts",
+// 		status: "todo",
+// 		priority: "medium",
+// 		assignee_id: "1",
+// 	},
+// ];
 
-//Mock Tasks
-const mockTasks: Array<{
-	id: string;
-	title: string;
-	status: "in_progress" | "completed";
-	ticket_id: string;
-	assignee_id: string;
-}> = [
-	{
-		id: "21",
-		title: "Build login UI",
-		status: "in_progress",
-		ticket_id: "10",
-		assignee_id: "1",
-	},
-];
+// //Mock Tasks
+// const mockTasks: Array<{
+// 	id: string;
+// 	title: string;
+// 	status: "in_progress" | "completed";
+// 	ticket_id: string;
+// 	assignee_id: string;
+// }> = [
+// 	{
+// 		id: "21",
+// 		title: "Build login UI",
+// 		status: "in_progress",
+// 		ticket_id: "10",
+// 		assignee_id: "1",
+// 	},
+// ];
 
-const mockBlockers: Array<{
-	id: string;
-	description: string;
-	status: "open" | "resolved";
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	};
-	assignee: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	} | null;
-	ticket: {
-		id: string;
-		title: string;
-	};
-	created_at: string;
-	resolved_at: string | null;
-}> = [
-	{
-		id: "32",
-		description: "Waiting for API keys from client",
-		status: "open",
-		created_by: {
-			id: "1",
-			name: "Miguel Andrade",
-			avatar_url: null,
-		},
-		assignee: {
-			id: "2",
-			name: "Pepa Perez",
-			avatar_url: null,
-		},
-		ticket: {
-			id: "21",
-			title: "Implement OAuth flow",
-		},
-		created_at: "2024-02-10T10:00:00Z",
-		resolved_at: null,
-	},
-	{
-		id: "33",
-		description: "Design assets not yet approved",
-		status: "resolved",
-		created_by: {
-			id: "2",
-			name: "Pepa Perez",
-			avatar_url: null,
-		},
-		assignee: null,
-		ticket: {
-			id: "1",
-			title: "Design settings page",
-		},
-		created_at: "2026-02-08T14:30:00Z",
-		resolved_at: "2026/02/17",
-	},
-];
+// const mockBlockers: Array<{
+// 	id: string;
+// 	description: string;
+// 	status: "open" | "resolved";
+// 	created_by: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	};
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	} | null;
+// 	ticket: {
+// 		id: string;
+// 		title: string;
+// 	};
+// 	created_at: string;
+// 	resolved_at: string | null;
+// }> = [
+// 	{
+// 		id: "32",
+// 		description: "Waiting for API keys from client",
+// 		status: "open",
+// 		created_by: {
+// 			id: "1",
+// 			name: "Miguel Andrade",
+// 			avatar_url: null,
+// 		},
+// 		assignee: {
+// 			id: "2",
+// 			name: "Pepa Perez",
+// 			avatar_url: null,
+// 		},
+// 		ticket: {
+// 			id: "21",
+// 			title: "Implement OAuth flow",
+// 		},
+// 		created_at: "2024-02-10T10:00:00Z",
+// 		resolved_at: null,
+// 	},
+// 	{
+// 		id: "33",
+// 		description: "Design assets not yet approved",
+// 		status: "resolved",
+// 		created_by: {
+// 			id: "2",
+// 			name: "Pepa Perez",
+// 			avatar_url: null,
+// 		},
+// 		assignee: null,
+// 		ticket: {
+// 			id: "1",
+// 			title: "Design settings page",
+// 		},
+// 		created_at: "2026-02-08T14:30:00Z",
+// 		resolved_at: "2026/02/17",
+// 	},
+// ];
 
-const mockStandups: Array<{
-	id: string;
-	created_at: string;
-	today: string;
-	yesterday: string | null,
-	blocker_ids: string[];
-	created_by: {
-		name: string;
-		id: string;
-		avatar_url: string | null;
-	}
-}> = [
-	{
-		id: "11",
-		created_at: "2026-02-17T10:00:00Z",
-		today: "Working on OAuth integration with Google and GitHub",
-		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
-		blocker_ids: ["32", "33"],
-		created_by: {
-			name: "Miguel Andrade",
-			id: "1",
-			avatar_url: null,
-		}
-	},
-	{
-		id: "12",
-		created_at: "2024-02-18T14:30:00Z",
-		today: "Creating responsive layouts for mobile view",
-		yesterday: "Finalized dashboard redesign, updated component library",
-		blocker_ids: [],
-		created_by: {
-			name: "Pepa Perez",
-			id: "2",
-			avatar_url: null,
-		}
-	}
-]
+// const mockStandups: Array<{
+// 	id: string;
+// 	created_at: string;
+// 	today: string;
+// 	yesterday: string | null,
+// 	blocker_ids: string[];
+// 	created_by: {
+// 		name: string;
+// 		id: string;
+// 		avatar_url: string | null;
+// 	}
+// }> = [
+// 	{
+// 		id: "11",
+// 		created_at: "2026-02-17T10:00:00Z",
+// 		today: "Working on OAuth integration with Google and GitHub",
+// 		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
+// 		blocker_ids: ["32", "33"],
+// 		created_by: {
+// 			name: "Miguel Andrade",
+// 			id: "1",
+// 			avatar_url: null,
+// 		}
+// 	},
+// 	{
+// 		id: "12",
+// 		created_at: "2024-02-18T14:30:00Z",
+// 		today: "Creating responsive layouts for mobile view",
+// 		yesterday: "Finalized dashboard redesign, updated component library",
+// 		blocker_ids: [],
+// 		created_by: {
+// 			name: "Pepa Perez",
+// 			id: "2",
+// 			avatar_url: null,
+// 		}
+// 	}
+// ]
 
-const mockLegalDocuments: Record<string, LegalDocuments> = {
-	privacy: {
-		key: "privacy",
-		title: "Privacy Policy",
-		content: "# Privacy Policy\n\nThis is a placeholder.",
-		updated_at: "2024-01-01T00:00:00Z",
-	},
-	terms: {
-		key: "terms",
-		title: "Terms of Service",
-		content: "# Terms of Service\n\nThis is a placeholder.",
-		updated_at: "2024-01-01T00:00:00Z",
-	},
-};
+// const mockLegalDocuments: Record<string, LegalDocuments> = {
+// 	privacy: {
+// 		key: "privacy",
+// 		title: "Privacy Policy",
+// 		content: "# Privacy Policy\n\nThis is a placeholder.",
+// 		updated_at: "2024-01-01T00:00:00Z",
+// 	},
+// 	terms: {
+// 		key: "terms",
+// 		title: "Terms of Service",
+// 		content: "# Terms of Service\n\nThis is a placeholder.",
+// 		updated_at: "2024-01-01T00:00:00Z",
+// 	},
+// };
 
-const mockAnalitycs : AnalitycsData = {
-	tasks: [
-		{ week: "Week 1", in_progress: 10, completed: 8 },
-		{ week: "Week 2", in_progress: 12, completed: 14 },
-		{ week: "Week 3", in_progress: 8, completed: 10 },
-		{ week: "Week 4", in_progress: 5, completed: 12 },
-	],
-	tickets: [
-		{ week: "Week 1", completed: 4 },
-		{ week: "Week 2", completed: 7 },
-		{ week: "Week 3", completed: 5 },
-		{ week: "Week 4", completed: 9 },
-	],
-	standups: { posted: 115, total: 120 },
-	blockers_avg_cycle_time: 1.5,
-};
+// const mockAnalitycs : AnalitycsData = {
+// 	tasks: [
+// 		{ week: "Week 1", in_progress: 10, completed: 8 },
+// 		{ week: "Week 2", in_progress: 12, completed: 14 },
+// 		{ week: "Week 3", in_progress: 8, completed: 10 },
+// 		{ week: "Week 4", in_progress: 5, completed: 12 },
+// 	],
+// 	tickets: [
+// 		{ week: "Week 1", completed: 4 },
+// 		{ week: "Week 2", completed: 7 },
+// 		{ week: "Week 3", completed: 5 },
+// 		{ week: "Week 4", completed: 9 },
+// 	],
+// 	standups: { posted: 115, total: 120 },
+// 	blockers_avg_cycle_time: 1.5,
+// };
 
 // ///////////////////////////////////////////////////
 // // API Response types (matches API_CONTRACTS.md) //

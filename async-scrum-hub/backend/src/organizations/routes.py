@@ -36,6 +36,7 @@ from src.organizations.schemas import (
 from src.tickets.schemas import TicketBriefOrg
 from src.tasks.schemas import TaskBriefOrg
 from src.blockers.schemas import BlockerBriefOrg
+from src.database.models.enums import TicketStatus, TaskStatus, BlockerStatus
 
 router = APIRouter()
 
@@ -119,9 +120,9 @@ def get_organization_members(
 			avatar_url=m.avatar_url,
 			org_role=m.org_role,
 			scrum_role=m.scrum_role,
-			tickets=[TicketBriefOrg.model_validate(t) for t in m.tickets_assigned],
-			tasks=[TaskBriefOrg.model_validate(t) for t in m.tasks_assigned],
-			blockers=[BlockerBriefOrg.model_validate(b) for b in m.created_blockers],
+			tickets=[TicketBriefOrg.model_validate(t) for t in m.tickets_assigned if t.status != TicketStatus.COMPLETED],
+			tasks=[TaskBriefOrg.model_validate(t) for t in m.tasks_assigned if t.status != TaskStatus.COMPLETED],
+			blockers=[BlockerBriefOrg.model_validate(b) for b in m.created_blockers if b.status == BlockerStatus.OPEN],
 		)
 		for m in members
 	]
