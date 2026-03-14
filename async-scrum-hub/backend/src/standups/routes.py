@@ -166,8 +166,11 @@ async def update_standup(
 	"/standups/{standup_id}",
 	status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_standup(
+async def delete_standup(
 	db: Session = Depends(get_db),
 	standup: Standup = Depends(require_resource_permission("standups:delete", get_standup_loader)),
 ):
+	org_id = str(standup.organization_id)
+	standup_id = str(standup.id)
 	service.delete_standup(db, standup)
+	await manager.broadcast(org_id, "standup.deleted", {"id": standup_id})

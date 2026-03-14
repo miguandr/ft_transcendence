@@ -202,7 +202,7 @@ export function AsyncStandup() {
 	};
 
 	useOrgWebSocket(orgId, (msg) => {
-		const reFetchEvents = ["standup.created", "standup.updated"];
+		const reFetchEvents = ["standup.created", "standup.updated", "standup.deleted"];
 		if (reFetchEvents.includes(msg.event)) {
 			fetchStandups();
 		}
