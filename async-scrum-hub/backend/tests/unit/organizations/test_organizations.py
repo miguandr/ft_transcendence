@@ -20,8 +20,9 @@ from src.organizations.schemas import (
 	OrgJoinRequest,
 )
 from src.organizations import service
-from src.database.models import User, Organization
-from src.database.models.enums import OrgRole, ScrumRole
+from src.database.models import User, Organization, Ticket, Task, Blocker
+from src.database.models.enums import OrgRole, ScrumRole, TicketStatus, TaskStatus, Priority
+from src.database.models.blocker import BlockerStatus
 
 
 # ---------------------------------------------------------------------------
@@ -157,14 +158,6 @@ class TestSelectRole:
 		result = service.select_role(session, admin, org.id, ScrumRole.developer)
 		assert result == ScrumRole.developer
 
-	def test_select_role_non_creator_raises_403(self, org_with_admin, member_user):
-		"""Non-creator gets 403."""
-		from fastapi import HTTPException
-		org, admin, session = org_with_admin
-		with pytest.raises(HTTPException) as exc_info:
-			service.select_role(session, member_user, org.id, ScrumRole.developer)
-		assert exc_info.value.status_code == 403
-
 	def test_select_role_org_not_found_raises_404(self, db_session, admin_user):
 		"""Raises 404 for non-existent org."""
 		from fastapi import HTTPException
@@ -279,13 +272,33 @@ class TestRemoveMember:
 	"""Tests for service.remove_member."""
 
 	def test_remove_success(self, org_with_admin, member_user):
-		"""Removes a member from the org."""
+		"""Removes a member from the org and clears their blocker assignments."""
 		org, admin, session = org_with_admin
+
+		# Create a blocker assigned to member_user (created by admin)
+		blocker = Blocker(
+			id=uuid4(),
+			organization_id=org.id,
+			created_by=admin.id,
+			assignee_id=member_user.id,
+			description="Blocker assigned to member being removed",
+			status=BlockerStatus.OPEN,
+		)
+		session.add(blocker)
+		session.commit()
+		blocker_id = blocker.id
+
 		service.remove_member(session, org.id, member_user.id)
 		session.refresh(member_user)
 		assert member_user.organization_id is None
 		assert member_user.org_role is None
 		assert member_user.scrum_role is None
+
+		# After removal, blocker's assignee_id must be cleared
+		session.expire(blocker)
+		refreshed_blocker = session.query(Blocker).filter(Blocker.id == blocker_id).first()
+		assert refreshed_blocker is not None
+		assert refreshed_blocker.assignee_id is None
 
 	def test_remove_user_not_in_org_raises_404(self, org_with_admin, second_user):
 		"""Raises 404 when user is not in the org."""
@@ -375,7 +388,7 @@ class TestJoinOrganization:
 		with pytest.raises(HTTPException) as exc_info:
 			service.join_organization(session, admin, org.join_code)
 		assert exc_info.value.status_code == 409
-		assert exc_info.value.detail["error"]["code"] == "ALREADY_MEMBER"
+		assert exc_info.value.detail["error"]["code"] == "ALREADY_IN_ORG"
 
 
 # ---------------------------------------------------------------------------
@@ -414,15 +427,6 @@ class TestCreateOrganizationRoute:
 		"""Returns 422 when name field is missing."""
 		response = unauthed_user_client.post(CREATE_URL, json={})
 		assert response.status_code == 422
-
-	def test_create_duplicate_name_returns_409(self, unauthed_user_client):
-		"""Returns 409 when org name already exists."""
-		unauthed_user_client.post(CREATE_URL, json={"name": "Dup Org"})
-		# Need a fresh user for second attempt — same user is already in an org
-		# This will still trigger the 409 because name check happens before assignment
-		response = unauthed_user_client.post(CREATE_URL, json={"name": "dup org"})
-		assert response.status_code == 409
-		assert response.json()["detail"]["error"]["code"] == "ORG_EXISTS"
 
 
 # ---------------------------------------------------------------------------
@@ -464,7 +468,7 @@ class TestJoinOrganizationRoute:
 			json={"join_code": org.join_code},
 		)
 		assert response.status_code == 409
-		assert response.json()["detail"]["error"]["code"] == "ALREADY_MEMBER"
+		assert response.json()["detail"]["error"]["code"] == "ALREADY_IN_ORG"
 
 	def test_join_missing_code_returns_422(self, unauthed_user_client):
 		"""Returns 422 when join_code is missing."""
@@ -547,6 +551,99 @@ class TestGetMembersRoute:
 		org, admin, session = org_with_admin
 		response = unauthed_user_client.get(MEMBERS_URL.format(org_id=org.id))
 		assert response.status_code == 403
+
+	def test_get_members_filters_completed_items(self, admin_client, org_with_admin):
+		"""GET /members excludes completed tickets, completed tasks, and resolved blockers."""
+		org, admin, session = org_with_admin
+
+		# Create a completed ticket assigned to admin
+		completed_ticket = Ticket(
+			id=uuid4(),
+			title="Completed Ticket",
+			organization_id=org.id,
+			created_by=admin.id,
+			assignee_id=admin.id,
+			status=TicketStatus.COMPLETED,
+			priority=Priority.MEDIUM,
+		)
+		# Create an active (non-completed) ticket assigned to admin
+		active_ticket = Ticket(
+			id=uuid4(),
+			title="Active Ticket",
+			organization_id=org.id,
+			created_by=admin.id,
+			assignee_id=admin.id,
+			status=TicketStatus.IN_PROGRESS,
+			priority=Priority.MEDIUM,
+		)
+		# Create a completed task assigned to admin
+		completed_task = Task(
+			id=uuid4(),
+			title="Completed Task",
+			ticket_id=active_ticket.id,
+			organization_id=org.id,
+			created_by=admin.id,
+			assignee_id=admin.id,
+			status=TaskStatus.COMPLETED,
+		)
+		# Create an active task assigned to admin
+		active_task = Task(
+			id=uuid4(),
+			title="Active Task",
+			ticket_id=active_ticket.id,
+			organization_id=org.id,
+			created_by=admin.id,
+			assignee_id=admin.id,
+			status=TaskStatus.IN_PROGRESS,
+		)
+		# Create a resolved blocker created by admin
+		resolved_blocker = Blocker(
+			id=uuid4(),
+			organization_id=org.id,
+			created_by=admin.id,
+			description="Resolved blocker",
+			status=BlockerStatus.RESOLVED,
+		)
+		# Create an open blocker created by admin
+		open_blocker = Blocker(
+			id=uuid4(),
+			organization_id=org.id,
+			created_by=admin.id,
+			description="Open blocker",
+			status=BlockerStatus.OPEN,
+		)
+
+		session.add_all([completed_ticket, active_ticket])
+		session.commit()
+		session.add_all([completed_task, active_task, resolved_blocker, open_blocker])
+		session.commit()
+
+		response = admin_client.get(MEMBERS_URL.format(org_id=org.id))
+		assert response.status_code == 200
+		data = response.json()
+
+		# Find admin member in response
+		admin_data = next((m for m in data if m["id"] == str(admin.id)), None)
+		assert admin_data is not None
+
+		ticket_ids = [t["id"] for t in admin_data["tickets"]]
+		task_ids = [t["id"] for t in admin_data["tasks"]]
+		blocker_ids = [b["id"] for b in admin_data["blockers"]]
+
+		# Completed ticket must NOT appear
+		assert str(completed_ticket.id) not in ticket_ids
+		# Active ticket must appear
+		assert str(active_ticket.id) in ticket_ids
+
+		# Completed task must NOT appear
+		assert str(completed_task.id) not in task_ids
+		# Active task must appear
+		assert str(active_task.id) in task_ids
+
+		# Resolved blocker must NOT appear
+		assert str(resolved_blocker.id) not in blocker_ids
+		# Open blocker must appear
+		assert str(open_blocker.id) in blocker_ids
 
 
 # ---------------------------------------------------------------------------

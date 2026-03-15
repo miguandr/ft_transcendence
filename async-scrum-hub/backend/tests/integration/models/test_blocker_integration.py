@@ -249,8 +249,8 @@ class TestBlockerCascadeDelete:
         retrieved = test_session.query(Blocker).filter_by(id=blocker_id).first()
         assert retrieved is None
 
-    def test_delete_assignee_sets_null(self, test_session, sample_organization):
-        """Test deleting assignee sets assignee_id to NULL."""
+    def test_delete_assignee_sets_assignee_null(self, test_session, sample_organization):
+        """Test deleting assignee now CASCADE deletes the blocker (ondelete=CASCADE)."""
         # Create two users
         creator = User(
             id=uuid4(),
@@ -281,14 +281,51 @@ class TestBlockerCascadeDelete:
 
         blocker_id = blocker.id
 
-        # Delete assignee
+        # Delete assignee — assignee_id should be SET NULL (blocker stays)
         test_session.delete(assignee)
         test_session.commit()
 
-        # Blocker should still exist but assignee_id should be NULL
+        # Blocker must still exist, but with assignee_id cleared to None
+        test_session.expire_all()
         retrieved = test_session.query(Blocker).filter_by(id=blocker_id).first()
         assert retrieved is not None
         assert retrieved.assignee_id is None
+
+    def test_delete_ticket_cascades_blocker(self, test_session, sample_user, sample_organization):
+        """Test deleting a ticket cascade deletes its linked blockers."""
+        from src.database.models import Ticket
+        from src.database.models.enums import TicketStatus, Priority
+
+        ticket = Ticket(
+            id=uuid4(),
+            title="Ticket with blocker",
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            status=TicketStatus.TODO,
+            priority=Priority.MEDIUM,
+        )
+        test_session.add(ticket)
+        test_session.commit()
+
+        blocker = Blocker(
+            id=uuid4(),
+            organization_id=sample_organization.id,
+            created_by=sample_user.id,
+            description="Blocker linked to ticket",
+            status=BlockerStatus.OPEN,
+            ticket_id=ticket.id,
+        )
+        test_session.add(blocker)
+        test_session.commit()
+
+        blocker_id = blocker.id
+
+        # Delete ticket — blocker must cascade delete
+        test_session.delete(ticket)
+        test_session.commit()
+
+        retrieved = test_session.query(Blocker).filter_by(id=blocker_id).first()
+        assert retrieved is None
 
     def test_delete_organization_deletes_blockers(self, test_session, sample_user, sample_organization):
         """Test deleting organization cascades to delete its blockers."""

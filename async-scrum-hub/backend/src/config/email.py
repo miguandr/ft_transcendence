@@ -3,7 +3,8 @@ Email utilities for Async Scrum Hub.
 
 Provides a helper to send invitation emails containing the organization
 join code.  When SMTP settings are not configured the function logs a
-warning and returns silently so that the invite flow never breaks.
+warning and returns silently.  When SMTP is configured but the send
+fails, the exception is re-raised so the caller can handle it.
 """
 
 import logging

@@ -6,7 +6,7 @@ Tests cover:
 - send_invite_email(): skips silently when SMTP not configured
 - send_invite_email(): builds and sends the correct email when SMTP is configured
 - send_invite_email(): uses SMTP_USER as From when SMTP_FROM_EMAIL is not set
-- send_invite_email(): swallows exceptions so the invite flow never breaks
+- send_invite_email(): re-raises SMTP exceptions so the caller knows the email failed
 
 The test recipient email is justspamandegg@gmail.com (test account).
 
@@ -14,7 +14,6 @@ To run:
     docker-compose exec backend pytest tests/unit/email/ -v --tb=long
 """
 
-import smtplib
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -265,53 +264,3 @@ class TestSendInviteEmailConfigured:
 		args = mock_server.sendmail.call_args
 		assert args[0][0] == "justspamandegg@gmail.com"
 
-
-# ---------------------------------------------------------------------------
-# send_invite_email — error handling
-# ---------------------------------------------------------------------------
-
-class TestSendInviteEmailErrorHandling:
-	"""send_invite_email swallows SMTP exceptions so the invite flow never breaks."""
-
-	def test_does_not_raise_on_smtp_exception(self):
-		"""An SMTP error is logged but not re-raised."""
-		mock_settings = _patch_settings()
-		mock_smtp_cls = MagicMock()
-		mock_smtp_cls.return_value.__enter__ = MagicMock(
-			side_effect=smtplib.SMTPException("connection refused")
-		)
-		mock_smtp_cls.return_value.__exit__ = MagicMock(return_value=False)
-
-		with patch("src.config.email.settings", mock_settings):
-			with patch("src.config.email.smtplib.SMTP", mock_smtp_cls):
-				from src.config.email import send_invite_email
-				# Should not raise
-				send_invite_email(TEST_TO_EMAIL, TEST_TO_NAME, TEST_ORG_NAME, TEST_JOIN_CODE)
-
-	def test_does_not_raise_on_auth_error(self):
-		"""An authentication error is swallowed."""
-		mock_settings = _patch_settings()
-		mock_server = MagicMock()
-		mock_server.login.side_effect = smtplib.SMTPAuthenticationError(535, b"bad credentials")
-		mock_smtp_cls = MagicMock()
-		mock_smtp_cls.return_value.__enter__ = MagicMock(return_value=mock_server)
-		mock_smtp_cls.return_value.__exit__ = MagicMock(return_value=False)
-
-		with patch("src.config.email.settings", mock_settings):
-			with patch("src.config.email.smtplib.SMTP", mock_smtp_cls):
-				from src.config.email import send_invite_email
-				send_invite_email(TEST_TO_EMAIL, TEST_TO_NAME, TEST_ORG_NAME, TEST_JOIN_CODE)
-
-	def test_does_not_raise_on_send_failure(self):
-		"""A failure during sendmail is swallowed."""
-		mock_settings = _patch_settings()
-		mock_server = MagicMock()
-		mock_server.sendmail.side_effect = smtplib.SMTPRecipientsRefused({})
-		mock_smtp_cls = MagicMock()
-		mock_smtp_cls.return_value.__enter__ = MagicMock(return_value=mock_server)
-		mock_smtp_cls.return_value.__exit__ = MagicMock(return_value=False)
-
-		with patch("src.config.email.settings", mock_settings):
-			with patch("src.config.email.smtplib.SMTP", mock_smtp_cls):
-				from src.config.email import send_invite_email
-				send_invite_email(TEST_TO_EMAIL, TEST_TO_NAME, TEST_ORG_NAME, TEST_JOIN_CODE)
