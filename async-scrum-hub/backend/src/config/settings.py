@@ -1,24 +1,26 @@
+"""
+Application configuration loaded from environment variables (.env).
+
+This class centralizes security-related settings such as:
+- JWT secret key (required)
+- JWT signing algorithm (default: HS256)
+- Access token expiration time (minutes)
+- SMTP email settings (optional, for invitation emails)
+
+Using pydantic-settings ensures:
+- Strong typing and validation
+- Automatic loading from .env
+- Clear separation between configuration and business logic
+"""
+
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
-# Application configuration loaded from environment variables (.env).
-#
-# This class centralizes security-related settings such as:
-# - JWT secret key (required)
-# - JWT signing algorithm (default: HS256)
-# - Access token expiration time (minutes)
-# - SMTP email settings (optional, for invitation emails)
-#
-# Using pydantic-settings ensures:
-# - Strong typing and validation
-# - Automatic loading from .env
-# - Clear separation between configuration and business logic
 class Settings(BaseSettings):
 	jwt_secret_key: str = Field(..., alias="JWT_SECRET_KEY")
 	jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
 
-	# SMTP / Email settings (optional — invite emails are skipped when not configured)
 	smtp_host: Optional[str] = Field(None, alias="SMTP_HOST")
 	smtp_port: int = Field(587, alias="SMTP_PORT")
 	smtp_user: Optional[str] = Field(None, alias="SMTP_USER")
@@ -27,5 +29,4 @@ class Settings(BaseSettings):
 
 	model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-# settings is an object created from the class Settings
 settings = Settings()
