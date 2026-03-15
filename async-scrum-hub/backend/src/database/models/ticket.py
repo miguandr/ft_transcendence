@@ -1,12 +1,3 @@
-"""
-Ticket model for the database.
-
-IMPORTANT - Authorization Fields Required (see ARCHITECTURE.md section 9.1):
-- organization_id: UUID FK to organizations (required for authorization checks)
-- created_by: UUID FK to users (required for ownership checks)
-- assignee_id: UUID FK to users, nullable (required for assignee checks)
-"""
-
 import uuid
 from datetime import datetime
 from sqlalchemy import DateTime, String, ForeignKey, func, Enum
@@ -25,14 +16,22 @@ if TYPE_CHECKING:
 
 
 class Ticket(Base):
-	__tablename__ = "tickets"
+	"""
+	Ticket model representing a primary work item (e.g. user story, bug, feature).
 
-#for quick lookups, testing needed
-#	__table_args__ = (
-#		Index("ix_tickets_org", "organization_id"),
-#		Index("ix_tickets_org_status", "organization_id", "status"),
-#		Index("ix_tickets_org_priority", "organization_id", "priority"),
-#	)
+	Tickets are the central unit of work in a project. They can be broken down
+	into tasks and may have blockers associated with them.
+
+	Business Rules:
+	- Default status when created: todo
+	- Default priority when created: medium
+	- Status values: todo, in_progress, completed
+	- Priority values: low, medium, high
+	- Deleting a ticket cascades to all its tasks and blockers
+	- assignee_id is set to NULL if the assigned user is deleted
+	"""
+
+	__tablename__ = "tickets"
 
 	id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
@@ -112,8 +111,7 @@ class Ticket(Base):
 		passive_deletes=True,
 	)
 
-#Relationships
-
+	#Relationships
 	creator: Mapped["User"] = relationship(
 		"User",
 		foreign_keys=[created_by],

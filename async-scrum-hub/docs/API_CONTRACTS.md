@@ -112,9 +112,9 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Success Response:** `201 Created`
 ```json
 {
-  "id": "uuid",
-  "email": "string",
-  "name": "string"
+	"id": "uuid",
+	"email": "string",
+	"name": "string"
 }
 ```
 
@@ -123,24 +123,24 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 `422 Unprocessable Entity` - Invalid input (example: validation error)
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `409 Conflict` - User already exists
 ```json
 {
-  "error": {
-	"code": "USER_EXISTS",
-	"message": "User with this email already exists"
-  }
+	"error": {
+		"code": "USER_EXISTS",
+		"message": "User with this email already exists"
+	}
 }
 ```
 ---
@@ -156,16 +156,16 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Request Body:**
 ```json
 {
-  "email": "string",
-  "password": "string"
+	"email": "string",
+	"password": "string"
 }
 ```
 
 **Success Response:** `200 OK`
 ```json
 {
-  "access_token": "string (JWT)",
-  "token_type": "bearer"
+	"access_token": "string (JWT)",
+	"token_type": "bearer"
 }
 ```
 
@@ -174,32 +174,32 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 `422 Unprocessable Entity` - Invalid input (example: missing fields)
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 `401 Unauthorized` - Invalid credentials
 ```json
 {
-  "error": {
-	"code": "INVALID_CREDENTIALS",
-	"message": "Email or password is incorrect"
-  }
+	"error": {
+		"code": "INVALID_CREDENTIALS",
+		"message": "Email or password is incorrect"
+	}
 }
 ```
 `403 Forbidden` - Team setup not completed
 ```json
 {
-  "error": {
-	"code": "TEAM_SETUP_NOT_DONE",
-	"message": "Team setup is not done"
-  }
+	"error": {
+		"code": "TEAM_SETUP_NOT_DONE",
+		"message": "Team setup is not done"
+	}
 }
 ```
 ---
@@ -220,14 +220,14 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Success Response:** `200 OK`
 ```json
 {
-  "id": "uuid",
-  "email": "string",
-  "name": "string",
-  "org_name": "string",
-  "avatar_url": "string | null",
-  "organization_id": "uuid | null",
-  "scrum_role": "scrum_master | product_owner | developer | null",
-  "org_role": "admin | member | null"
+	"id": "uuid",
+	"email": "string",
+	"name": "string",
+	"org_name": "string",
+	"avatar_url": "string | null",
+	"organization_id": "uuid | null",
+	"scrum_role": "scrum_master | product_owner | developer | null",
+	"org_role": "admin | member | null"
 }
 ``````
 
@@ -236,10 +236,10 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 ---
@@ -266,14 +266,14 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 **Success Response:** `200 OK`
 ```json
 {
-  "id": "uuid",
-  "email": "string",
-  "name": "string",
-  "org_name": "string",
-  "avatar_url": "string | null",
-  "organization_id": "uuid | null",
-  "scrum_role": "scrum_master | product_owner | developer | null",
-  "org_role": "admin | member | null"
+	"id": "uuid",
+	"email": "string",
+	"name": "string",
+	"org_name": "string",
+	"avatar_url": "string | null",
+	"organization_id": "uuid | null",
+	"scrum_role": "scrum_master | product_owner | developer | null",
+	"org_role": "admin | member | null"
 }
 ```
 
@@ -282,24 +282,24 @@ Permissions are scoped to specific resources (organization, task, ticket, etc.).
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 ---
@@ -338,30 +338,30 @@ file: binary (image file)
 `400 Bad Request` - Invalid file type
 ```json
 {
-  "error": {
-	"code": "INVALID_FILE_TYPE",
-	"message": "Only JPEG, PNG, GIF, and WebP images are allowed"
-  }
+	"error": {
+		"code": "INVALID_FILE_TYPE",
+		"message": "Only JPEG, PNG, GIF, and WebP images are allowed"
+	}
 }
 ```
 
 `400 Bad Request` - File too large
 ```json
 {
-  "error": {
-	"code": "FILE_TOO_LARGE",
-	"message": "File size exceeds the maximum limit of 5MB"
-  }
+	"error": {
+		"code": "FILE_TOO_LARGE",
+		"message": "File size exceeds the maximum limit of 5MB"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 ---
@@ -388,17 +388,17 @@ file: binary (image file)
 **Request Body:**
 ```json
 {
-  "name": "string",
+	"name": "string",
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "id": "uuid",
-  "name": "string",
-  "join_code": "SCR-493", // generated server-side when the organization is created.
-  "created_by": "uuid (owner)"
+	"id": "uuid",
+	"name": "string",
+	"join_code": "SCR-493",
+	"created_by": "uuid (owner)"
 }
 ```
 
@@ -407,34 +407,34 @@ file: binary (image file)
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `409 Conflict` - Organization already exists
 ```json
 {
-  "error": {
-	"code": "ORG_EXISTS",
-	"message": "An organization with this name already exists."
-  }
+	"error": {
+		"code": "ORG_EXISTS",
+		"message": "An organization with this name already exists."
+	}
 }
 ```
 ---
@@ -460,7 +460,7 @@ file: binary (image file)
 **Request Body:**
 ```json
 {
-  "scrum_role": "scrum_master | product_owner | developer"
+	"scrum_role": "scrum_master | product_owner | developer"
 }
 ```
 
@@ -477,20 +477,20 @@ file: binary (image file)
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -554,30 +554,30 @@ file: binary (image file)
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -599,15 +599,15 @@ file: binary (image file)
 **Request Body:**
 ```json
 {
-  "name": "string",
-  "email": "string"
+	"name": "string",
+	"email": "string"
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "email": "string"
+	"email": "string"
 }
 ```
 
@@ -616,54 +616,54 @@ file: binary (image file)
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 
 `409 Conflict` - User already a member
 ```json
 {
-  "error": {
-	"code": "ALREADY_MEMBER",
-	"message": "User is already a member of this organization"
-  }
+	"error": {
+		"code": "ALREADY_MEMBER",
+		"message": "User is already a member of this organization"
+	}
 }
 ```
 ---
@@ -690,30 +690,30 @@ file: binary (image file)
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization or user not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization or user not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization or user not found"
+	}
 }
 ```
 ---
@@ -734,20 +734,20 @@ The frontend should use this list to show role options before calling `PATCH /or
 **Request Body:**
 ```json
 {
-  "join_code": "SCR-493",
+	"join_code": "SCR-493",
 }
 ```
 
 **Success Response:** `200 OK`
 ```json
 {
-  "organization_id": "uuid",
-  "org_role": "member",
-  "available_scrum_role": [
-	{ "role": "scrum_master" },
-	{ "role": "product_owner" },
-	{ "role": "developer" }
-  ]
+	"organization_id": "uuid",
+	"org_role": "member",
+	"available_scrum_role": [
+		{ "role": "scrum_master" },
+		{ "role": "product_owner" },
+		{ "role": "developer" }
+	]
 }
 ```
 
@@ -755,20 +755,20 @@ The frontend should use this list to show role options before calling `PATCH /or
 `400 Bad Request` - Wether a code exists
 ```json
 {
-  "error": {
-	"code": "INVALID_CODE",
-	"message": "Invalid code."
-  }
+	"error": {
+		"code": "INVALID_CODE",
+		"message": "Invalid code."
+	}
 }
 ```
 
 `409 Conflict` - User already a member
 ```json
 {
-  "error": {
-	"code": "ALREADY_MEMBER",
-	"message": "User is already a member of this organization"
-  }
+	"error": {
+		"code": "ALREADY_MEMBER",
+		"message": "User is already a member of this organization"
+	}
 }
 ```
 ---
@@ -798,26 +798,26 @@ The frontend should use this list to show role options before calling `PATCH /or
 **Request Body:**
 ```json
 {
-  "title": "string",
-  "description": "string | null",
-  "priority": "low | medium | high",
-  "assignee_id": "uuid | null"  // Must be a user with Developer role
+	"title": "string",
+	"description": "string | null",
+	"priority": "low | medium | high",
+	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
 
 **Success Response:** `201 Created`
 ```json
 {
-  "id": "uuid",
-  "title": "string",
-  "description": "string | null",
-  "status": "todo | in_progress | completed",
-  "priority": "low | medium | high",
-  "created_by": "uuid",
-  "assignee_id": "uuid | null",
-  "organization_id": "uuid",
-  "created_at": "timestamp",
-  "updated_at": "timestamp"
+	"id": "uuid",
+	"title": "string",
+	"description": "string | null",
+	"status": "todo | in_progress | completed",
+	"priority": "low | medium | high",
+	"created_by": "uuid",
+	"assignee_id": "uuid | null",
+	"organization_id": "uuid",
+	"created_at": "timestamp",
+	"updated_at": "timestamp"
 }
 ```
 
@@ -826,54 +826,54 @@ The frontend should use this list to show role options before calling `PATCH /or
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to tickets"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to tickets"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -930,30 +930,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1009,30 +1009,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1105,54 +1105,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to tickets"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to tickets"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1193,44 +1193,44 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1257,30 +1257,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1309,9 +1309,9 @@ Used to render the organization board.
 **Request Body:**
 ```json
 {
-  "title": "string",
-  "description": "string | null",
-  "assignee_id": "uuid | null"  // Must be a user with Developer role
+	"title": "string",
+	"description": "string | null",
+	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```
 
@@ -1322,7 +1322,7 @@ Used to render the organization board.
 	"title": "string",
 	"description": "string | null",
 	"status": "in_progress",
-  	"created_by": "uuid (owner)",
+	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
 	"ticket_id": "uuid"
 }
@@ -1333,54 +1333,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to tasks"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to tasks"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1423,30 +1423,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Ticket not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Ticket not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Ticket not found"
+	}
 }
 ```
 ---
@@ -1473,7 +1473,7 @@ Used to render the organization board.
 	"title": "string",
 	"description": "string | null",
 	"status": "in_progress | completed",
-  	"created_by": "uuid (owner)",
+	"created_by": "uuid (owner)",
 	"assignee_id": "uuid | null",
 	"ticket_id": "uuid"
 }
@@ -1484,30 +1484,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Task not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Task not found"
+	}
 }
 ```
 ---
@@ -1561,54 +1561,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to tasks"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to tasks"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Task not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Task not found"
+	}
 }
 ```
 ---
@@ -1636,30 +1636,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Task not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Task not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Task not found"
+	}
 }
 ```
 ---
@@ -1718,54 +1718,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 
 `409 Conflict` - Standup already exists for today
 ```json
 {
-  "error": {
-	"code": "STANDUP_ALREADY_EXISTS",
-	"message": "You have already created a standup for today"
-  }
+	"error": {
+		"code": "STANDUP_ALREADY_EXISTS",
+		"message": "You have already created a standup for today"
+	}
 }
 ```
 ---
@@ -1820,30 +1820,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -1910,54 +1910,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `409 Conflict` - Standup can no longer be edited
 ```json
 {
-  "error": {
-	"code": "EDIT_WINDOW_EXPIRED",
-	"message": "Standups can only be edited on the day they are created"
-  }
+	"error": {
+		"code": "EDIT_WINDOW_EXPIRED",
+		"message": "Standups can only be edited on the day they are created"
+	}
 }
 ```
 
 `404 Not Found` - Standup not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Standup not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Standup not found"
+	}
 }
 ```
 ---
@@ -1983,30 +1983,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Standup not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Standup not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Standup not found"
+	}
 }
 ```
 ---
@@ -2060,54 +2060,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+		"type": "string",
+		"loc": ["body", "field_name"],
+		"msg": "validation error message",
+		"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to blockers"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to blockers"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -2165,30 +2165,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -2252,54 +2252,54 @@ Used to render the organization board.
 `422 Unprocessable Entity` - Invalid input
 ```json
 {
-  "detail": [
-	{
-	  "type": "string",
-	  "loc": ["body", "field_name"],
-	  "msg": "validation error message",
-	  "input": "invalid_value"
-	}
-  ]
+	"detail": [
+		{
+			"type": "string",
+			"loc": ["body", "field_name"],
+			"msg": "validation error message",
+			"input": "invalid_value"
+		}
+	]
 }
 ```
 
 `400 Bad Request` - Invalid assignee role
 ```json
 {
-  "error": {
-	"code": "INVALID_ASSIGNEE",
-	"message": "Only users with Developer role can be assigned to blockers"
-  }
+	"error": {
+		"code": "INVALID_ASSIGNEE",
+		"message": "Only users with Developer role can be assigned to blockers"
+	}
 }
 ```
 
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Blocker not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Blocker not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Blocker not found"
+	}
 }
 ```
 ---
@@ -2330,40 +2330,40 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Blocker not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Blocker not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Blocker not found"
+	}
 }
 ```
 
 `409 Conflict` - Blocker already resolved
 ```json
 {
-  "error": {
-	"code": "BLOCKER_ALREADY_RESOLVED",
-	"message": "Blocker already resolved"
-  }
+	"error": {
+		"code": "BLOCKER_ALREADY_RESOLVED",
+		"message": "Blocker already resolved"
+	}
 }
 ```
 ---
@@ -2388,10 +2388,10 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-  "key": "privacy",
-  "title": "Privacy Policy",
-  "content": "# Privacy Policy\n\n...",
-  "updated_at": "timestamp"
+	"key": "privacy",
+	"title": "Privacy Policy",
+	"content": "# Privacy Policy\n\n...",
+	"updated_at": "timestamp"
 }
 ```
 
@@ -2400,10 +2400,10 @@ Used to render the organization board.
 `404 Not Found` - Document not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Legal document not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Legal document not found"
+	}
 }
 ```
 ---
@@ -2427,23 +2427,27 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-  "tasks":[ 							//line chart
+	//line chart
+	"tasks":[
 	{ "week": "Week 1", "active": "int", "resolved": "int"},
 	{ "week": "Week 2", "active": "int", "resolved": "int"},
 	{ "week": "Week 3", "active": "int", "resolved": "int"},
 	{ "week": "Week 4", "active": "int", "resolved": "int"}
-  ],
-  "tickets":[							//bar chart
+	],
+	//bar chart
+	"tickets":[
 	{ "week": "Week 1", "completed": "int"},
 	{ "week": "Week 2", "completed": "int"},
 	{ "week": "Week 3", "completed": "int"},
 	{ "week": "Week 4", "completed": "int"}
-  ],
-  "standups": {							//numeric cards
-	"posted": "int",
-	"total": "int" 
-  },
-  "blockers_avg_cycle_time": "float"    //numeric cards
+	],
+	//numeric cards
+	"standups": {
+		"posted": "int",
+		"total": "int" 
+	},
+	//numeric cards
+	"blockers_avg_cycle_time": "float"
 }
 ```
 
@@ -2452,30 +2456,30 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - Insufficient permissions
 ```json
 {
-  "error": {
-	"code": "FORBIDDEN",
-	"message": "You do not have permission to perform this action"
-  }
+	"error": {
+		"code": "FORBIDDEN",
+		"message": "You do not have permission to perform this action"
+	}
 }
 ```
 
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---
@@ -2504,20 +2508,20 @@ Used to render the organization board.
 **Success Response:** `200 OK`
 ```json
 {
-  "summary": {
-	"tasks_in_progress": "int",
-	"tickets_completed": "int",
-	"active_blockers": "int"
-  },
+	"summary": {
+		"tasks_in_progress": "int",
+		"tickets_completed": "int",
+		"active_blockers": "int"
+	},
   "recent_updates": [
-	{
-	  "type": "task | ticket",
-	  "event": "created | completed",
-	  "title": "string",
-	  "timestamp": "ISO 8601 datetime (UTC)",
-	  "created_by": "UserBrief"
-	}
-  ]
+		{
+		"type": "task | ticket",
+		"event": "created | completed",
+		"title": "string",
+		"timestamp": "ISO 8601 datetime (UTC)",
+		"created_by": "UserBrief"
+		}
+	]
 }
 ```
 
@@ -2526,29 +2530,29 @@ Used to render the organization board.
 `401 Unauthorized` - Authentication required
 ```json
 {
-  "error": {
-	"code": "UNAUTHORIZED",
-	"message": "Authentication required"
-  }
+	"error": {
+		"code": "UNAUTHORIZED",
+		"message": "Authentication required"
+	}
 }
 ```
 
 `403 Forbidden` - User is not part of any organization
 ```json
 {
-  "error": {
-	"code": "NO_ORGANIZATION",
-	"message": "User is not part of any organization."
-  }
+	"error": {
+		"code": "NO_ORGANIZATION",
+		"message": "User is not part of any organization."
+	}
 }
 ```
 `404 Not Found` - Organization not found
 ```json
 {
-  "error": {
-	"code": "NOT_FOUND",
-	"message": "Organization not found"
-  }
+	"error": {
+		"code": "NOT_FOUND",
+		"message": "Organization not found"
+	}
 }
 ```
 ---

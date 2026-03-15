@@ -1,15 +1,3 @@
-"""
-Organizations service layer.
-
-Contains all business logic for organization operations:
-- create_organization
-- select_role
-- get_organization_members
-- invite_member
-- remove_member
-- join_organization
-"""
-
 import random
 import string
 import uuid
@@ -91,10 +79,6 @@ def create_organization(db: Session, user: User, name: str) -> Organization:
 	)
 	db.add(org)
 	db.flush()
-
-	# Make creator the org admin
-	# user.organization_id = org.id
-	# user.org_role = "admin"
 
 	db.execute(
 		sa_update(User)
@@ -243,11 +227,6 @@ def join_organization(
 
 	if user.organization_id is not None:
 		raise _conflict("ALREADY_IN_ORG", "User already belongs to an organization")
-
-
-	# Join the org first
-	# user.organization_id = org.id
-	# user.org_role = "member"
 
 	db.execute(
 		sa_update(User)

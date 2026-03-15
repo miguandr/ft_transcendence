@@ -1,5 +1,3 @@
-# import src.database.models
-
 from .user import User
 from .organization import Organization
 from .standup import Standup

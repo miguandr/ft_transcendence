@@ -1,12 +1,3 @@
-"""
-Task model for the database.
-
-IMPORTANT - Authorization Fields Required (see ARCHITECTURE.md section 9.1):
-- organization_id: UUID FK to organizations (required for authorization checks)
-- created_by: UUID FK to users (required for ownership checks)
-- assignee_id: UUID FK to users, nullable (required for assignee checks)
-"""
-
 import uuid
 from datetime import datetime
 from sqlalchemy import DateTime, String, ForeignKey, func, Enum
@@ -24,6 +15,20 @@ if TYPE_CHECKING:
 
 
 class Task(Base):
+	"""
+	Task model representing a sub-item of a ticket.
+
+	Tasks break down a ticket into smaller actionable steps.
+	Each task belongs to exactly one ticket and one organization.
+
+	Business Rules:
+	- Tasks are deleted when their parent ticket is deleted (cascade)
+	- Default status when created: in_progress
+	- Status values: in_progress, completed
+	- assignee_id is set to NULL if the assigned user is deleted
+	- Only one assignee per task (optional)
+	"""
+
 	__tablename__ = "tasks"
 
 	id: Mapped[uuid.UUID] = mapped_column(
@@ -90,8 +95,8 @@ class Task(Base):
 		onupdate=func.now(),
 		nullable=False,
 	)
-#Relationships
 
+	#Relationships
 	ticket: Mapped["Ticket"] = relationship(
 		"Ticket",
 		back_populates="tasks",
@@ -114,5 +119,3 @@ class Task(Base):
 		"Organization",
 		back_populates="tasks",
 	)
-
-

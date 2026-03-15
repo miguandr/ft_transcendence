@@ -1,3 +1,12 @@
+"""
+Legal API routes.
+
+Endpoints:
+- GET    /legal/documents/{key}                    → get legal document     (public; keys: privacy, terms)
+
+Reads markdown files from /app/legal/{key}.md and returns content with last-modified timestamp.
+"""
+
 import os
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status

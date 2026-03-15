@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class LegalDocumentResponse(BaseModel):
 	key: str
 	title: str

@@ -6,7 +6,6 @@ from src.database.models.enums import OrgRole, ScrumRole
 from src.tickets.schemas import TicketBriefOrg
 from src.tasks.schemas import TaskBriefOrg
 from src.blockers.schemas import BlockerBriefOrg
-#from src.users.schemas import UserBrief
 
 class OrgCreateRequest(BaseModel):
 	name: str = Field(..., min_length=1)
@@ -28,9 +27,6 @@ class OrgSelectRoleResponse(BaseModel):
 
 	model_config = ConfigDict(from_attributes=True)
 
-#class OrgGetMemberRequest(BaseModel):
-#	pass 
-
 class OrgGetMemberResponse(BaseModel):
 	id: UUID
 	name: str
@@ -48,15 +44,8 @@ class OrgInviteMemberRequest(BaseModel):
 	email: str = Field(..., min_length=1)
 
 class OrgInviteMemberResponse(BaseModel):
-	email: str #TODO check if this is enough (api_contract is only email)
-
+	email: str
 	model_config = ConfigDict(from_attributes=True)
-
-#class OrgDeleteMemberRequest(BaseModel):
-#	pass  # No fields needed for this request
-
-#class OrgDeleteMemberResponse(BaseModel):
-#	pass  #TODO check if this is correct only 204 as responce No fields needed for this response
 
 class OrgJoinRequest(BaseModel):
 	join_code: str = Field(..., min_length=1)

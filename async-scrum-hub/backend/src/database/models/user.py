@@ -14,6 +14,22 @@ if TYPE_CHECKING:
 	from .task import Task
 
 class User(Base):
+	"""
+	User model representing an application account.
+
+	Users can belong to at most one organization at a time and hold two independent
+	role dimensions within it: an organizational role and a scrum role.
+
+	Business Rules:
+	- Email must be globally unique
+	- A user not in any organization has org_role and scrum_role set to NULL
+	- org_role values: admin, member
+	- scrum_role values: scrum_master, product_owner, developer
+	- If the user's organization is deleted, organization_id is set to NULL (user is NOT deleted)
+	- If the user is deleted, their standups and created blockers are deleted (cascade)
+	- Tickets and tasks created by or assigned to the user are unaffected (passive deletes)
+	"""
+
 	__tablename__ = "users"
 	__table_args__ = (
 		CheckConstraint(
@@ -56,7 +72,7 @@ class User(Base):
 
 	organization_id: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("organizations.id", ondelete="SET NULL"),  # If Org is deleted, set NULL
+		ForeignKey("organizations.id", ondelete="SET NULL"),
 		index=True,
 		nullable=True,
 	)
@@ -73,16 +89,26 @@ class User(Base):
 		default=None,
 	)
 
-	# Relationships
+	created_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True),
+		server_default=func.now(),
+		nullable=False
+	)
 
-	# The organization the user belongs to (nullable if not in any org)
+	updated_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True),
+		server_default=func.now(),
+		onupdate=func.now(),
+		nullable=False,
+	)
+
+	# Relationships
 	organization: Mapped["Organization | None"] = relationship(
 		"Organization",
 		foreign_keys=[organization_id],
 		back_populates="users"
 	)
 
-	# All organizations this user has created (as founder/owner)
 	created_organizations: Mapped[list["Organization"]] = relationship(
 		"Organization",
 		foreign_keys="Organization.created_by",
@@ -101,21 +127,21 @@ class User(Base):
 		"Standup",
 		foreign_keys="Standup.created_by",
 		back_populates="creator",
-		cascade="all, delete-orphan"  # If User is deleted, delete their standups
+		cascade="all, delete-orphan"
 	)
 
 	created_blockers: Mapped[list["Blocker"]] = relationship(
 		"Blocker",
 		foreign_keys="Blocker.created_by",
 		back_populates="creator",
-		cascade="all, delete-orphan"  # If User is deleted, delete their created blockers
+		cascade="all, delete-orphan"
 	)
 
 	assigned_blockers: Mapped[list["Blocker"]] = relationship(
 		"Blocker",
 		foreign_keys="Blocker.assignee_id",
 		back_populates="assignee",
-		passive_deletes=True  # DB handles SET NULL via FK (defined in Blocker)
+		passive_deletes=True
 	)
 
 	tickets_created: Mapped[list["Ticket"]] = relationship(
@@ -138,21 +164,8 @@ class User(Base):
 		back_populates="assignee",
 		passive_deletes=True,
 	)
-	# End of Relationships
 
 	@property
 	def org_name(self) -> str | None:
 		return self.organization.name if self.organization else None
 
-	created_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True),
-		server_default=func.now(),
-		nullable=False
-	)
-
-	updated_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True),
-		server_default=func.now(),
-		onupdate=func.now(),
-		nullable=False,
-	)

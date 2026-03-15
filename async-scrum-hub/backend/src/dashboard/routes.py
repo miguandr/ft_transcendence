@@ -1,3 +1,13 @@
+"""
+Dashboard API routes.
+
+Endpoints:
+- GET    /organizations/{org_id}/dashboard         → get dashboard data     (authenticated member)
+
+Returns aggregated data for the current user within the organization
+(open blockers, today's standup, assigned tickets and tasks).
+"""
+
 import uuid
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
