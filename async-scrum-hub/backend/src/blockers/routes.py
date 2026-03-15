@@ -1,3 +1,17 @@
+"""
+Blockers API routes.
+
+Endpoints:
+- POST   /organizations/{org_id}/blockers          → create blocker         (any member)
+- GET    /organizations/{org_id}/blockers          → list blockers          (any member; ?status=open|resolved)
+- PATCH  /blockers/{blocker_id}                    → update blocker         (creator or SM)
+- PATCH  /blockers/{blocker_id}/resolve            → resolve blocker        (creator or SM)
+
+Authorization follows the dependency helpers in src.api.deps:
+- require_org_permission(action):            for endpoints with org_id in path
+- require_resource_permission(action, loader): for endpoints with blocker_id in path
+"""
+
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status

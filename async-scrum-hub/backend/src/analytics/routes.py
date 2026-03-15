@@ -1,3 +1,13 @@
+"""
+Analytics API routes.
+
+Endpoints:
+- GET    /organizations/{org_id}/analytics         → get analytics data     (authenticated member)
+
+Returns org-level metrics (ticket/task completion rates, blocker trends, etc.)
+scoped to the current user's organization.
+"""
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 

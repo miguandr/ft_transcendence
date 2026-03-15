@@ -6,7 +6,6 @@ from src.database.models import User, Ticket
 from src.database.models.enums import TicketStatus, Priority, ScrumRole
 from src.api.permissions import PERMISSIONS
 
-
 # ── HTTP exception helpers ────────────────────────────────────────────
 
 def _not_found(message: str = "Ticket not found") -> HTTPException:
@@ -15,20 +14,17 @@ def _not_found(message: str = "Ticket not found") -> HTTPException:
 		detail={"error": {"code": "NOT_FOUND", "message": message}},
 	)
 
-
 def _bad_assignee() -> HTTPException:
 	return HTTPException(
 		status_code=status.HTTP_400_BAD_REQUEST,
 		detail={"error": {"code": "INVALID_ASSIGNEE", "message": "Only users with Developer role can be assigned to tickets"}},
 	)
 
-
 def _forbidden(message: str = "You do not have permission to perform this action") -> HTTPException:
 	return HTTPException(
 		status_code=status.HTTP_403_FORBIDDEN,
 		detail={"error": {"code": "FORBIDDEN", "message": message}},
 	)
-
 
 # ── Internal helpers ──────────────────────────────────────────────────
 
@@ -43,7 +39,6 @@ def _validate_assignee(db: Session, assignee_id: uuid.UUID | None, organization_
 		raise _forbidden("Assignee is not a member of this organization")
 	if assignee.scrum_role != ScrumRole.developer:
 		raise _bad_assignee()
-
 
 def _check_restricted_fields(user: User, updates: dict) -> None:
 	"""
@@ -75,7 +70,6 @@ def get_ticket_by_id(ticket_id: uuid.UUID, db: Session) -> Ticket:
 		raise _not_found()
 	return ticket
 
-
 def create_ticket(
 	db: Session,
 	org_id: uuid.UUID,
@@ -101,7 +95,6 @@ def create_ticket(
 	db.refresh(ticket)
 	return ticket
 
-
 def list_tickets(
 	db: Session,
 	org_id: uuid.UUID,
@@ -114,7 +107,6 @@ def list_tickets(
 	if priority_filter is not None:
 		query = query.filter(Ticket.priority == priority_filter)
 	return query.order_by(Ticket.created_at.desc()).all()
-
 
 def update_ticket(
 	db: Session,
@@ -139,7 +131,6 @@ def update_ticket(
 	db.refresh(ticket)
 	return ticket
 
-
 def move_ticket(
 	db: Session,
 	ticket: Ticket,
@@ -149,7 +140,6 @@ def move_ticket(
 	db.commit()
 	db.refresh(ticket)
 	return ticket
-
 
 def delete_ticket(db: Session, ticket: Ticket) -> None:
 	db.delete(ticket)

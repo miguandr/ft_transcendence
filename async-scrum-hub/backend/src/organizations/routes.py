@@ -2,16 +2,15 @@
 Organizations API routes.
 
 Endpoints:
-- POST   /organizations                                → create organization  (any authenticated user)
-- PATCH  /organizations/{org_id}                       → select scrum role    (org creator only)
-- GET    /organizations/{org_id}/members               → list members         (any org member)
-- POST   /organizations/{org_id}/members               → invite member        (org admin)
-- DELETE /organizations/{org_id}/members/{user_id}     → remove member        (org admin)
-- POST   /organizations/join                           → join by code         (any authenticated user)
+- POST   /organizations                            → create organization        (authenticated)
+- POST   /organizations/join                       → join org by join_code      (authenticated)
+- PATCH  /organizations/{org_id}                   → select scrum role          (authenticated member)
+- GET    /organizations/{org_id}/members           → list members + active work (any member)
+- POST   /organizations/{org_id}/members           → invite member by email     (admin)
+- DELETE /organizations/{org_id}/members/{user_id} → remove member              (admin)
 
-AUTHORIZATION DEPENDENCIES (from src.api.deps):
-- get_current_user: For global-scope endpoints (no org membership required)
-- require_org_permission(action): For org-scope endpoints (membership + role checks)
+Authorization follows the dependency helpers in src.api.deps:
+- require_org_permission(action): for endpoints that require org membership or admin role
 """
 
 import uuid

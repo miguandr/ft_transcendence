@@ -1,3 +1,14 @@
+"""
+Realtime WebSocket routes.
+
+Endpoints:
+- WS     /ws/{org_id}                              → real-time event stream (authenticated member)
+
+Authenticates via JWT passed as ?token= query param.
+Closes with code 4001 if the token is invalid, 4003 if the user does not belong to org_id.
+Server-push only — the server broadcasts events and ignores client messages.
+"""
+
 import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends
 from sqlalchemy.orm import Session

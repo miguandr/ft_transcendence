@@ -1,3 +1,13 @@
+"""
+Auth API routes.
+
+Endpoints:
+- POST   /auth/register                            → register new account   (public)
+- POST   /auth/login                               → login, returns JWT     (public)
+
+No authorization required — these endpoints are public.
+"""
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 

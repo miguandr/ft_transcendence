@@ -24,4 +24,3 @@ api_router.include_router(ticket_routes.router, tags=["tickets"])
 api_router.include_router(task_routes.router, tags=["tasks"])
 api_router.include_router(analytics_routes.router, tags=["analytics"])
 api_router.include_router(dashboard_routes.router, tags=["dashboard"])
-

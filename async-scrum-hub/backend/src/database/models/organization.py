@@ -14,6 +14,19 @@ if TYPE_CHECKING:
 	from .task import Task
 
 class Organization(Base):
+	"""
+	Organization model representing a team or workspace.
+
+	An organization groups users together and owns all related entities
+	(standups, blockers, tickets, tasks). Users join via a unique join_code.
+
+	Business Rules:
+	- join_code is unique across all organizations (max 10 chars)
+	- The creator of an organization cannot be deleted while the org exists (RESTRICT)
+	- Deleting an organization cascades to: standups, blockers, tickets, tasks
+	- Users belonging to the org get their organization_id set to NULL (not deleted)
+	"""
+
 	__tablename__ = "organizations"
 
 	id: Mapped[uuid.UUID] = mapped_column(
@@ -40,6 +53,19 @@ class Organization(Base):
 		nullable=False
 	)
 
+	created_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True),
+		server_default=func.now(),
+		nullable=False
+	)
+
+	updated_at: Mapped[datetime] = mapped_column(
+		DateTime(timezone=True),
+		server_default=func.now(),
+		onupdate=func.now(),
+		nullable=False,
+	)
+
 	# Relationships
 	creator: Mapped["User"] = relationship(
 		"User",
@@ -47,24 +73,23 @@ class Organization(Base):
 		back_populates="created_organizations"
 	)
 
-	# All users that belong to this organization
 	users: Mapped[list["User"]] = relationship(
 		"User",
 		foreign_keys="User.organization_id",
 		back_populates="organization",
-		passive_deletes=True  # DB handles SET NULL via FK (defined in User)
+		passive_deletes=True
 	)
 
 	standups: Mapped[list["Standup"]] = relationship(
 		"Standup",
 		back_populates="organization",
-		cascade="all, delete-orphan"  # If Organization is deleted, delete its standups
+		cascade="all, delete-orphan"
 	)
 
 	blockers: Mapped[list["Blocker"]] = relationship(
 		"Blocker",
 		back_populates="organization",
-		cascade="all, delete-orphan"  # If Organization is deleted, delete its blockers
+		cascade="all, delete-orphan"
 	)
 
 	tickets: Mapped[list["Ticket"]] = relationship(
@@ -79,18 +104,4 @@ class Organization(Base):
 		back_populates="organization",
 		cascade="all, delete-orphan",
 		passive_deletes=True,
-	)
-	# End of Relationships
-
-	created_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True),
-		server_default=func.now(),
-		nullable=False
-	)
-
-	updated_at: Mapped[datetime] = mapped_column(
-		DateTime(timezone=True),
-		server_default=func.now(),
-		onupdate=func.now(),
-		nullable=False,
 	)
