@@ -378,8 +378,7 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `auth/` domain.
 - Implemented `user/` domain.
 - Built database models: `auth.py`, `user.py`.
-- Wrote backend tests for auth, user domains and analytics.
-- Implemented `analytics/`, `legal/` and `dashboard/` domain (weekly aggregations, cycle time).
+- Implemented `analytics/`, `legal/` and `dashboard/` domain with the corresponded tests
 - Set up Alembic migrations and backend testing scaffolding.
 
 ### Miguel — Scrum Master & Frontend
@@ -400,7 +399,7 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `tickets/` domain (CRUD, status transitions, priority).
 - Implemented `tasks/` domain.
 - Built database models: `ticket.py`, `task.py`.
-- Wrote backend tests for organizations and tickets domains.
+- Wrote backend tests for organizations, task and tickets domains.
 
 ### Maria Luiza — Product Owner & DevOps
 - Implemented `standups/` domain (create, auto-fill, update, list).
