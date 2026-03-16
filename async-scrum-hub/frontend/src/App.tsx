@@ -11,7 +11,6 @@ import { TeamSetup } from "./features/auth/TeamSetup";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { SprintBoard } from "./features/sprint_board/SprintBoard";
 import { AsyncStandup } from "./features/standups/AsyncStandup";
-//import { AsyncStandupEmpty } from "./features/standups/AsyncStandupEmpty";
 import { Blockers } from "./features/blockers/Blockers";
 import { Analytics } from "./features/analytics/Analytics";
 import { Info } from "./features/info/Info";

@@ -51,24 +51,29 @@ export function AsyncStandup() {
 		(currentStandup) =>
 			currentStandup.created_by.id === authUser?.id && currentStandup.standup_date === today
 	);
-	//Update helpers — one card per user: today's if it exists, otherwise yesterday's
-	const visibleStandups = Object.values(
-		standups
-			.filter((s) => s.standup_date === today || s.standup_date === yesterday)
-			.reduce(
-				(acc, s) => {
-					const userId = s.created_by.id;
-					if (!acc[userId] || s.standup_date > acc[userId].standup_date) {
-						acc[userId] = s;
-					}
-					return acc;
-				},
-				{} as Record<string, StandupListItem>
-			)
-	).sort(
-		(a, b) =>
-			b.standup_date.localeCompare(a.standup_date) || b.created_at.localeCompare(a.created_at)
+
+	//Latest recent standup per user
+	const recentStandups = standups.filter(
+		(s) => s.standup_date === today || s.standup_date === yesterday
 	);
+	const latestStandupPerUser = recentStandups.reduce((acc, standup) => {
+		const userId = standup.created_by.id;
+		const existing = acc[userId];
+
+		// If no entry exists for this user, or this standup is newer, update the map
+		if (!existing || standup.standup_date > existing.standup_date) {
+			acc[userId] = standup;
+		}
+		return acc;
+	}, {} as Record<string, StandupListItem>);
+	const visibleStandups = Object.values(latestStandupPerUser).sort((a, b) => {
+		// Sort primarily by the date (Today first)
+		const dateOrder = b.standup_date.localeCompare(a.standup_date);
+
+		// If dates are identical, sort by actual creation timestamp
+		return dateOrder || b.created_at.localeCompare(a.created_at);
+	});
+
 
 	const fetchStandups = useCallback(async () => {
 		if (!orgId) return;
@@ -78,9 +83,9 @@ export function AsyncStandup() {
 			const standupsData = await listStandups(orgId);
 			setStandups(standupsData);
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchStandups: "Authentication required" });
 				refreshUser();
@@ -100,6 +105,7 @@ export function AsyncStandup() {
 		fetchStandups();
 	}, [fetchStandups]);
 
+
 	//Handlers
 	const handleCreateStandup = async () => {
 		if (!orgId) return;
@@ -111,11 +117,11 @@ export function AsyncStandup() {
 			});
 			await fetchStandups();
 			setIsCreateStandupOpen(false);
-			setStandupForm({ today: "" }); // reset form
+			setStandupForm({ today: "" });
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ createStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
@@ -146,9 +152,9 @@ export function AsyncStandup() {
 			setEditingStandup(null);
 			setStandupForm({ today: "" });
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ editStandup: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
@@ -177,9 +183,9 @@ export function AsyncStandup() {
 			await fetchStandups();
 			setConfirmDelete(null);
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ deleteStandup: "Authentication required" });
 				refreshUser();
@@ -202,7 +208,7 @@ export function AsyncStandup() {
 	};
 
 	useOrgWebSocket(orgId, (msg) => {
-		const reFetchEvents = ["standup.created", "standup.updated", "standup.deleted"];
+		const reFetchEvents = ["standup.created", "standup.updated"];
 		if (reFetchEvents.includes(msg.event)) {
 			fetchStandups();
 		}
@@ -290,7 +296,7 @@ export function AsyncStandup() {
 											<div className="flex-1">
 												<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
 													{s.standup_date === today
-														? "Today" 
+														? "Today"
 														: "Yesterday"}
 												</h4>
 												<p className="text-sm text-gray-600">{s.today}</p>
@@ -318,7 +324,7 @@ export function AsyncStandup() {
 									</div>
 
 									{/* Yesterday Section */}
-									{s.yesterday && s.standup_date === today && (
+									{s.yesterday && (
 										<div className="pb-4">
 											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
 												Yesterday

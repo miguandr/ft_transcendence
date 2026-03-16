@@ -1,6 +1,10 @@
 import { Avatar } from "../../../components/custom/index";
 import { PRIORITY_COLORS } from "../constants/sprint.constants";
-import type { OrgMember, ListTicketsBoard, TicketStatus } from "../types/sprint.types";
+import type {
+	OrgMember,
+	ListTicketsBoard,
+	TicketStatus
+} from "../types/sprint.types";
 
 interface Column {
 	id: TicketStatus;

@@ -4,16 +4,16 @@ import { CheckCircle2, ShieldAlert } from "lucide-react";
 interface ModalConfirmationProps {
 	isOpen: boolean;
 	onClose: () => void;
-	icon?: ReactNode; // Optional: overrides the default icon
-	iconBgColor?: string; // Optional: overrides the default icon background
+	icon?: ReactNode;
+	iconBgColor?: string;
 	title: string;
 	description?: string;
-	confirmLabel?: string; // e.g. "Remove", "Delete", "Confirm"
+	confirmLabel?: string;
 	cancelLabel?: string;
-	confirmVariant?: "danger" | "success"; // red or green confirm button
+	confirmVariant?: "danger" | "success";
 	onConfirm: () => void;
 	isConfirming?: boolean;
-	confirmingLabel?: string; // e.g. "Removing...", "Deleting..."
+	confirmingLabel?: string;
 }
 
 export function ModalConfirmation({

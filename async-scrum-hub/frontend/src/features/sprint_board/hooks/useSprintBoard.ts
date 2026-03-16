@@ -125,9 +125,9 @@ export function useSprintBoard() {
 			setTeamMembers(members);
 			setTicketsBoard(boardTickets);
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketBoard: "Authentication required" });
 				refreshUser();
@@ -157,9 +157,9 @@ export function useSprintBoard() {
 			const ticketDetail = await getTicketDetails(ticketId);
 			setSelectedTicketDetail(ticketDetail);
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketDetail: "Authentication required" });
 				refreshUser();
@@ -192,9 +192,9 @@ export function useSprintBoard() {
 			setTicketForm({ title: "", description: "", priority: "medium", assignee: "" });
 			fetchTicketBoard();
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ ticketCreate: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -243,9 +243,9 @@ export function useSprintBoard() {
 			}
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ ticketEdit: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -279,9 +279,9 @@ export function useSprintBoard() {
 			fetchTicketBoard();
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketDelete: "Authentication required" });
 				refreshUser();
@@ -319,9 +319,9 @@ export function useSprintBoard() {
 			}
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ taskCreate: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -349,9 +349,9 @@ export function useSprintBoard() {
 			setSelectedTask(task);
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskDetail: "Authentication required" });
 				refreshUser();
@@ -383,9 +383,9 @@ export function useSprintBoard() {
 			}
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskDelete: "Authentication required" });
 				refreshUser();
@@ -423,9 +423,9 @@ export function useSprintBoard() {
 			}
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ blockerCreate: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -478,9 +478,9 @@ export function useSprintBoard() {
 			setDraggedTicket(null);
 			fetchTicketBoard();
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ ticketDrop: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
@@ -521,9 +521,9 @@ export function useSprintBoard() {
 			} : prev);
 			setDraggedTask(null);
 		} catch (error: unknown ) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+			
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ taskDrop: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {

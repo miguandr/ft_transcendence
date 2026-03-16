@@ -1,7 +1,7 @@
 import { MessageSquare, Columns, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { motion } from "framer-motion"; // turns regular divs into animated divs
+import { motion } from "framer-motion";
 
 export function Welcome() {
 	const navigate = useNavigate();
@@ -10,9 +10,8 @@ export function Welcome() {
 	const [exitDestination, setExitDestination] = useState("");
 
 	const handleNavigate = (destination: string) => {
-		setExitDestination(destination); // Step 1: remember where we are going
-		setIsExiting(true); // Step 2: triggers fade-out
-		// Navigation happens later, in the animation callback
+		setExitDestination(destination);
+		setIsExiting(true);
 	};
 
 	const features = [
@@ -34,7 +33,7 @@ export function Welcome() {
 		<motion.div
 			className="min-h-screen bg-white flex items-center justify-center p-8"
 			initial={{ opacity: 0 }} // Start invisible
-			animate={{ opacity: isExiting ? 0 : 1 }} // if isExiting is true -> animate to opacity:0 (fadeout)
+			animate={{ opacity: isExiting ? 0 : 1 }}
 			transition={{ duration: 0.4, ease: "easeOut" }}
 			onAnimationComplete={() => {
 				if (isExiting && exitDestination) {

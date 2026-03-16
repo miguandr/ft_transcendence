@@ -99,7 +99,6 @@ export function useTopBar() {
 		setErrors({});
 		setIsUploading(true);
 
-		//Step 1: instant local preview
 		const reader = new FileReader();
 		reader.onload = (event) => {
 			setPreviewAvatar(event.target?.result as string);
@@ -112,10 +111,9 @@ export function useTopBar() {
 			setPreviewAvatar(null);
 
 		} catch (error) {
-			console.error("Failed to upload avatar:", error);
-
-			// Type assertion for API error format
 			const apiError = error as APIError;
+
+			console.error("Failed to upload avatar:", error);
 			if (apiError.error?.code === "INVALID_TYPE_FILE") {
 				setErrors({ avatar: "Only JPEG, PNG, GIF, and WebP images are allowed" });
 			} else if (apiError.error?.code === "FILE_TOO_LARGE") {
@@ -149,10 +147,9 @@ export function useTopBar() {
 				setExpandedSection(null);
 			}, 2000);
 		} catch (error: unknown) {
-			console.error("Failed to send invite:", error);
-
-			// Type assertion for API error format
 			const apiError = error as APIError;
+
+			console.error("Failed to send invite:", error);
 			if (apiError.error?.code === "INVALID_INPUT") {
 				setErrors({ invite: "Email is incorrect" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {

@@ -1,6 +1,19 @@
-import { Button, Modal, Label, Input, Select, ErrorText } from "../../../../components/custom/index";
+import {
+	Button,
+	Modal,
+	Label,
+	Input,
+	Select,
+	ErrorText
+} from "../../../../components/custom/index";
 import type { Priority, OrgMember } from "../../types/sprint.types";
-type TicketFormData = { title: string; description: string; priority: Priority; assignee: string };
+
+type TicketFormData = {
+	title: string;
+	description: string;
+	priority: Priority;
+	assignee: string
+};
 
 interface Props {
 	onClose: () => void;

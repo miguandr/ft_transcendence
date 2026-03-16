@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, signup } from "../../services/api";
-import { Button, Input, Label, HintText, ErrorText, PageContainer } from "../../components/custom/index";
 import { useAuth } from "../../routes/useAuth";
+import {
+	Button,
+	Input,
+	Label,
+	HintText,
+	ErrorText,
+	PageContainer
+} from "../../components/custom/index";
 import type { APIError } from "../../utils/shared.types";
 
 
@@ -59,7 +66,6 @@ export function SignUp() {
 		}
 
 		setErrors(newErrors);
-		//Return true if no errors
 		return Object.keys(newErrors).length === 0;
 	};
 
@@ -92,11 +98,10 @@ export function SignUp() {
 
 			navigate("/team-setup");
 		} catch (error: unknown) {
-			console.error("Sign up failed:", error);
-
 			const apiError = error as APIError;
 			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
 
+			console.error("Sign up failed:", error);
 			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
 				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error message" });
 			} else if (errorCode === "USER_EXISTS") {
