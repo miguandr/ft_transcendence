@@ -726,7 +726,7 @@ file: binary (image file)
 - The authenticated user
 
 **Notes**
-- `available_scrum_role` only includes roles not yet taken in the org. `developer` is always present. 
+- `available_scrum_role` only includes roles not yet taken in the org. `developer` is always present.
 The frontend should use this list to show role options before calling `PATCH /organizations/{org_id}` (3.2).
 
 **Authentication:** Required (JWT)
@@ -989,7 +989,8 @@ Used to render the organization board.
 		{
 			"id": "uuid",
 			"title": "string",
-			"status": "in_progress | completed"
+			"status": "in_progress | completed",
+			"assignee_id": "uuid | null",
 		}
 	],
 	"blockers": [
@@ -2444,7 +2445,7 @@ Used to render the organization board.
 	//numeric cards
 	"standups": {
 		"posted": "int",
-		"total": "int" 
+		"total": "int"
 	},
 	//numeric cards
 	"blockers_avg_cycle_time": "float"

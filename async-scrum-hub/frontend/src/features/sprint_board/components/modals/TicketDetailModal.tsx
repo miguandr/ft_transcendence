@@ -36,7 +36,7 @@ interface Props {
 	onSelectTask: (taskId: string) => void;
 	onTaskDragStart: (task: TaskSummary) => void;
 	onTaskDrop: (status: TaskStatus) => void;
-	canDragTask: boolean;
+	canDragTask: (task: TaskSummary) => boolean;
 
 	canEdit: boolean;
 	canDelete: boolean;
@@ -138,11 +138,11 @@ export function TicketDetailModal({
 									.map((task) => (
 										<div
 											key={task.id}
-											draggable={canDragTask}
+											draggable={canDragTask(task)}
 											onDragStart={() => onTaskDragStart(task)}
 											onClick={() => onSelectTask(task.id)}
 											className={`bg-white p-3 rounded-lg border border-gray-200 text-sm hover:shadow-sm transition-shadow ${
-												canDragTask
+												canDragTask(task)
 													? "cursor-grab active:cursor-grabbing"
 													: "cursor-pointer"
 											}`}
@@ -167,11 +167,11 @@ export function TicketDetailModal({
 									.map((task) => (
 										<div
 											key={task.id}
-											draggable={canDragTask}
+											draggable={canDragTask(task)}
 											onDragStart={() => onTaskDragStart(task)}
 											onClick={() => onSelectTask(task.id)}
 											className={`bg-white p-3 rounded-lg border border-emerald-200 text-sm hover:shadow-sm transition-shadow flex items-center gap-2 ${
-												canDragTask
+												canDragTask(task)
 													? "cursor-grab active:cursor-grabbing"
 													: "cursor-pointer"
 											}`}
@@ -267,7 +267,7 @@ export function TicketDetailModal({
 								Edit Ticket
 							</Button>
 							<div className="absolute left-0 top-full mt-1 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-								Only Product Owner can edit tickets
+								Only Product Owner and Scrum Master can edit tickets
 							</div>
 						</div>
 					)}
