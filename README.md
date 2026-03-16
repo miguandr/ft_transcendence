@@ -379,7 +379,7 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `user/` domain.
 - Built database models: `auth.py`, `user.py`.
 - Wrote backend tests for auth, user domains and analytics.
-- Implemented `analytics/` domain (weekly aggregations, cycle time).
+- Implemented `analytics/`, `legal/` and `dashboard/` domain (weekly aggregations, cycle time).
 - Set up Alembic migrations and backend testing scaffolding.
 
 ### Miguel — Scrum Master & Frontend
