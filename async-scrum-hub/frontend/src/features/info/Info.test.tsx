@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { BrowserRouter } from "react-router-dom";
 import { Info } from "./Info";
-import { getCurrentUser, getCurrentUserInfo, removeMember } from "../../services/api";
+import { getCurrentUser, removeMember } from "../../services/api";
 
 // Mock the API functions
 vi.mock("../../services/api", () => ({
