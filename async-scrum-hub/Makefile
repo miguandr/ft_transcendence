@@ -17,3 +17,6 @@ logs:
 
 build:
 	HOST_IP=$(HOST_IP) docker-compose up --build
+
+remove:
+	docker-compose down -v 
