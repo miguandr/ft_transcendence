@@ -35,14 +35,14 @@
 
 Wrapped in `RequireAuth` → renders `AuthenticatedLayout`
 
-| Route | Component | Purpose |
-|---|---|---|
-| `/dashboard` | `Dashboard.tsx` | Sprint overview and recent updates |
-| `/board` | `SprintBoard.tsx` | Kanban board for current sprint |
-| `/standup` | `AsyncStandup.tsx` | Daily standup submission and history |
-| `/blockers` | `Blockers.tsx` | Active blockers across the team |
-| `/analytics` | `Analytics.tsx` | Sprint metrics and charts |
-| `/info` | `Info.tsx` | Team and sprint info |
+| Route        | Component          | Purpose 
+|--------------|--------------------|--------------------------------------|
+| `/dashboard` | `Dashboard.tsx`    | Sprint overview and recent updates   |
+| `/board`     | `SprintBoard.tsx`  | Kanban board for current sprint      |
+| `/standup`   | `AsyncStandup.tsx` | Daily standup submission and history |
+| `/blockers`  | `Blockers.tsx`     | Active blockers across the team      |
+| `/analytics` | `Analytics.tsx`    | Sprint metrics and charts            |
+| `/info`      | `Info.tsx`         | Team and sprint info                 |
 
 ---
 
@@ -79,11 +79,8 @@ frontend/src/
 # Install dependencies
 npm install
 
-# Start dev server (http://localhost:5173)
+# Start dev server (http://localhost:5173 / http://localhost:5174)
 npm run dev
-
-# Run tests
-npm test
 
 # Build for production
 npm run build

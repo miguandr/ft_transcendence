@@ -51,7 +51,7 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
+git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4-b02b1c4c8715-7248977-dtorrett
 cd async-scrum-hub
 
 # 2. Configure environment variables
@@ -59,12 +59,14 @@ cp .env.example .env
 # Edit .env with your values
 
 # 3. Start the full stack
-docker-compose up --build
+docker-compose up -d --build
+cd frontend
+npm install
+npm run dev
 ```
 
 The application will be available at:
-- **Frontend:** `http://localhost:5173`
-- **Backend API:** `http://localhost:8000`
+- **Frontend:** `http://localhost:5173` / `http://localhost:5174`
 - **API Docs (Swagger):** `http://localhost:8000/docs`
 
 ### Environment Variables
