@@ -20,7 +20,11 @@ import {
 	listTicketsBoard,
 	getOrganizationMembers,
 } from "../../services/api";
-import type { ListTicketsBoardResponse, OrganizationMember, BlockerListItem } from "../../types/api.types";
+import type {
+	ListTicketsBoardResponse,
+	OrganizationMember,
+	BlockerListItem
+} from "../../types/api.types";
 import type { APIError } from "../..//utils/shared.types";
 
 
@@ -90,9 +94,9 @@ export function Blockers() {
 			setTeamMembers(membersData);
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchBlocker: "Authentication required" });
 				refreshUser();
@@ -119,7 +123,6 @@ export function Blockers() {
 		setIsCreating(true);
 
 		try {
-			// Call API to create blocker
 			await createBlocker(orgId, {
 				description: blockerForm.description,
 				ticket_id: blockerForm.ticket_id || null,
@@ -130,9 +133,9 @@ export function Blockers() {
 			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" }); // Reset form values
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ createBlocker: apiError.detail[0]?.msg ?? "Validation error message" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -166,9 +169,9 @@ export function Blockers() {
 			setBlockerForm({ description: "", ticket_id: "", assignee_id: "" });
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ editBlocker: apiError.detail[0]?.msg ?? "Validation error message" });
 			} else if (apiError.error?.code === "INVALID_ASSIGNEE") {
@@ -199,9 +202,9 @@ export function Blockers() {
 			setSelectedBlocker(null);
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ resolveBlocker: "Authentication required" });
 				refreshUser();
@@ -234,7 +237,6 @@ export function Blockers() {
 		setIsEditBlockerOpen(true);
 	};
 
-	// Get the open and resolved blockers, and sort them from newest to oldest
 	const openBlockers = blockers.filter((b) => b.status === "open").sort((a, b) => b.created_at.localeCompare(a.created_at));
 	const resolvedBlockers = blockers.filter((b) => b.status === "resolved").sort((a, b) => b.created_at.localeCompare(a.created_at));
 

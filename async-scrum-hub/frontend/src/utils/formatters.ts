@@ -76,5 +76,3 @@ export function assignColorById(userId: string): string {
 	const index = Math.abs(hash) % colorPalette.length;
 	return colorPalette[index];
 }
-
-

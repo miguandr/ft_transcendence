@@ -39,9 +39,9 @@ export function Analytics() {
 			setAnalytics(data);
 
 		} catch (error:unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+			
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ analytics: "Authentication required" });
 				refreshUser();

@@ -1,9 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../../services/api";
-import { Button, Input, Label, ErrorText, HintText, PageContainer } from "../../components/custom/index";
 import { motion } from "framer-motion";
 import { useAuth } from "../../routes/useAuth";
+import {
+	Button,
+	Input,
+	Label,
+	ErrorText,
+	HintText,
+	PageContainer
+} from "../../components/custom/index";
 import type { APIError } from "../../utils/shared.types";
 
 
@@ -15,7 +22,7 @@ export function Login() {
 	const [password, setPassword] = useState("");
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const [isLoading, setIsLoading] = useState(false);
-	const [isExiting, setIsExiting] = useState(false); // Track fade-out animation
+	const [isExiting, setIsExiting] = useState(false);
 	const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
 
@@ -25,7 +32,6 @@ export function Login() {
 		if (!email) {
 			newErrors.email = "Email is required";
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			// checks for basic email format (text@text.text)
 			newErrors.email = "Email is invalid";
 		}
 
@@ -36,7 +42,6 @@ export function Login() {
 		}
 
 		setErrors(newErrors);
-		// Return true if no errors
 		return Object.keys(newErrors).length === 0;
 	};
 
@@ -55,17 +60,14 @@ export function Login() {
 				setErrors({ email: "Unable to load user data after login." });
 				return;
 			}
-			// Trigger fade-out animation (navigation happens in onAnimationComplete)
 			setRedirectTo(currentUser.organization_id ? "/dashboard" : "/team-setup");
 			setIsExiting(true);
 
 		} catch (error: unknown) {
-			console.error("Login failed:", error);
-
-			// Type assertion for API error format
 			const apiError = error as APIError;
 			const errorCode = apiError?.detail?.error?.code ?? apiError?.error?.code;
 
+			console.error("Login failed:", error);
 			if (Array.isArray(apiError?.detail) && apiError.detail.length > 0) {
 				setErrors({ email: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (errorCode === "INVALID_CREDENTIALS") {

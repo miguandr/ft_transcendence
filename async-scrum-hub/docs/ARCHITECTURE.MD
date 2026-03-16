@@ -122,22 +122,54 @@ The following directory structure reflects the architecture described above and 
 async-scrum-hub/
 ├── frontend/
 │   ├── src/
-│   │   ├── features/
-│   │   │   ├── auth/           # Login, SignUp, TeamSetup, Welcome
-│   │   │   ├── analytics/      # Analytics dashboard page
-│   │   │   ├── blockers/       # Blockers page
-│   │   │   ├── dashboard/      # Main dashboard page
-│   │   │   ├── info/           # Info/legal page
-│   │   │   ├── sprint_board/   # Sprint board (tickets + tasks)
-│   │   │   └── standups/       # Async standup page
-│   │   │
 │   │   ├── components/
-│   │   │   ├── custom/         # Project-specific reusable components
-│   │   │   ├── ui/             # shadcn/ui primitives
-│   │   │   └── layout/         # Sidebar, TopBar
+│   │   │   ├── custom/			# Project-specific reusable components
+│   │   │   └── layout/
+│   │   │        ├── SideBar/
+│   │   │        |   ├── Sidebar.tsx
+│   │   │        |   └── useSidebar.ts
+│   │   │        └── TopBar/
+│   │   │            ├── Topbar.tsx
+│   │   │            └── useTopbar.ts
+│   │   │
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   |    ├── Login.tsx
+│   │   │   |    ├── SignUp.tsx
+│   │   │   |    ├── TeampSetup.tsx
+│   │   │   |    ├── WelcomeAnimation.tsx
+│   │   │   |    └── Welcome.tsx
+│   │   │   |
+│   │   │   ├── analytics/			# Analytics dashboard page
+│   │   │   ├── blockers/			# Blockers page
+│   │   │   ├── dashboard/			# Main dashboard page
+│   │   │   ├── info/				# Info/legal page
+│   │   │   ├── sprint_board/		# Sprint board page
+│   │   │   |    ├── components/	# Diverse UI components (board + kanban + Dialogue window)
+│   │   │   |    |   └── modals/
+│   │   │   |    |     ├── CreateBlockerModal.tsx
+│   │   │   |    |     ├── CreateTaskModal.tsx
+│   │   │   |    |     ├── CreateTicketModal.tsx
+│   │   │   |    |     ├── EditTicketModal.tsx
+│   │   │   |    |     ├── TaskDetailModal.tsx
+│   │   │   |    |     └── TicketDetailModal.tsx
+│   │   │   |    |
+│   │   │   |    ├── constants/		# Static data
+│   │   │   |    ├── hooks/			# Sprint board logic
+│   │   │   |    |__ types/			# Interfaces and types
+│   │   │   |
+│   │   │   └── standups/			# Async standup page
+│   │   │
+│   │   ├── hooks/useOrgWebSocket.ts
+│   │   ├── routes/					# Traffic controller
+│   │   │   |── AuthProvider.tsx
+│   │   │   |── RequireAuth.tsx
+│   │   │   └── useAuth.ts
 │   │   │
 │   │   ├── services/
-│   │   │   └── api.ts          # API client and typed request functions
+│   │   │   └── api.ts				# API client and typed request functions
+│   │   ├── types/
+│   │   │   └── api.types.ts		# Architectural and Data types
 │   │   ├── utils/
 │   │   │   └── formatters.ts
 │   │   ├── test/

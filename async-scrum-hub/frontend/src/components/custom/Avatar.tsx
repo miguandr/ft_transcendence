@@ -2,13 +2,13 @@ import { useState } from "react";
 import { assignColorById, generateAvatarInitials, resolveAvatarUrl } from "../../utils/formatters";
 
 interface AvatarProps {
-	avatarUrl?: string | null; // Optional: URL to user's uploaded image
-	userId?: string; // Optional: auto-generate color from user ID
-	color?: string; // Optional: override with explicit color
+	avatarUrl?: string | null;
+	userId?: string;
+	color?: string;
 	size?: "sm" | "md" | "lg";
 	className?: string;
-	initialsClassName?: string; // Optional: custom class for initials span
-	name?: string; // User's full name
+	initialsClassName?: string;
+	name?: string;
 }
 
 export function Avatar({
@@ -22,10 +22,8 @@ export function Avatar({
 }: AvatarProps) {
 	const [imageError, setImageError] = useState(false);
 
-	// Always generate initials from name
 	const displayInitials = name ? generateAvatarInitials(name) : "";
 
-	// Priority: explicit color > userId-based color > default
 	const avatarColor = color || (userId ? assignColorById(userId) : "from-gray-100 to-gray-300");
 
 	const sizeStyles = {
@@ -34,13 +32,12 @@ export function Avatar({
 		lg: "w-12 h-12 text-base",
 	};
 
-	// Show image if URL exists and hasn't errored
 	const resolvedUrl = resolveAvatarUrl(avatarUrl);
 	const showImage = resolvedUrl && !imageError;
 
 	return (
 		<div
-			className={`rounded-full flex items-center justify-center shrink-0 overflow-hidden ${sizeStyles[size]} ${className} ${!showImage ? `bg-gradient-to-br ${avatarColor}` : ""}`}
+			className={`rounded-full flex items-center justify-center shrink-0 overflow-hidden ${sizeStyles[size]} ${className} ${!showImage ? `bg-linear-to-br ${avatarColor}` : ""}`}
 		>
 			{showImage ? (
 				<img

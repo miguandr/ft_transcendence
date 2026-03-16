@@ -19,9 +19,8 @@ export function TeamSetup() {
 	const [teamCode, setTeamCode] = useState("");
 	const [teamName, setTeamName] = useState("");
 	const [teamConfirmed, setTeamConfirmed] = useState(false);
-	const [confirmedTeamName, setConfirmedTeamName] = useState<string | null>(null);
-	const [joinCode, setJoinCode] = useState<string | null>(null); // only set in create mode
-	const [orgId, setOrgId] = useState<string | null>(null); // only set in create mode
+	const [joinCode, setJoinCode] = useState<string | null>(null);
+	const [orgId, setOrgId] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [selectedRole, setSelectedRole] = useState<Role>(null);
@@ -54,9 +53,9 @@ export function TeamSetup() {
 			setTeamConfirmed(true);
 
 		} catch (error: unknown) {
-			console.error("API call failed:", error);
-
 			const apiError = error as APIError;
+
+			console.error("API call failed:", error);
 			if (apiError.error?.code === "INVALID_CODE") {
 				setErrors({ join: "Invalid code." });
 			} else if (apiError.error?.code === "ALREADY_MEMBER") {
@@ -90,7 +89,6 @@ export function TeamSetup() {
 			const response = await createOrganization({ name: teamName });
 			setOrgId(response.id);
 			setJoinCode(response.join_code);
-			setConfirmedTeamName(teamName);
 			setTeamConfirmed(true);
 
 		} catch (error: unknown) {

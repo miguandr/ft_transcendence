@@ -1,5 +1,10 @@
-import { Button, Modal, Avatar, ErrorText } from "../../../../components/custom/index";
 import { Trash2 } from "lucide-react";
+import {
+	Button,
+	Modal,
+	Avatar,
+	ErrorText
+} from "../../../../components/custom/index";
 import type { Task, UserRef } from "../../types/sprint.types";
 
 interface Props {
@@ -11,7 +16,14 @@ interface Props {
 	error?: string;
 }
 
-export function TaskDetailModal({ onClose, onDelete, task, teamMembers, canDelete, error }: Props) {
+export function TaskDetailModal({
+	onClose,
+	onDelete,
+	task,
+	teamMembers,
+	canDelete,
+	error
+}: Props) {
 	const assignee = teamMembers.find((m) => m.id === task.assignee_id);
 
 	return (
