@@ -98,10 +98,10 @@ export function useSprintBoard() {
 		authUser?.scrum_role === "scrum_master";
 	const canEditTicketPriority =
 		authUser?.scrum_role === "product_owner";
-	const canDragTask =
+	const canDragTask = (task: TaskSummary) =>
 		authUser?.scrum_role === "product_owner" ||
 		authUser?.scrum_role === "scrum_master" ||
-		authUser?.id === selectedTask?.assignee_id;
+		authUser?.id === task.assignee_id;
 	const canEditTask = (task: Task) =>
 		authUser?.scrum_role === "product_owner" ||
 		authUser?.scrum_role === "scrum_master" ||
@@ -497,7 +497,7 @@ export function useSprintBoard() {
 	};
 
 	const handleTaskDragStart = (task: TaskSummary, ticketId: string) => {
-		if (!canDragTask) return;
+		if (!canDragTask(task)) return;
 		setDraggedTask({ task, ticketId });
 	};
 
@@ -522,7 +522,7 @@ export function useSprintBoard() {
 			setDraggedTask(null);
 		} catch (error: unknown ) {
 			const apiError = error as APIError;
-			
+
 			console.error("API call failed:", error);
 			if (Array.isArray(apiError.detail) && apiError.detail.length > 0) {
 				setErrors({ taskDrop: apiError.detail[0]?.msg ?? "Validation error" });
