@@ -9,8 +9,25 @@ freeCodeCamp.org
 https://www.youtube.com/watch?v=c9Wg6Cb_YlU
 
 Free Figma UX Design UI Essentials Course | 2025
-Bring Your Own Laptop
 https://www.youtube.com/watch?v=QJBP2uy8LcU
 
 Using Typescript with ReactV19.2
 https://react.dev/learn/typescript
+
+Code with Mosh Frontend courses:
+The Ultimate HTML5 & CSS3
+The Ultimate JavaScript Series
+https://codewithmosh.com/
+
+
+## Books
+
+-Design how People think
+by John Whalen
+
+-Clean Code
+by Robert C. Martin
+
+-Learning Patterns:
+Patterns for building powerful web apps with vanilla jаvascript and React
+by Lydia Hallie, Addy Osmani
