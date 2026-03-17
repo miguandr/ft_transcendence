@@ -2,7 +2,9 @@
 
 # WEB
 
-• Minor: Use a frontend framework (React, Vue, Angular, Svelte, etc.).
+• Minor: Use a frontend framework (React 18 and TypeScript).
+
+• Minor: Use a backend framework (FastAPI).
 
 • Minor: Custom-made design system with reusable components, including a proper
 color palette, typography, and icons (minimum: 10 reusable components).
@@ -12,8 +14,7 @@ color palette, typography, and icons (minimum: 10 reusable components).
 	◦ Handle connection/disconnection gracefully.
 	◦ Efficient message broadcasting.
 
-• Major: A public API to interact with the database with a secured API key, rate
-limiting, documentation, and at least 5 endpoints:
+• Major: A public API to interact with the database with a secured API key, rate limiting, documentation, and at least 5 endpoints:
 	◦ GET /api/{something}
 	◦ POST /api/{something}
 	◦ PUT /api/{something}
@@ -36,8 +37,6 @@ limiting, documentation, and at least 5 endpoints:
 	◦ Roles management (admin, user, guest, moderator, etc.).
 	◦ Different views and actions based on user role.
 
-• Minor: Real-time collaborative features (shared workspaces, live editing, collaborative drawing, etc.). (ticket, blockers and task editing, adding, moving, etc).
-
 • Minor: User activity analytics and insights dashboard.
 
 
@@ -52,23 +51,17 @@ limiting, documentation, and at least 5 endpoints:
 	◦ Adds meaningful value by improving usability and supporting collaborative workflow management.
 	◦ Justification provided in README.md explaining its technical implementation and added value.
 
-• Minor: Use a backend framework (FastAPI).
-
 • Minor (Custom): An organization system
 	◦ Create organizations.
 	◦ Add users to organizations.
 	◦ Remove users from organizations.
-	◦ View organizations and allow users to perform specific actions within an or-
-		ganization (minimum: create, read, update).
+	◦ View organizations and allow users to perform specific actions within an organization (minimum: create, read, update).
 
-
-*******************
-maybe:
-
-• Major: An organization system:
-◦ Create, edit, and delete organizations.
-◦ Add users to organizations.
-◦ Remove users from organizations.
-◦ View organizations and allow users to perform specific actions within an or-
-ganization (minimum: create, read, update).
-NOTE: edit and delete need to be created
+• Minor (Custom): Team workload visibility and capacity overview
+	◦ Dedicated operational dashboard showing each member's assigned tickets, active tasks, and open blockers in a unified per-member expandable view.
+	◦ Team-wide stat cards aggregate totals across all members.
+	◦ Real-time updates via WebSocket — workload counts reflect live changes without page refresh.
+	◦ Distinct from the analytics dashboard (historical trends); this module covers current workload state per person.
+	◦ Supports Scrum Master and Product Owner in identifying capacity imbalances and blocker concentration.
+	◦ Implemented with full test coverage (~1200 lines, 40+ test cases).
+	◦ Justification provided in README.md explaining its technical implementation and added value.
