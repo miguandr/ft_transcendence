@@ -2,9 +2,10 @@ import {
 	Button,
 	Modal,
 	Label,
-	ErrorText
+	ErrorText,
+	Select
 } from "../../../../components/custom/index";
-import type { Priority } from "../../types/sprint.types";
+import type { Priority, OrgMember } from "../../types/sprint.types";
 
 type TicketFormData = {
 	title: string;
@@ -19,6 +20,7 @@ interface Props {
 	canEditDescription: boolean;
 	form: TicketFormData;
 	setForm: (form: TicketFormData) => void;
+	teamMembers: OrgMember[];
 	onSubmit: () => void;
 	isSaving?: boolean;
 	error?: string;
@@ -30,6 +32,7 @@ export function EditTicketModal({
 	canEditDescription,
 	form,
 	setForm,
+	teamMembers,
 	onSubmit,
 	isSaving = false,
 	error,
@@ -105,6 +108,30 @@ export function EditTicketModal({
 						</button>
 							))}
 					</div>
+				</div>
+				<div>
+					<Label>
+						Assignee <span className="text-rose-500">*</span>
+					</Label>
+					<Select
+						value={form.assignee}
+						onChange={(e) =>
+							setForm({
+								...form,
+								assignee: e.target.value,
+							})
+						}
+						options={[
+							{ value: "", label: "Select team member" },
+							...teamMembers
+								.filter((m) => m.scrum_role === "developer")
+								.map((member) => ({
+									value: member.id,
+									label: member.name,
+								})),
+						]}
+						className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
+					/>
 				</div>
 			</div>
 			{error && <ErrorText>{error}</ErrorText>}

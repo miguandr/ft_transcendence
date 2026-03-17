@@ -167,6 +167,7 @@ export interface TicketResponse {
 		id: string;
 		title: string;
 		status: TaskStatus;
+		assignee_id: string;
 	}>
 	blockers: Array<{
 		id: string;
