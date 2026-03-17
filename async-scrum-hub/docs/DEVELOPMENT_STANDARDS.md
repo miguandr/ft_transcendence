@@ -32,7 +32,7 @@ If something here is unclear, we discuss it before coding.
 ### What is a PR?
 A Pull Request is a request to merge your feature branch into `dev`.
 All PRs must be reviewed by at least one teammate.
-
+git comm
 ---
 
 ## 3. Definition of Done (MANDATORY)
