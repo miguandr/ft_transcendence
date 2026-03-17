@@ -126,7 +126,7 @@ Facilitated team coordination and tracked progress. Implemented the standups and
 ### Frontend
 | Technology            | Purpose
 |-----------------------|---------------------------
-| React 18 + TypeScript | UI framework
+| React 19 + TypeScript | UI framework
 | Vite                  | Build tool and dev server
 | Tailwind CSS          | Utility-first styling
 | React Router          | Client-side navigation
