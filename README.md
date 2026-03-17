@@ -129,8 +129,9 @@ Facilitated team coordination and tracked progress. Implemented the standups and
 | React 18 + TypeScript | UI framework
 | Vite                  | Build tool and dev server
 | Tailwind CSS          | Utility-first styling
-| shadcn/ui             | Accessible UI primitives
+| React Router          | Client-side navigation
 | Recharts              | Analytics charts
+| Lucide-react          | Icons
 | WebSocket API         | Real-time updates
 
 ### Backend
@@ -415,6 +416,7 @@ Users can create an organization — which makes them admin — or join an exist
 - [FastAPI](https://fastapi.tiangolo.com/) — Backend framework
 - [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/) — ORM
 - [React](https://react.dev/) — Frontend framework
+- [TypeScript](https://react.dev/learn/typescript)
 - [shadcn/ui](https://ui.shadcn.com/) — UI component library
 - [Recharts](https://recharts.org/) — Charting library
 - [Pydantic](https://docs.pydantic.dev/) — Data validation
