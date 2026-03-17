@@ -150,7 +150,7 @@ export function EditTicketModal({
 					size="md"
 					className="bg-cyan-500 hover:bg-cyan-600"
 					onClick={onSubmit}
-					disabled={isSaving}
+					disabled={isSaving || !form.assignee}
 					isLoading={isSaving}
 				>
 					Save
