@@ -90,7 +90,8 @@ export function useSprintBoard() {
 	const getTasksForTicket = () => selectedTicketDetail?.tasks ?? [];
 	const getActiveBlockers = () => selectedTicketDetail?.blockers
 		.filter(b => b.status === "open") ?? [];
-	const isCompleted = selectedTicket?.status === "completed";
+	const isCompleted =
+		(selectedTicketDetail?.status ?? selectedTicket?.status) === "completed";
 	// Derived data
 	const orgId = authUser?.organization_id ?? null;
 	// Derived UI logic (permissions)
