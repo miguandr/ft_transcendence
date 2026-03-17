@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrablo-, afoth.*
+*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrabelo-, afoth.*
 
 ---
 
@@ -59,10 +59,7 @@ cp .env.example .env
 # Edit .env with your values
 
 # 3. Start the full stack
-docker-compose up -d --build
-cd frontend
-npm install
-npm run dev
+docker compose up --build
 ```
 
 The application will be available at:
@@ -84,8 +81,8 @@ The application will be available at:
 | Member      | 42 Login   | Role(s)                   |
 |-------------|------------|---------------------------|
 | Daniela     | `dtorrett` | Tech Lead · Developer     |
-| Miguel      | `miguandr` | Scrum Master · Developer  |
-| Maria Luiza | `mrablo-`  | Product Owner · Developer |
+| Miguel      | `miguandr` | Product Owner · Developer |
+| Maria Luiza | `mrabelo-` | Scrum Master · Developer  |
 | Freddy      | `afoth`    | Developer                 |
 
 
@@ -94,14 +91,14 @@ The application will be available at:
 **Daniela — Tech Lead & Backend Architecture**
 Defined and maintained the overall backend architecture. Responsible for the FastAPI entrypoint, database foundation, API infrastructure (authorization system, dependency injection, permission model), auth and users domains, and all architecture documentation.
 
-**Miguel — Scrum Master & Frontend**
-Defined product vision and feature priorities. Owns the frontend application: all page features, component design system, API client integration, and UI/UX implementation.
+**Miguel — Product Owner & Frontend**
+Defined product vision and feature priorities. Organized team meetings. Owns the frontend application: all page features, component design system, API client integration, and UI/UX implementation.
 
 **Freddy — Developer & Backend Feature Domains**
-Facilitated team coordination and tracked progress. Implemented the organizations, task and tickets backend domains.
+Implemented the organizations, task and tickets backend domains.
 
-**Maria Luiza — Product Owner & DevOps**
-Implemented the standups and blockers backend domains, the analytics module, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
+**Maria Luiza — Scrum Master & DevOps**
+Facilitated team coordination and tracked progress. Implemented the standups and blockers backend domains, the analytics module, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
 
 ---
 
@@ -381,8 +378,7 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `analytics/`, `legal/` and `dashboard/` domain with the corresponded tests
 - Set up Alembic migrations and backend testing scaffolding.
 
-### Miguel — Scrum Master & Frontend
-- Facilitated team coordination, tracked progress, organized sprint planning.
+### Miguel — Product Owner & Frontend
 - Defined product vision, feature priorities, and acceptance criteria.
 - Built and maintained the entire frontend platform.
 - Developed auth infrastructure with token management, protected routes and auto-logout.
@@ -401,7 +397,8 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Built database models: `ticket.py`, `task.py`.
 - Wrote backend tests for organizations, task and tickets domains.
 
-### Maria Luiza — Product Owner & DevOps
+### Maria Luiza — Scrum Master & DevOps
+- Facilitated team coordination and tracked progress.
 - Implemented `standups/` domain (create, auto-fill, update, list).
 - Implemented `blockers/` domain (create, update, resolve).
 - Built database models: `standup.py`, `blocker.py`.
