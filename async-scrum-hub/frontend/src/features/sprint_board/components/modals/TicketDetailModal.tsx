@@ -38,6 +38,7 @@ interface Props {
 	onTaskDrop: (status: TaskStatus) => void;
 	canDragTask: (task: TaskSummary) => boolean;
 
+	completed: boolean;
 	canEdit: boolean;
 	canDelete: boolean;
 	error?: string;
@@ -60,6 +61,7 @@ export function TicketDetailModal({
 	onTaskDrop,
 	canDragTask,
 
+	completed,
 	canEdit,
 	canDelete,
 	error,
@@ -111,6 +113,7 @@ export function TicketDetailModal({
 						onClick={onOpenCreateTask}
 						icon={<Plus className="w-3 h-3" />}
 						iconPosition="left"
+						disabled={completed}
 					>
 						Create Task
 					</Button>
@@ -131,7 +134,7 @@ export function TicketDetailModal({
 							<div
 								className="space-y-2 min-h-[100px] bg-gray-50 rounded-xl p-3"
 								onDragOver={(e) => e.preventDefault()}
-								onDrop={() => onTaskDrop("in_progress")}
+								onDrop={() => !completed && onTaskDrop("in_progress")}
 							>
 								{tasks
 									.filter((t) => t.status === "in_progress")
@@ -197,6 +200,7 @@ export function TicketDetailModal({
 						onClick={onOpenCreateBlocker}
 						icon={<Plus className="w-3 h-3" />}
 						iconPosition="left"
+						disabled={completed}
 						className="text-rose-700 bg-rose-50  hover:bg-rose-50 transition-colors"
 					>
 						Create Blocker
@@ -252,6 +256,7 @@ export function TicketDetailModal({
 							size="sm"
 							icon={<Edit2 className="w-3 h-3" />}
 							iconPosition="left"
+							disabled={completed}
 						>
 							Edit Ticket
 						</Button>
@@ -280,6 +285,7 @@ export function TicketDetailModal({
 							className="text-rose-700 bg-rose-50 hover:bg-rose-100"
 							icon={<Trash2 className="w-3 h-3" />}
 							iconPosition="left"
+							disabled={completed}
 						>
 							Delete Ticket
 						</Button>

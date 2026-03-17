@@ -14,6 +14,7 @@ interface Props {
 	teamMembers: UserRef[];
 	canDelete: boolean;
 	error?: string;
+	completed: boolean;
 }
 
 export function TaskDetailModal({
@@ -22,7 +23,8 @@ export function TaskDetailModal({
 	task,
 	teamMembers,
 	canDelete,
-	error
+	error,
+	completed
 }: Props) {
 	const assignee = teamMembers.find((m) => m.id === task.assignee_id);
 
@@ -47,7 +49,7 @@ export function TaskDetailModal({
 
 			<div>
 				{/* <h4 className="text-sm text-gray-700 mb-2">Assignee</h4> */}
-				<div className="flex items-center gap-2">
+				<div className="flex items-center mb-2 gap-2">
 					{assignee && (
 						<>
 							<Avatar
@@ -72,6 +74,7 @@ export function TaskDetailModal({
 						className="text-rose-700 bg-rose-50 rounded-lg hover:bg-rose-100"
 						onClick={onDelete}
 						icon={<Trash2 className="w-3 h-3" />}
+						disabled={completed}
 					>
 						Delete Task
 					</Button>

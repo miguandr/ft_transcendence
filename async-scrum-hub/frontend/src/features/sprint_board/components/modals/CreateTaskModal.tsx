@@ -72,8 +72,10 @@ export function CreateTaskModal({
 				/>
 			</div>
 			<div>
+				<Label>
+					Assignee <span className="text-rose-500">*</span>
+				</Label>
 				<Select
-					label="Assignee"
 					value={form.assignee}
 					onChange={(e) =>
 						setForm({
@@ -109,7 +111,7 @@ export function CreateTaskModal({
 				variant="primary"
 				className="px-4 py-2 text-sm text-white bg-cyan-500 hover:bg-cyan-600 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				onClick={onSubmit}
-				disabled={!form.title.trim() || isSaving}
+				disabled={!form.title.trim() || !form.assignee || isSaving}
 				isLoading={isSaving}
 			>
 				Create task
