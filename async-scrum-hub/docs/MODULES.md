@@ -2,7 +2,7 @@
 
 # WEB
 
-• Minor: Use a frontend framework (React 18 and TypeScript).
+• Minor: Use a frontend framework (React 19 and TypeScript).
 
 • Minor: Use a backend framework (FastAPI).
 

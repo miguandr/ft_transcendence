@@ -329,7 +329,7 @@ blockers
 ### Module Details
 
 **Module 1 — Use a frontend framework (React + TypeScript)**
-The frontend is built with React 18 and TypeScript, using Vite as the build tool. The application is a fully client-side SPA with client-side routing via React Router, typed API calls, and component-level state management with React hooks.
+The frontend is built with React 19 and TypeScript, using Vite as the build tool. The application is a fully client-side SPA with client-side routing via React Router, typed API calls, and component-level state management with React hooks.
 
 **Module 2 — Use a backend framework (FastAPI)**
 The backend is built with FastAPI, a modern Python web framework that provides automatic OpenAPI documentation, async support, dependency injection, and Pydantic-based request/response validation. FastAPI is the backend counterpart to the frontend React framework claimed in Module 1.
