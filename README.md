@@ -63,8 +63,10 @@ docker compose up --build
 ```
 
 The application will be available at:
-- **Frontend:** `http://localhost:5173` / `http://localhost:5174`
-- **API Docs (Swagger):** `http://localhost:8000/docs`
+- **Application:** `https://localhost:8443`
+- **API Docs (Swagger):** `https://localhost:8443/docs`
+
+> The browser will warn about a self-signed certificate on first visit — click **Advanced → Proceed** to continue.
 
 ### Environment Variables
 
