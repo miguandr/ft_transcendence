@@ -6,12 +6,14 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.schemas.common import UserBrief
 
 
+STANDUP_MAX_LENGTH = 2000
+
 class StandupCreateRequest(BaseModel):
-	today: str = Field(..., min_length=1)
+	today: str = Field(..., min_length=1, max_length=STANDUP_MAX_LENGTH)
 
 
 class StandupUpdateRequest(BaseModel):
-	today: Optional[str] = Field(None, min_length=1)
+	today: Optional[str] = Field(None, min_length=1, max_length=STANDUP_MAX_LENGTH)
 
 
 class TicketBrief(BaseModel):
