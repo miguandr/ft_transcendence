@@ -41,7 +41,7 @@ class StandupCreateResponse(BaseModel):
 	today: str
 	yesterday: Optional[str]
 	blocker_ids: Optional[list[UUID]]
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 
 	model_config = ConfigDict(from_attributes=True)
 
@@ -53,6 +53,6 @@ class StandupResponse(BaseModel):
 	today: str
 	yesterday: Optional[str]
 	blockers: list[BlockerBriefInStandup]
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 
 	model_config = ConfigDict(from_attributes=True)

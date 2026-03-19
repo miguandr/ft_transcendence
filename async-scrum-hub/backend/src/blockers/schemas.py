@@ -38,7 +38,7 @@ class BlockerResponse(BaseModel):
 	id: UUID
 	description: str
 	status: str
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 	assignee: Optional[UserBrief] = None
 	ticket: TicketBrief
 	created_at: datetime

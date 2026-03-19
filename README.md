@@ -184,8 +184,8 @@ tickets
   status (todo | in_progress | completed)
   priority (low | medium | high)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
-  assignee_id (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
+  assignee_id (FK → users, SET NULL, nullable)
   created_at | updated_at
 
 tasks
@@ -193,8 +193,8 @@ tasks
   status (in_progress | completed)
   ticket_id (FK → tickets, CASCADE)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
-  assignee_id (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
+  assignee_id (FK → users, SET NULL, nullable)
   created_at | updated_at
 
 standups
@@ -202,7 +202,7 @@ standups
   blocker_ids (UUID[], nullable)
   standup_date (date)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   created_at | updated_at
   UNIQUE (organization_id, created_by, standup_date)
 
@@ -211,7 +211,7 @@ blockers
   status (open | resolved)
   ticket_id (FK → tickets, CASCADE)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   assignee_id (FK → users, SET NULL, nullable)
   resolved_at (nullable) | created_at | updated_at
 ```

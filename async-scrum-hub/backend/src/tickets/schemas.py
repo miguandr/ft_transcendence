@@ -16,7 +16,7 @@ class TicketBriefOrg(BaseModel):
 	model_config = ConfigDict(from_attributes=True)
 
 class TicketBriefList(TicketBriefOrg):
-	assignee: UserBriefTicket
+	assignee: Optional[UserBriefTicket] = None
 	created_at: datetime
 	updated_at: datetime
 
@@ -35,8 +35,8 @@ class CreateTicketResponse(BaseModel):
 	description: Optional[str]
 	status: TicketStatus
 	priority: Priority
-	created_by: UserBrief
-	assignee_id: UUID
+	created_by: Optional[UserBrief]
+	assignee_id: Optional[UUID]
 	organization_id: UUID
 	created_at: datetime
 	updated_at: datetime
