@@ -52,13 +52,9 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 ```bash
 # 1. Clone the repository
 git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4-b02b1c4c8715-7248977-dtorrett
+
+# 2. Start the full stack
 cd async-scrum-hub
-
-# 2. Configure environment variables
-cp .env.example .env
-# Edit .env with your values
-
-# 3. Start the full stack
 make up
 ```
 
