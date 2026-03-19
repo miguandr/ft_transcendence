@@ -24,7 +24,7 @@ class Blocker(Base):
 	Blocker model representing impediments that block progress.
 
 	Blockers are issues that prevent team members from completing their work.
-	They can be assigned to developers and optionally linked to tickets.
+	They can be assigned to developers and must be linked to a ticket.
 
 	Business Rules:
 	- Blockers cannot be deleted, only resolved
@@ -79,10 +79,10 @@ class Blocker(Base):
 		index=True
 	)
 
-	ticket_id: Mapped[uuid.UUID | None] = mapped_column(
+	ticket_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
 		ForeignKey("tickets.id", ondelete="CASCADE"),
-		nullable=True,
+		nullable=False,
 		index=True
 	)
 
@@ -122,7 +122,7 @@ class Blocker(Base):
 		foreign_keys=[assignee_id],
 		back_populates="assigned_blockers"
 	)
-	ticket: Mapped["Ticket | None"] = relationship(
+	ticket: Mapped["Ticket"] = relationship(
 		"Ticket",
 		back_populates="blockers"
 	)
