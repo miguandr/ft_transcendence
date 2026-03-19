@@ -25,8 +25,7 @@ class Task(Base):
 	- Tasks are deleted when their parent ticket is deleted (cascade)
 	- Default status when created: in_progress
 	- Status values: in_progress, completed
-	- assignee_id is set to NULL if the assigned user is deleted
-	- Only one assignee per task (optional)
+	- assignee_id is required
 	"""
 
 	__tablename__ = "tasks"
@@ -77,10 +76,10 @@ class Task(Base):
 		nullable=False,
 	)
 
-	assignee_id: Mapped[uuid.UUID | None] = mapped_column(
+	assignee_id: Mapped[uuid.UUID] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id", ondelete="SET NULL"),
-		nullable=True
+		ForeignKey("users.id", ondelete="CASCADE"),
+		nullable=False
 	)
 
 	created_at: Mapped[datetime] = mapped_column(
@@ -109,7 +108,7 @@ class Task(Base):
 		back_populates="tasks_created",
 	)
 
-	assignee: Mapped["User | None"] = relationship(
+	assignee: Mapped["User"] = relationship(
 		"User",
 		foreign_keys=[assignee_id],
 		back_populates="tasks_assigned",
