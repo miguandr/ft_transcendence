@@ -17,8 +17,8 @@ class CreateTaskResponse(BaseModel):
 	title: str
 	description: Optional[str]
 	status: TaskStatus
-	created_by: UserBrief
-	assignee_id: UUID
+	created_by: Optional[UserBrief]
+	assignee_id: Optional[UUID]
 	ticket_id: UUID
 
 	model_config = ConfigDict(from_attributes=True)
@@ -27,7 +27,7 @@ class TaskBrief(BaseModel):
 	id: UUID
 	title: str
 	status: TaskStatus
-	assignee_id: UUID
+	assignee_id: Optional[UUID]
 
 	model_config = ConfigDict(from_attributes=True)
 

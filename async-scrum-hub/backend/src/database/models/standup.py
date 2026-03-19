@@ -42,10 +42,10 @@ class Standup(Base):
 		index=True
 	)
 
-	created_by: Mapped[uuid.UUID] = mapped_column(
+	created_by: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id", ondelete="CASCADE"),
-		nullable=False,
+		ForeignKey("users.id", ondelete="SET NULL"),
+		nullable=True,
 		index=True
 	)
 
@@ -94,7 +94,7 @@ class Standup(Base):
 		back_populates="standups"
 	)
 
-	creator: Mapped["User"] = relationship(
+	creator: Mapped["User | None"] = relationship(
 		"User",
 		foreign_keys=[created_by],
 		back_populates="standups_created"
