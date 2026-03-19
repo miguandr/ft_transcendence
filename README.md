@@ -185,7 +185,7 @@ tickets
   priority (low | medium | high)
   organization_id (FK → organizations, CASCADE)
   created_by (FK → users, CASCADE)
-  assignee_id (FK → users, SET NULL, nullable)
+  assignee_id (FK → users, CASCADE)
   created_at | updated_at
 
 tasks
@@ -194,7 +194,7 @@ tasks
   ticket_id (FK → tickets, CASCADE)
   organization_id (FK → organizations, CASCADE)
   created_by (FK → users, CASCADE)
-  assignee_id (FK → users, SET NULL, nullable)
+  assignee_id (FK → users, CASCADE)
   created_at | updated_at
 
 standups
