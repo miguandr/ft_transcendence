@@ -20,14 +20,16 @@ class BlockerBriefOrg(BaseModel):
 
 	model_config = ConfigDict(from_attributes=True)
 
+DESCRIPTION_MAX_LENGTH = 2000
+
 class BlockerCreateRequest(BaseModel):
-	description: str = Field(..., min_length=1)
+	description: str = Field(..., min_length=1, max_length=DESCRIPTION_MAX_LENGTH)
 	ticket_id: Optional[UUID] = None
 	assignee_id: Optional[UUID] = None
 
 
 class BlockerUpdateRequest(BaseModel):
-	description: Optional[str] = Field(None, min_length=1)
+	description: Optional[str] = Field(None, min_length=1, max_length=DESCRIPTION_MAX_LENGTH)
 	ticket_id: Optional[UUID] = None
 	assignee_id: Optional[UUID] = None
 
