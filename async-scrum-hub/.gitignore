@@ -12,6 +12,7 @@ Thumbs.db
 
 # IDE
 .vscode/
+.vscode/*
 .idea/
 
 # FastAPI static (auto-generated docs assets)
@@ -31,3 +32,9 @@ node_modules/
 dist/
 build/
 *.local
+
+# BUT keep these two files
+!.vscode/launch.json
+!.vscode/tasks.json
+
+a.out

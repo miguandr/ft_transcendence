@@ -21,6 +21,7 @@ APP_URL := https://localhost:8443
 .PHONY: up down restart logs build remove
 
 up:
+	@[ -f .env ] || (cp .env.example .env && echo "Created .env from .env.example")
 	@echo "Starting Async Scrum Hub..."
 	HOST_IP=$(HOST_IP) docker compose up -d
 	@echo "Waiting for app to be ready..."
@@ -44,6 +45,7 @@ logs:
 	docker compose logs -f
 
 build:
+	@[ -f .env ] || (cp .env.example .env && echo "Created .env from .env.example")
 	@echo "Building and starting Async Scrum Hub..."
 	HOST_IP=$(HOST_IP) docker compose up --build -d
 	@echo "Waiting for app to be ready..."
