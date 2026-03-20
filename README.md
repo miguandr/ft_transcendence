@@ -55,7 +55,7 @@ git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4
 
 # 2. Start the full stack
 cd async-scrum-hub
-make up
+make build
 ```
 
 The application will be available at:
@@ -384,7 +384,7 @@ Users can create an organization — which makes them admin — or join an exist
 - Implemented full API infrastructure: `deps.py`, `permissions.py`, `authorize.py`, `routes.py`.
 - Implemented `dashboard/` domain.
 - Implemented `analytics/` domain.
-- Implemented `auth/` domain (register, login, JWT) 
+- Implemented `auth/` domain (register, login, JWT)
 - Implemented `users/` domain (profile, avatar).
 - Built database models: `user.py`, `organization.py`.
 - Wrote backend tests for dashboard, analytics, auth and users domains
