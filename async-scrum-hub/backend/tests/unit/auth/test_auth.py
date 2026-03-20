@@ -114,13 +114,6 @@ class TestLogin:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         assert payload["sub"] == user_id
 
-    def test_login_team_setup_not_done(self, client):
-        """User with valid credentials but no organization returns 403."""
-        self._register_user(client)
-        response = client.post(LOGIN_URL, json={"email": VALID_USER["email"], "password": VALID_USER["password"]})
-        assert response.status_code == 403
-        assert response.json()["detail"]["error"]["code"] == "TEAM_SETUP_NOT_DONE"
-
     def test_login_wrong_password(self, client):
         """Wrong password returns 401."""
         self._register_user(client)

@@ -1,16 +1,15 @@
 import { Navigate, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
-import { useAuth } from "../routes/useAuth"; // or wherever your auth context is
+import { useAuth } from "../routes/useAuth";
 
 type Props = {
 	children: ReactNode;
 };
 
 export function RequireAuth({ children }: Props) {
-	const { user, isLoading } = useAuth(); // adapt to your auth hook
+	const { user, isLoading } = useAuth();
 	const location = useLocation();
 
-	//if (isLoading) return null; // or loading spinner
 	if (isLoading) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-white">

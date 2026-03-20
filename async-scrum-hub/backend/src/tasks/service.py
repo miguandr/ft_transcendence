@@ -5,10 +5,6 @@ from fastapi import HTTPException, status
 from src.database.models import User, Task, Ticket
 from src.database.models.enums import TaskStatus, ScrumRole
 
-#HTTP exceptions
-
-#def Unproscessable_entity_exception(error_type: str) -> HTTPException:
-
 def bad_request_exception() -> HTTPException:
 	return HTTPException(
 		status_code=status.HTTP_400_BAD_REQUEST,
@@ -27,8 +23,6 @@ def forbidden_exception() -> HTTPException:
 		detail={"error": {"code": "FORBIDDEN", "message": "You do not have permission to perform this action"}},
 	)
 
-
-
 def validate_assignee(db: Session, assignee_id: uuid.UUID | None, organization_id: uuid.UUID) -> None:
 	"""Validate that the assignee exists and has the Developer role."""
 	if assignee_id is None:
@@ -41,14 +35,12 @@ def validate_assignee(db: Session, assignee_id: uuid.UUID | None, organization_i
 	if assignee.scrum_role != ScrumRole.developer:
 		raise bad_request_exception()
 
-
 def get_ticket(db: Session, ticket_id: uuid.UUID) -> Ticket:
 	"""Load ticket from DB or raise 404."""
 	ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
 	if not ticket:
 		raise not_found_exception("Ticket not found")
 	return ticket
-
 
 def create_task(
 	db: Session,

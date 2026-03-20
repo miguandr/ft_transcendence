@@ -12,7 +12,7 @@ To run:
 
 import pytest
 from uuid import uuid4
-from datetime import date
+from datetime import date, datetime, timezone
 from sqlalchemy import text
 
 from src.analytics.schemas import (
@@ -133,14 +133,16 @@ class TestGetAnalyticsService:
 	def test_active_task_counted_in_current_week(self, db_setup):
 		"""IN_PROGRESS task created this week appears in Week 4 active count."""
 		user, session, org_id = db_setup
+		now = datetime.now(timezone.utc).isoformat(sep=' ')
 		session.execute(text("""
-			INSERT INTO tasks (id, organization_id, created_by, ticket_id, title, status)
-			VALUES (:id, :org_id, :user_id, :ticket_id, 'Task A', 'IN_PROGRESS')
+			INSERT INTO tasks (id, organization_id, created_by, ticket_id, title, status, created_at, updated_at)
+			VALUES (:id, :org_id, :user_id, :ticket_id, 'Task A', 'in_progress', :now, :now)
 		"""), {
 			"id": uuid4().hex,
 			"org_id": org_id.hex,
 			"user_id": user.id.hex,
 			"ticket_id": uuid4().hex,
+			"now": now,
 		})
 		session.commit()
 		result = service.get_analytics(session, user)
@@ -150,14 +152,16 @@ class TestGetAnalyticsService:
 	def test_resolved_task_counted_in_current_week(self, db_setup):
 		"""COMPLETED task updated this week appears in Week 4 resolved count."""
 		user, session, org_id = db_setup
+		now = datetime.now(timezone.utc).isoformat(sep=' ')
 		session.execute(text("""
-			INSERT INTO tasks (id, organization_id, created_by, ticket_id, title, status)
-			VALUES (:id, :org_id, :user_id, :ticket_id, 'Task B', 'COMPLETED')
+			INSERT INTO tasks (id, organization_id, created_by, ticket_id, title, status, created_at, updated_at)
+			VALUES (:id, :org_id, :user_id, :ticket_id, 'Task B', 'completed', :now, :now)
 		"""), {
 			"id": uuid4().hex,
 			"org_id": org_id.hex,
 			"user_id": user.id.hex,
 			"ticket_id": uuid4().hex,
+			"now": now,
 		})
 		session.commit()
 		result = service.get_analytics(session, user)
@@ -167,13 +171,15 @@ class TestGetAnalyticsService:
 	def test_completed_ticket_counted_in_current_week(self, db_setup):
 		"""COMPLETED ticket created this week appears in Week 4 completed count."""
 		user, session, org_id = db_setup
+		now = datetime.now(timezone.utc).isoformat(sep=' ')
 		session.execute(text("""
-			INSERT INTO tickets (id, organization_id, created_by, title, status, priority)
-			VALUES (:id, :org_id, :user_id, 'Ticket A', 'COMPLETED', 'medium')
+			INSERT INTO tickets (id, organization_id, created_by, title, status, priority, created_at, updated_at)
+			VALUES (:id, :org_id, :user_id, 'Ticket A', 'completed', 'medium', :now, :now)
 		"""), {
 			"id": uuid4().hex,
 			"org_id": org_id.hex,
 			"user_id": user.id.hex,
+			"now": now,
 		})
 		session.commit()
 		result = service.get_analytics(session, user)
@@ -185,6 +191,7 @@ class TestGetAnalyticsService:
 		user, session, org_id = db_setup
 		result = service.get_analytics(session, user)
 		assert result.blockers_avg_cycle_time == 0.0
+
 
 
 # ---------------------------------------------------------------------------

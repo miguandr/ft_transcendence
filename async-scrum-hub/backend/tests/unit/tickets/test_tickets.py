@@ -399,6 +399,38 @@ class TestDeleteTicket:
 		result = session.query(Ticket).filter(Ticket.id == ticket_id).first()
 		assert result is None
 
+	def test_delete_ticket_with_all_completed_tasks_succeeds(self, db_setup):
+		"""Can delete a ticket whose tasks are all completed."""
+		from src.database.models import Task
+		from src.database.models.enums import TaskStatus
+		user, org, session = db_setup
+
+		ticket = Ticket(
+			id=uuid4(),
+			title="Ticket with completed task",
+			organization_id=org.id,
+			created_by=user.id,
+			status=TicketStatus.IN_PROGRESS,
+			priority=Priority.MEDIUM,
+		)
+		session.add(ticket)
+		session.commit()
+
+		completed_task = Task(
+			id=uuid4(),
+			title="Completed Task",
+			ticket_id=ticket.id,
+			organization_id=org.id,
+			created_by=user.id,
+			status=TaskStatus.COMPLETED,
+		)
+		session.add(completed_task)
+		session.commit()
+
+		service.delete_ticket(session, ticket)
+		result = session.query(Ticket).filter(Ticket.id == ticket.id).first()
+		assert result is None
+
 
 # ---------------------------------------------------------------------------
 # Route tests
@@ -909,3 +941,34 @@ class TestDeleteTicketRoute:
 		"""Returns 404 when ticket does not exist."""
 		response = client.delete(DELETE_URL.format(ticket_id=uuid4()))
 		assert response.status_code == 404
+
+	def test_delete_ticket_with_completed_tasks_returns_204(self, client, db_setup):
+		"""Returns 204 when deleting a ticket whose only task is completed."""
+		from src.database.models import Task
+		from src.database.models.enums import TaskStatus
+		user, org, session = db_setup
+
+		ticket = Ticket(
+			id=uuid4(),
+			title="Ticket with completed task",
+			organization_id=org.id,
+			created_by=user.id,
+			status=TicketStatus.IN_PROGRESS,
+			priority=Priority.MEDIUM,
+		)
+		session.add(ticket)
+		session.commit()
+
+		completed_task = Task(
+			id=uuid4(),
+			title="Done Task",
+			ticket_id=ticket.id,
+			organization_id=org.id,
+			created_by=user.id,
+			status=TaskStatus.COMPLETED,
+		)
+		session.add(completed_task)
+		session.commit()
+
+		response = client.delete(DELETE_URL.format(ticket_id=ticket.id))
+		assert response.status_code == 204

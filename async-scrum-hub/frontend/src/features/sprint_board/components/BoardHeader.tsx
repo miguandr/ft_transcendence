@@ -6,7 +6,11 @@ interface Props {
 	canCreateTicket: boolean;
 }
 
-export function BoardHeader({ onCreateTicket, canCreateTicket }: Props) {
+export function BoardHeader({
+	onCreateTicket,
+	canCreateTicket
+}: Props) {
+	
 	return (
 		<PageHeader
 			title="Sprint Board"

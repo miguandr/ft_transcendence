@@ -4,8 +4,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: "primary" | "secondary" | "text" | "outlined" | "ghost";
 	size?: "sm" | "md" | "lg";
 	isLoading?: boolean;
-	isActive?: boolean; // For toggle buttons (priority selector, etc.)
-	icon?: ReactNode; // Optional icon
+	isActive?: boolean;
+	icon?: ReactNode;
 	iconPosition?: "left" | "right";
 	children: ReactNode;
 }
@@ -42,7 +42,6 @@ export function Button({
 	const disabledStyles =
 		isLoading || disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
 
-	// Active state for toggle buttons (overrides variant styles)
 	const activeStyles = isActive ? "!border-cyan-300 !bg-cyan-50 !text-cyan-700" : "";
 
 	return (

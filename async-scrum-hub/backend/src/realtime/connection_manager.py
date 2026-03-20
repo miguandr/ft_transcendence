@@ -1,6 +1,5 @@
 from fastapi import WebSocket
 
-
 class ConnectionManager:
 	"""
 	Manages active WebSocket connections grouped by organization ID.
@@ -10,7 +9,6 @@ class ConnectionManager:
 	"""
 
 	def __init__(self):
-		# org_id (str) -> list of active WebSocket connections
 		self.active_connections: dict[str, list[WebSocket]] = {}
 
 	async def connect(self, websocket: WebSocket, org_id: str) -> None:

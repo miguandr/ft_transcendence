@@ -1,16 +1,18 @@
-# Permission definitions based on PERMISSIONS_MATRIX.md
+"""
+Permission definitions based on PERMISSIONS_MATRIX.md
 
-# Scopes:
-# - PUBLIC: JWT not required (roles/owner/assignee do not apply and must be ignored by authorize())
-# - GLOBAL: JWT required, no organization membership required
-# - ORG: JWT required + organization membership required
-#
-# Convention (only for scope=org):
-# - Organization admins are NOT listed in roles (admin override in authorize()).
-# - roles=[]  means "admin only" (no non-admin role can perform this action).
-# Convention (for scope=global):
-# - roles is ignored by authorize() — any authenticated user can perform the action.
-# - roles=[] to reflect that no role restriction applies.
+Scopes:
+- PUBLIC: JWT not required (roles/owner/assignee do not apply and must be ignored by authorize())
+- GLOBAL: JWT required, no organization membership required
+- ORG: JWT required + organization membership required
+
+Convention (only for scope=org):
+- Organization admins are NOT listed in roles (admin override in authorize()).
+- roles=[]  means "admin only" (no non-admin role can perform this action).
+Convention (for scope=global):
+- roles is ignored by authorize() — any authenticated user can perform the action.
+- roles=[] to reflect that no role restriction applies.
+"""
 
 PERMISSIONS = {
 	#--User--

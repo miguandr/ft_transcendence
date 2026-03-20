@@ -16,39 +16,39 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 			detail={"error": {"code": "NO_ORGANIZATION", "message": "User is not part of any organization."}},
 		)
 	
- 	# --- Section 1: Summary ---   
+	# --- Section 1: Summary ---
 	# --- Tasks ---   
 	tasks_in_progress = db.query(Task).filter(
 		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.IN_PROGRESS
-    ).count()
+	).count()
 	
-	# --- Tickets ---   
+	# --- Tickets ---
 	tickets_completed = db.query(Ticket).filter(
 		Ticket.organization_id == user.organization_id,
 		Ticket.status == TicketStatus.COMPLETED		
-    ).count()
+	).count()
 	
-	# --- Blockers ---   
+	# --- Blockers ---
 	active_blockers = db.query(Blocker).filter(
 		Blocker.organization_id == user.organization_id,
 		Blocker.status == BlockerStatus.OPEN	
-    ).count()
+	).count()
 	
 	summary_dashboard = DashboardSummary(tasks_in_progress=tasks_in_progress, tickets_completed=tickets_completed, active_blockers=active_blockers)
 		
- 	# --- Section 2: Recent updates ---  
+	# --- Section 2: Recent updates ---
 	updates_dashboard = [] 
 	now = datetime.now(timezone.utc)
 	start_1_week_ago = now - timedelta(weeks=1)
 
-	# --- Tasks created --- 
+	# --- Tasks created ---
 	tasksCreated = db.query(Task).filter(
 		Task.organization_id == user.organization_id,
 		Task.status == TaskStatus.IN_PROGRESS,
 		Task.created_at < now,
 		Task.created_at > start_1_week_ago		
-    ).all()
+	).all()
 
 	for task in tasksCreated:
 		updates_dashboard.append(
@@ -67,7 +67,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 		Task.status == TaskStatus.COMPLETED,
 		Task.updated_at < now,
 		Task.updated_at > start_1_week_ago
-    ).all()
+	).all()
 
 	for task in tasksCompleted:
 		updates_dashboard.append(
@@ -86,7 +86,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 		Ticket.status == TicketStatus.IN_PROGRESS,
 		Ticket.created_at < now,
 		Ticket.created_at > start_1_week_ago
-    ).all()
+	).all()
 
 	for ticket in ticketsCreated:
 		updates_dashboard.append(
@@ -105,7 +105,7 @@ def get_dashboard(db: Session, user: User, org_id: uuid.UUID) -> DashboardRespon
 		Ticket.status == TicketStatus.COMPLETED,
 		Ticket.updated_at < now,
 		Ticket.updated_at > start_1_week_ago
-    ).all()
+	).all()
 
 	for ticket in ticketsCompleted:
 		updates_dashboard.append(

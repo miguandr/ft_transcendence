@@ -82,17 +82,15 @@ export function Info() {
 		setIsRemoving(true);
 		if (confirmDelete && orgId) {
 			try {
-				// Call API to remove member
 				await removeMember(orgId, confirmDelete);
-
-				// Ipdate UI by removing member from state
 				setMembers(members.filter((m) => m.id !== confirmDelete));
 				await refreshUser();
 				setConfirmDelete(null);
-			} catch (error) {
-				console.error("API call failed:", error);
 
+			} catch (error) {
 				const apiError = error as APIError;
+
+				console.error("API call failed:", error);
 				if (apiError.error?.code === "UNAUTHORIZED") {
 					setErrors({ removeMember: "Authentication required" });
 					refreshUser();

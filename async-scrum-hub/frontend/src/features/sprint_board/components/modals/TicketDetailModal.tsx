@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom"
 import { Plus, Edit2, CheckCircle, Trash2 } from "lucide-react"
-import { Button, Modal, ErrorText } from "../../../../components/custom/index";
 import { PRIORITY_COLORS } from "../../constants/sprint.constants"
-import type { TaskStatus, Ticket, TaskSummary, BlockerStatus } from "../../types/sprint.types";
+import {
+	Button,
+	Modal,
+	ErrorText
+} from "../../../../components/custom/index";
+import type {
+	TaskStatus,
+	Ticket,
+	TaskSummary,
+	BlockerStatus
+} from "../../types/sprint.types";
 
 interface Props {
 	ticket: Ticket;
@@ -34,7 +43,6 @@ interface Props {
 	error?: string;
 	errorTaskDrop?: string;
 }
-
 
 export function TicketDetailModal({
 	ticket,

@@ -123,14 +123,6 @@ class TestCreateStandup:
         standup = service.create_standup(session, org.id, user, "Today's work")
         assert standup.yesterday == "Yesterday's work content"
 
-    @pytest.mark.skip(reason="blocker_ids ARRAY not supported in SQLite - covered by integration tests")
-    def test_create_standup_auto_populates_blocker_ids(self, db_setup, sample_blocker):
-        """blocker_ids is auto-filled with open blockers in the org."""
-        user, org, session = db_setup
-        standup = service.create_standup(session, org.id, user, "Working despite blockers")
-        assert sample_blocker.id in standup.blocker_ids
-
-    @pytest.mark.skip(reason="blocker_ids ARRAY not supported in SQLite - covered by integration tests")
     def test_create_standup_does_not_include_resolved_blockers(self, db_setup):
         """Resolved blockers are not included in blocker_ids."""
         user, org, session = db_setup
@@ -147,6 +139,38 @@ class TestCreateStandup:
 
         standup = service.create_standup(session, org.id, user, "No blockers today")
         assert resolved_blocker.id not in (standup.blocker_ids or [])
+
+    def test_create_standup_does_not_include_other_users_blockers(self, db_setup):
+        """Blockers created by other users (not assigned to current user) are excluded."""
+        from src.database.models import User as UserModel
+        user, org, session = db_setup
+
+        # Create a different user in the same org
+        other_user = UserModel(
+            id=uuid4(),
+            email="other_standup_user@example.com",
+            name="Other Standup User",
+            password_hash="hashed",
+            organization_id=org.id,
+            org_role="member",
+            scrum_role="developer",
+        )
+        session.add(other_user)
+        session.commit()
+
+        # Blocker created by other_user, not assigned to current user
+        other_blocker = Blocker(
+            id=uuid4(),
+            organization_id=org.id,
+            created_by=other_user.id,
+            description="Other user's blocker",
+            status=BlockerStatus.OPEN,
+        )
+        session.add(other_blocker)
+        session.commit()
+
+        standup = service.create_standup(session, org.id, user, "Today's work")
+        assert other_blocker.id not in (standup.blocker_ids or [])
 
     def test_create_standup_duplicate_today_raises_409(self, db_setup, sample_standup):
         """Creating a second standup today raises 409 STANDUP_ALREADY_EXISTS."""

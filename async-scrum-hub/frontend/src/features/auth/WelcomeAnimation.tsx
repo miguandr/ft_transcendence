@@ -69,7 +69,7 @@ export function WelcomeAnimation() {
 	}, []);
 
 	const particles = useMemo<Particle[]>(() => {
-		const count = 1000; // tweak 90–180
+		const count = 1000;
 		const out: Particle[] = [];
 
 		for (let i = 0; i < count; i++) {
@@ -142,32 +142,32 @@ export function WelcomeAnimation() {
 									animate={
 										animationStage === "convergence"
 											? {
-													x: p.end.x,
-													y: p.end.y,
-													opacity: p.opacity,
+												x: p.end.x,
+												y: p.end.y,
+												opacity: p.opacity,
 												}
 											: animationStage === "transformation"
 												? {
-														x: p.end.x * 6.5,
-														y: p.end.y * 6.5,
-														opacity: 0,
+													x: p.end.x * 6.5,
+													y: p.end.y * 6.5,
+													opacity: 0,
 													}
 												: { opacity: 0 }
 									}
 									transition={
 										animationStage === "convergence" // IF convergence stage
 											? {
-													// THEN use these settings:
-													duration: 3.0, // ← Duration for convergence (particles moving TO center)
-													ease: [0.42, 1, 0.36, 1],
-													delay:
-														animationStage === "convergence"
-															? p.delay
-															: 0,
+												// THEN use these settings:
+												duration: 3.0, // ← Duration for convergence (particles moving TO center)
+												ease: [0.42, 1, 0.36, 1],
+												delay:
+													animationStage === "convergence"
+														? p.delay
+														: 0,
 												}
 											: {
-													// ELSE (transformation stage)
-													duration: 3.6, // ← Duration for transformation (particles expanding OUT)
+												// ELSE (transformation stage)
+												duration: 3.6, // ← Duration for transformation (particles expanding OUT)
 												}
 									}
 								/>
@@ -175,6 +175,7 @@ export function WelcomeAnimation() {
 						</div>
 					</div>
 				)}
+
 				{/* Animated Title - appears with particles, fades out with them */}
 				{!showContent && (
 					<motion.div
@@ -198,6 +199,7 @@ export function WelcomeAnimation() {
 						<h1 className="text-5xl font-bold text-gray-900">ScrumHub</h1>
 					</motion.div>
 				)}
+				
 				{/* Final Content - Welcome page */}
 				<motion.div
 					initial={{ opacity: 0 }}

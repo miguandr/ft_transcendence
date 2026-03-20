@@ -15,12 +15,10 @@ class TicketBriefOrg(BaseModel):
 
 	model_config = ConfigDict(from_attributes=True)
 
-
 class TicketBriefList(TicketBriefOrg):
 	assignee: Optional[UserBriefTicket] = None
 	created_at: datetime
 	updated_at: datetime
-
 
 class CreateTicketRequest(BaseModel):
 	title: str = Field(..., min_length=1)
@@ -39,11 +37,8 @@ class CreateTicketResponse(BaseModel):
 	organization_id: UUID
 	created_at: datetime
 	updated_at: datetime
-
+	
 	model_config = ConfigDict(from_attributes=True)
-
-#class ListTicketsResponse(BaseModel):
-#    tickets: list[TicketBriefList]
 
 class BlockerBriefTicket(BaseModel):
 	id: UUID
@@ -52,7 +47,6 @@ class BlockerBriefTicket(BaseModel):
 	created_by: UserBrief
 
 	model_config = ConfigDict(from_attributes=True)
-
 
 class TicketDetailResponse(CreateTicketResponse):
 	tasks: list[TaskBrief] = []
@@ -67,7 +61,6 @@ class UpdateTicketRequest(BaseModel):
 
 class UpdateTicketResponse(TicketDetailResponse):
 	pass
-
 
 class MoveTicketRequest(BaseModel):
 	status: TicketStatus
