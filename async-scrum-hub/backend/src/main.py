@@ -23,15 +23,10 @@ app = FastAPI(
 # This allows the frontend (running on port 5173) to make requests to the backend (port 8000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Frontend dev server
-        "http://localhost:5174",  # Frontend dev server (alternate port)
-        "http://localhost:3000",  # Alternative frontend port
-        "http://frontend:5173",   # Docker service name
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
