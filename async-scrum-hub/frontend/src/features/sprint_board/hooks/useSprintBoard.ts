@@ -90,6 +90,8 @@ export function useSprintBoard() {
 	const getTasksForTicket = () => selectedTicketDetail?.tasks ?? [];
 	const getActiveBlockers = () => selectedTicketDetail?.blockers
 		.filter(b => b.status === "open") ?? [];
+	const isCompleted =
+		(selectedTicketDetail?.status ?? selectedTicket?.status) === "completed";
 	// Derived data
 	const orgId = authUser?.organization_id ?? null;
 	// Derived UI logic (permissions)
@@ -98,10 +100,15 @@ export function useSprintBoard() {
 		authUser?.scrum_role === "scrum_master";
 	const canEditTicketPriority =
 		authUser?.scrum_role === "product_owner";
-	const canDragTask = (task: TaskSummary) =>
-		authUser?.scrum_role === "product_owner" ||
-		authUser?.scrum_role === "scrum_master" ||
-		authUser?.id === task.assignee_id;
+	const canDragTask = (task: TaskSummary) => {
+		if (isCompleted) return false;
+
+		return (
+			authUser?.scrum_role === "product_owner" ||
+			authUser?.scrum_role === "scrum_master" ||
+			authUser?.id === task.assignee_id
+		);
+	}
 	const canEditTask = (task: Task) =>
 		authUser?.scrum_role === "product_owner" ||
 		authUser?.scrum_role === "scrum_master" ||
@@ -226,6 +233,7 @@ export function useSprintBoard() {
 					{
 						description: ticketForm.description,
 						priority: ticketForm.priority,
+						assignee_id: ticketForm.assignee,
 					}
 				);
 			} else {
@@ -296,6 +304,7 @@ export function useSprintBoard() {
 			setIsDeleting(false);
 		}
 	};
+
 
 	const handleCreateTask = async () => {
 		if (!selectedTicket) return
@@ -592,7 +601,7 @@ export function useSprintBoard() {
 		isLoading,
 		isSaving,
 		isDeleting,
-		canDragTask,
+		isCompleted,
 		developerMembers,
 
 		// Setters
@@ -629,6 +638,7 @@ export function useSprintBoard() {
 
 		// Permissions
 		canEditTask,
+		canDragTask,
 		isLeadRole,
 		canEditTicketPriority,
 	}

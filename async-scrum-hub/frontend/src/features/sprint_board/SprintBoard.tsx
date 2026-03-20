@@ -31,6 +31,7 @@ export function SprintBoard() {
 		isLoading,
 		isSaving,
 		isDeleting,
+		isCompleted,
 		developerMembers,
 
 		// Setters
@@ -145,6 +146,7 @@ export function SprintBoard() {
 							...ticketForm,
 							description: selectedTicketDetail.description ?? "",
 							priority: selectedTicketDetail.priority,
+							assignee: selectedTicketDetail.assignee_id ?? "",
 						});
 						setIsEditTicketOpen(true);
 					}}
@@ -159,6 +161,7 @@ export function SprintBoard() {
 					onTaskDrop={handleTaskDrop}
 					canDragTask={canDragTask}
 
+					completed={isCompleted}
 					canEdit={isLeadRole}
 					canDelete={isLeadRole}
 					error={errors.ticketDelete}
@@ -170,6 +173,7 @@ export function SprintBoard() {
 			{isEditTicketOpen && selectedTicket && (
 				<EditTicketModal
 					onClose={() => setIsEditTicketOpen(false)}
+					teamMembers={teamMembers}
 					canEditPriority={canEditTicketPriority}
 					canEditDescription={isLeadRole}
 					form={ticketForm}
@@ -202,6 +206,7 @@ export function SprintBoard() {
 					teamMembers={teamMembers}
 					canDelete={canEditTask(selectedTask)}
 					error={errors.taskDelete}
+					completed={isCompleted}
 				/>
 			)}
 
