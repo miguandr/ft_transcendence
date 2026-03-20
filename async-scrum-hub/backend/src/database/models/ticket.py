@@ -55,7 +55,8 @@ class Ticket(Base):
 			TicketStatus,
 			name="ticket_status",
 			native_enum=True,
-			validate_strings=True
+			validate_strings=True,
+			values_callable=lambda x: [e.value for e in x],
 			),
 		nullable=False,
 		default=TicketStatus.TODO,
@@ -66,7 +67,8 @@ class Ticket(Base):
 			Priority,
 			name="ticket_priority",
 			native_enum=True,
-			validate_strings=True
+			validate_strings=True,
+			values_callable=lambda x: [e.value for e in x],
 			),
 		nullable=False,
 		default=Priority.MEDIUM,

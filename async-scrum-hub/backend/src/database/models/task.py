@@ -47,7 +47,8 @@ class Task(Base):
 			TaskStatus,
 			name="task_status",
 			native_enum=True,
-			validate_strings=True
+			validate_strings=True,
+			values_callable=lambda x: [e.value for e in x],
 			),
 		nullable=False,
 		default=TaskStatus.IN_PROGRESS,

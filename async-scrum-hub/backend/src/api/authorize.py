@@ -75,12 +75,14 @@ def authorize(
 			else:
 				raise HTTPException(500, "Organization context missing")
 
-		if not user.org_role or not user.scrum_role:
-			raise HTTPException(500, "User missing role information")
-
 		# Admin override
 		if user.org_role == "admin":
 			return
+
+
+		if not user.org_role or not user.scrum_role:
+			raise HTTPException(500, "User missing role information")
+
 
 		# Role-based permission
 		if user.scrum_role in permission["roles"]:

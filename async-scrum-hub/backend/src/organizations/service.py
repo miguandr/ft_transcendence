@@ -17,6 +17,7 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import update as sa_update
 
 from src.config.email import send_invite_email
 from src.database.models import Organization, User
@@ -59,6 +60,12 @@ def _bad_request(code: str, message: str):
 def create_organization(db: Session, user: User, name: str) -> Organization:
 	"""Create a new organization. The creator becomes admin."""
 
+	if user.organization_id is not None:
+		raise HTTPException(
+			status_code=status.HTTP_409_CONFLICT,
+			detail={"error": {"code": "ALREADY_IN_ORG", "message": "User already belongs to an organization"}},
+		)
+
 	# Case-insensitive name uniqueness
 	existing = (
 		db.query(Organization)
@@ -85,11 +92,18 @@ def create_organization(db: Session, user: User, name: str) -> Organization:
 	db.flush()
 
 	# Make creator the org admin
-	user.organization_id = org.id
-	user.org_role = OrgRole.admin
+	# user.organization_id = org.id
+	# user.org_role = "admin"
+
+	db.execute(
+		sa_update(User)
+		.where(User.id == user.id)
+		.values(organization_id=org.id, org_role="admin")
+	)
 
 	db.commit()
 	db.refresh(org)
+	db.refresh(user)
 	return org
 
 
@@ -194,6 +208,15 @@ def remove_member(
 	if not user:
 		raise _not_found("Organization or user not found")
 
+	if user.org_role == "admin":
+		admin_count = db.query(User).filter(
+			User.organization_id == org_id,
+			User.org_role == "admin"
+		).count()
+		if admin_count <= 1:
+			raise _conflict("LAST_ADMIN", "Cannot remove the last admin of an organization")
+
+
 	user.organization_id = None
 	user.org_role = None
 	user.scrum_role = None
@@ -211,13 +234,19 @@ def join_organization(
 	if not org:
 		raise _bad_request("INVALID_CODE", "Invalid code.")
 
-	# Check if user is already a member
-	if user.organization_id == org.id:
-		raise _conflict("ALREADY_MEMBER", "User is already a member of this organization")
+	if user.organization_id is not None:
+		raise _conflict("ALREADY_IN_ORG", "User already belongs to an organization")
+
 
 	# Join the org first
-	user.organization_id = org.id
-	user.org_role = OrgRole.member
+	# user.organization_id = org.id
+	# user.org_role = "member"
+
+	db.execute(
+		sa_update(User)
+		.where(User.id == user.id)
+		.values(organization_id=org.id, org_role="member")
+	)
 
 	# Check which unique roles (SM, PO) are still available in the org
 	available_roles = []

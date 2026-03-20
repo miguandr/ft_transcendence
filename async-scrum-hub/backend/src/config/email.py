@@ -107,3 +107,4 @@ def send_invite_email(
 		logger.info("Invite email sent to %s for org '%s'", to_email, organization_name)
 	except Exception:
 		logger.exception("Failed to send invite email to %s", to_email)
+		raise

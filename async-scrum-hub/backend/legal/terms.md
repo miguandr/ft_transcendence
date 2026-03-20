@@ -1,5 +1,3 @@
-# Terms of Service
-
 Last updated: 2026-01-01
 
 ## 1. Acceptance of Terms

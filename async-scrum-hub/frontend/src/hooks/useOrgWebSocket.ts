@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useAuth } from "../routes/useAuth";
 
 type WSMessage = { event: string; data: unknown };
 
@@ -7,9 +8,12 @@ export function useOrgWebSocket(
 	onMessage: (msg: WSMessage) => void
 ) {
 	const onMessageRef = useRef(onMessage);
+	const { refreshUser } = useAuth();
+	const refreshUserRef = useRef(refreshUser);
 
 	useEffect(() => {
 		onMessageRef.current = onMessage;
+		refreshUserRef.current = refreshUser;
 	});
 
 	useEffect(() => {
@@ -33,7 +37,10 @@ export function useOrgWebSocket(
 
 		ws.onclose = (event) => {
 			if (event.code === 4001) console.error("WS: invalid token");
-			if (event.code === 4003) console.error("WS: not an org member");
+			if (event.code === 4003) {
+				console.error("WS: not an org member");
+				void refreshUserRef.current();
+			}
 		};
 
 		return () => ws.close();
