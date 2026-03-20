@@ -2036,7 +2036,7 @@ Used to render the organization board.
 ```json
 {
 	"description": "string",
-	"ticket_id": "uuid | null",
+	"ticket_id": "uuid",
 	"assignee_id": "uuid | null"  // Must be a user with Developer role
 }
 ```

@@ -181,7 +181,7 @@ export function TicketDetailModal({
 
 			{/* Blockers */}
 			<div className="pb-4">
-				<div className="flex items-center justify-between mb-2">
+				<div className="flex items-center justify-between mb-4">
 					<h4 className="text-sm font-medium text-gray-700">Blockers</h4>
 					<Button
 						variant="secondary"
@@ -218,8 +218,6 @@ export function TicketDetailModal({
 										</p>
 										<p className="text-xs text-gray-500">
 											Created by {blocker.created_by.name}
-											{/* Created by {blocker.created_by.name} ·{" "} */}
-											{blocker.status}
 										</p>
 									</div>
 									{blocker.status === "open" && (
@@ -237,7 +235,7 @@ export function TicketDetailModal({
 				)}
 			</div>
 
-			<div className="flex items-center justify-between gap-3 py-4 border-t border-gray-100">
+			<div className="flex items-center justify-between gap-3 -mx-6 px-6 py-4 -mb-4 border-t border-gray-100">
 				<div className="flex items-center gap-2">
 					{canEdit ? (
 						<Button

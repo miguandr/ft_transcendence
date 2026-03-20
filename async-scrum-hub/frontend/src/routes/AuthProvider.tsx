@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getCurrentUser } from "../services/api";
 import { AuthContext } from "../routes/useAuth"
 import type { User } from "../services/api";
@@ -8,7 +8,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
-	const refreshUser = async (): Promise<User | null> => {
+	const refreshUser = useCallback(async (): Promise<User | null> => {
 		const token = localStorage.getItem("token");
 
 		if (!token) {
@@ -28,8 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		} finally {
 			setIsLoading(false);
 		}
-	};
-
+	}, []);
+	
 	const logout = () => {
 		localStorage.removeItem("token");
 		setUser(null);

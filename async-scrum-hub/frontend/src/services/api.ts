@@ -65,225 +65,225 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // MOCK DATA
 // =============================================================
 
-//Mock User database (in real backend, this is PostgreSQL)
-const mockUsers: Array<{
-	id: string;
-	email: string;
-	password: string; // In real backend, this would be hashed!
-	name: string;
-	avatar_url: string | null;
-	org_name: string | null;
-	organization_id: string | null;
-	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
-	org_role: "admin" | "member" | null;
-}> = [
-	{
-		id: "1",
-		email: "miguel@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Miguel Andrade",
-		avatar_url: null,
-		org_name: "Las Empanadas",
-		organization_id: "2",
-		scrum_role: "scrum_master",
-		org_role: "admin",
-	},
-	{
-		id: "2",
-		email: "pedro@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Pedro Perez",
-		avatar_url: null,
-		org_name: "Las Arepas",
-		organization_id: "2",
-		scrum_role: "product_owner",
-		org_role: "member",
-	},
-	{
-		id: "3",
-		email: "pepa@example.com",
-		password: "password123", // In real backend, this would be hashed!
-		name: "Pepa Perez",
-		avatar_url: null,
-		org_name: "Las Cachapas",
-		organization_id: "2",
-		scrum_role: "developer",
-		org_role: "member",
-	},
-];
+// //Mock User database (in real backend, this is PostgreSQL)
+// const mockUsers: Array<{
+// 	id: string;
+// 	email: string;
+// 	password: string; // In real backend, this would be hashed!
+// 	name: string;
+// 	avatar_url: string | null;
+// 	org_name: string | null;
+// 	organization_id: string | null;
+// 	scrum_role: "scrum_master" | "product_owner" | "developer" | null;
+// 	org_role: "admin" | "member" | null;
+// }> = [
+// 	{
+// 		id: "1",
+// 		email: "miguel@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Miguel Andrade",
+// 		avatar_url: null,
+// 		org_name: "Las Empanadas",
+// 		organization_id: "2",
+// 		scrum_role: "scrum_master",
+// 		org_role: "admin",
+// 	},
+// 	{
+// 		id: "2",
+// 		email: "pedro@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Pedro Perez",
+// 		avatar_url: null,
+// 		org_name: "Las Arepas",
+// 		organization_id: "2",
+// 		scrum_role: "product_owner",
+// 		org_role: "member",
+// 	},
+// 	{
+// 		id: "3",
+// 		email: "pepa@example.com",
+// 		password: "password123", // In real backend, this would be hashed!
+// 		name: "Pepa Perez",
+// 		avatar_url: null,
+// 		org_name: "Las Cachapas",
+// 		organization_id: "2",
+// 		scrum_role: "developer",
+// 		org_role: "member",
+// 	},
+// ];
 
-const mockOrganizations = [
-	{
-		id: "2",
-		name: "TeamX",
-		join_code: "SRC-444",
-		created_by: "user_0",
-	},
-];
+// const mockOrganizations = [
+// 	{
+// 		id: "2",
+// 		name: "TeamX",
+// 		join_code: "SRC-444",
+// 		created_by: "user_0",
+// 	},
+// ];
 
-const mockTickets: Array<{
-	id: string;
-	title: string;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	assignee_id: string;
-}> = [
-	{
-		id: "10",
-		title: "Update dashboard charts",
-		status: "todo",
-		priority: "medium",
-		assignee_id: "1",
-	},
-];
+// const mockTickets: Array<{
+// 	id: string;
+// 	title: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	assignee_id: string;
+// }> = [
+// 	{
+// 		id: "10",
+// 		title: "Update dashboard charts",
+// 		status: "todo",
+// 		priority: "medium",
+// 		assignee_id: "1",
+// 	},
+// ];
 
-//Mock Tasks
-const mockTasks: Array<{
-	id: string;
-	title: string;
-	status: "in_progress" | "completed";
-	ticket_id: string;
-	assignee_id: string;
-}> = [
-	{
-		id: "21",
-		title: "Build login UI",
-		status: "in_progress",
-		ticket_id: "10",
-		assignee_id: "1",
-	},
-];
+// //Mock Tasks
+// const mockTasks: Array<{
+// 	id: string;
+// 	title: string;
+// 	status: "in_progress" | "completed";
+// 	ticket_id: string;
+// 	assignee_id: string;
+// }> = [
+// 	{
+// 		id: "21",
+// 		title: "Build login UI",
+// 		status: "in_progress",
+// 		ticket_id: "10",
+// 		assignee_id: "1",
+// 	},
+// ];
 
-const mockBlockers: Array<{
-	id: string;
-	description: string;
-	status: "open" | "resolved";
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	};
-	assignee: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	} | null;
-	ticket: {
-		id: string;
-		title: string;
-	};
-	created_at: string;
-	resolved_at: string | null;
-}> = [
-	{
-		id: "32",
-		description: "Waiting for API keys from client",
-		status: "open",
-		created_by: {
-			id: "1",
-			name: "Miguel Andrade",
-			avatar_url: null,
-		},
-		assignee: {
-			id: "2",
-			name: "Pepa Perez",
-			avatar_url: null,
-		},
-		ticket: {
-			id: "21",
-			title: "Implement OAuth flow",
-		},
-		created_at: "2024-02-10T10:00:00Z",
-		resolved_at: null,
-	},
-	{
-		id: "33",
-		description: "Design assets not yet approved",
-		status: "resolved",
-		created_by: {
-			id: "2",
-			name: "Pepa Perez",
-			avatar_url: null,
-		},
-		assignee: null,
-		ticket: {
-			id: "1",
-			title: "Design settings page",
-		},
-		created_at: "2026-02-08T14:30:00Z",
-		resolved_at: "2026/02/17",
-	},
-];
+// const mockBlockers: Array<{
+// 	id: string;
+// 	description: string;
+// 	status: "open" | "resolved";
+// 	created_by: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	};
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	} | null;
+// 	ticket: {
+// 		id: string;
+// 		title: string;
+// 	};
+// 	created_at: string;
+// 	resolved_at: string | null;
+// }> = [
+// 	{
+// 		id: "32",
+// 		description: "Waiting for API keys from client",
+// 		status: "open",
+// 		created_by: {
+// 			id: "1",
+// 			name: "Miguel Andrade",
+// 			avatar_url: null,
+// 		},
+// 		assignee: {
+// 			id: "2",
+// 			name: "Pepa Perez",
+// 			avatar_url: null,
+// 		},
+// 		ticket: {
+// 			id: "21",
+// 			title: "Implement OAuth flow",
+// 		},
+// 		created_at: "2024-02-10T10:00:00Z",
+// 		resolved_at: null,
+// 	},
+// 	{
+// 		id: "33",
+// 		description: "Design assets not yet approved",
+// 		status: "resolved",
+// 		created_by: {
+// 			id: "2",
+// 			name: "Pepa Perez",
+// 			avatar_url: null,
+// 		},
+// 		assignee: null,
+// 		ticket: {
+// 			id: "1",
+// 			title: "Design settings page",
+// 		},
+// 		created_at: "2026-02-08T14:30:00Z",
+// 		resolved_at: "2026/02/17",
+// 	},
+// ];
 
-const mockStandups: Array<{
-	id: string;
-	created_at: string;
-	today: string;
-	yesterday: string | null,
-	blocker_ids: string[];
-	created_by: {
-		name: string;
-		id: string;
-		avatar_url: string | null;
-	}
-}> = [
-	{
-		id: "11",
-		created_at: "2026-02-17T10:00:00Z",
-		today: "Working on OAuth integration with Google and GitHub",
-		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
-		blocker_ids: ["32", "33"],
-		created_by: {
-			name: "Miguel Andrade",
-			id: "1",
-			avatar_url: null,
-		}
-	},
-	{
-		id: "12",
-		created_at: "2024-02-18T14:30:00Z",
-		today: "Creating responsive layouts for mobile view",
-		yesterday: "Finalized dashboard redesign, updated component library",
-		blocker_ids: [],
-		created_by: {
-			name: "Pepa Perez",
-			id: "2",
-			avatar_url: null,
-		}
-	}
-]
+// const mockStandups: Array<{
+// 	id: string;
+// 	created_at: string;
+// 	today: string;
+// 	yesterday: string | null,
+// 	blocker_ids: string[];
+// 	created_by: {
+// 		name: string;
+// 		id: string;
+// 		avatar_url: string | null;
+// 	}
+// }> = [
+// 	{
+// 		id: "11",
+// 		created_at: "2026-02-17T10:00:00Z",
+// 		today: "Working on OAuth integration with Google and GitHub",
+// 		yesterday: null, //"Completed user authentication flow, fixed session persistence bug",
+// 		blocker_ids: ["32", "33"],
+// 		created_by: {
+// 			name: "Miguel Andrade",
+// 			id: "1",
+// 			avatar_url: null,
+// 		}
+// 	},
+// 	{
+// 		id: "12",
+// 		created_at: "2024-02-18T14:30:00Z",
+// 		today: "Creating responsive layouts for mobile view",
+// 		yesterday: "Finalized dashboard redesign, updated component library",
+// 		blocker_ids: [],
+// 		created_by: {
+// 			name: "Pepa Perez",
+// 			id: "2",
+// 			avatar_url: null,
+// 		}
+// 	}
+// ]
 
-const mockLegalDocuments: Record<string, LegalDocuments> = {
-	privacy: {
-		key: "privacy",
-		title: "Privacy Policy",
-		content: "# Privacy Policy\n\nThis is a placeholder.",
-		updated_at: "2024-01-01T00:00:00Z",
-	},
-	terms: {
-		key: "terms",
-		title: "Terms of Service",
-		content: "# Terms of Service\n\nThis is a placeholder.",
-		updated_at: "2024-01-01T00:00:00Z",
-	},
-};
+// const mockLegalDocuments: Record<string, LegalDocuments> = {
+// 	privacy: {
+// 		key: "privacy",
+// 		title: "Privacy Policy",
+// 		content: "# Privacy Policy\n\nThis is a placeholder.",
+// 		updated_at: "2024-01-01T00:00:00Z",
+// 	},
+// 	terms: {
+// 		key: "terms",
+// 		title: "Terms of Service",
+// 		content: "# Terms of Service\n\nThis is a placeholder.",
+// 		updated_at: "2024-01-01T00:00:00Z",
+// 	},
+// };
 
-const mockAnalitycs : AnalitycsData = {
-	tasks: [
-		{ week: "Week 1", in_progress: 10, completed: 8 },
-		{ week: "Week 2", in_progress: 12, completed: 14 },
-		{ week: "Week 3", in_progress: 8, completed: 10 },
-		{ week: "Week 4", in_progress: 5, completed: 12 },
-	],
-	tickets: [
-		{ week: "Week 1", completed: 4 },
-		{ week: "Week 2", completed: 7 },
-		{ week: "Week 3", completed: 5 },
-		{ week: "Week 4", completed: 9 },
-	],
-	standups: { posted: 115, total: 120 },
-	blockers_avg_cycle_time: 1.5,
-};
+// const mockAnalitycs : AnalitycsData = {
+// 	tasks: [
+// 		{ week: "Week 1", in_progress: 10, completed: 8 },
+// 		{ week: "Week 2", in_progress: 12, completed: 14 },
+// 		{ week: "Week 3", in_progress: 8, completed: 10 },
+// 		{ week: "Week 4", in_progress: 5, completed: 12 },
+// 	],
+// 	tickets: [
+// 		{ week: "Week 1", completed: 4 },
+// 		{ week: "Week 2", completed: 7 },
+// 		{ week: "Week 3", completed: 5 },
+// 		{ week: "Week 4", completed: 9 },
+// 	],
+// 	standups: { posted: 115, total: 120 },
+// 	blockers_avg_cycle_time: 1.5,
+// };
 
 // ///////////////////////////////////////////////////
 // // API Response types (matches API_CONTRACTS.md) //
@@ -1293,601 +1293,601 @@ export async function inviteMember(
 // 	updated_at: string;
 // }
 
-export async function listTickets(org_id: string): Promise<TicketListItem[]> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// export async function listTickets(org_id: string): Promise<TicketListItem[]> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Validate user belongs to organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Validate user belongs to organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	// Mock tickets data
-	const mockTickets: TicketListItem[] = [
-		{
-			id: "21",
-			title: "Implement user authentication",
-			status: "in_progress",
-			priority: "high",
-			assignee: {
-				id: "1",
-				name: "Alice Johnson",
-				avatar_url: null,
-			},
-			created_at: "2024-01-10T10:00:00Z",
-			updated_at: "2024-01-15T14:30:00Z",
-		},
-		{
-			id: "22",
-			title: "Design landing page",
-			status: "todo",
-			priority: "medium",
-			assignee: null,
-			created_at: "2024-01-11T09:00:00Z",
-			updated_at: "2024-01-11T09:00:00Z",
-		},
-		{
-			id: "23",
-			title: "Fix payment gateway bug",
-			status: "completed",
-			priority: "high",
-			assignee: {
-				id: "2",
-				name: "Bob Smith",
-				avatar_url: null,
-			},
-			created_at: "2024-01-08T08:00:00Z",
-			updated_at: "2024-01-14T16:00:00Z",
-		},
-	];
+// 	// Mock tickets data
+// 	const mockTickets: TicketListItem[] = [
+// 		{
+// 			id: "21",
+// 			title: "Implement user authentication",
+// 			status: "in_progress",
+// 			priority: "high",
+// 			assignee: {
+// 				id: "1",
+// 				name: "Alice Johnson",
+// 				avatar_url: null,
+// 			},
+// 			created_at: "2024-01-10T10:00:00Z",
+// 			updated_at: "2024-01-15T14:30:00Z",
+// 		},
+// 		{
+// 			id: "22",
+// 			title: "Design landing page",
+// 			status: "todo",
+// 			priority: "medium",
+// 			assignee: null,
+// 			created_at: "2024-01-11T09:00:00Z",
+// 			updated_at: "2024-01-11T09:00:00Z",
+// 		},
+// 		{
+// 			id: "23",
+// 			title: "Fix payment gateway bug",
+// 			status: "completed",
+// 			priority: "high",
+// 			assignee: {
+// 				id: "2",
+// 				name: "Bob Smith",
+// 				avatar_url: null,
+// 			},
+// 			created_at: "2024-01-08T08:00:00Z",
+// 			updated_at: "2024-01-14T16:00:00Z",
+// 		},
+// 	];
 
-	return mockTickets;
-}
+// 	return mockTickets;
+// }
 
 // =============================================================
 // BLOCKERS
 // =============================================================
 
 //Interfaces
-interface CreateBlockerRequest {
-	description: string;
-	ticket_id: string | null;
-	assignee_id: string | null;
-}
+// interface CreateBlockerRequest {
+// 	description: string;
+// 	ticket_id: string | null;
+// 	assignee_id: string | null;
+// }
 
-interface CreateBlockerResponse {
-	id: string;
-	description: string;
-	status: "open";
-	created_by: string;
-	assignee_id: string | null;
-	ticket_id: string | null;
-	created_at: string;
-	resolved_at: null;
-}
+// interface CreateBlockerResponse {
+// 	id: string;
+// 	description: string;
+// 	status: "open";
+// 	created_by: string;
+// 	assignee_id: string | null;
+// 	ticket_id: string | null;
+// 	created_at: string;
+// 	resolved_at: null;
+// }
 
-export interface BlockerListItem {
-	id: string;
-	description: string;
-	status: "open" | "resolved";
-	created_by: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	};
-	assignee: {
-		id: string;
-		name: string;
-	} | null;
-	ticket: {
-		id: string;
-		title: string;
-	};
-	created_at: string;
-	resolved_at: string | null;
-}
+// export interface BlockerListItem {
+// 	id: string;
+// 	description: string;
+// 	status: "open" | "resolved";
+// 	created_by: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	};
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 	} | null;
+// 	ticket: {
+// 		id: string;
+// 		title: string;
+// 	};
+// 	created_at: string;
+// 	resolved_at: string | null;
+// }
 
-interface UpdateBlockerRequest {
-	description?: string;
-	ticket_id?: string | null;
-	assignee_id?: string | null;
-}
+// interface UpdateBlockerRequest {
+// 	description?: string;
+// 	ticket_id?: string | null;
+// 	assignee_id?: string | null;
+// }
 
-interface UpdateBlockerResponse {
-	id: string;
-	description: string;
-	status: "open" | "resolved";
-	created_by: string;
-	assignee_id: string | null;
-	ticket_id: string | null;
-	created_at: string;
-	resolved_at: string | null;
-}
+// interface UpdateBlockerResponse {
+// 	id: string;
+// 	description: string;
+// 	status: "open" | "resolved";
+// 	created_by: string;
+// 	assignee_id: string | null;
+// 	ticket_id: string | null;
+// 	created_at: string;
+// 	resolved_at: string | null;
+// }
 
-// Create Blocker
-export async function createBlocker(
-	org_id: string,
-	data: CreateBlockerRequest
-): Promise<CreateBlockerResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Create Blocker
+// export async function createBlocker(
+// 	org_id: string,
+// 	data: CreateBlockerRequest
+// ): Promise<CreateBlockerResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Validate user belongs to organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Validate user belongs to organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	// Validate description
-	if (!data.description.trim()) {
-		createApiError("INVALID_INPUT", "Description is required");
-	}
+// 	// Validate description
+// 	if (!data.description.trim()) {
+// 		createApiError("INVALID_INPUT", "Description is required");
+// 	}
 
-	// Validate assignee is a developer if provided
-	if (data.assignee_id) {
-		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
-		if (!assignee) {
-			createApiError("INVALID_INPUT", "Assignee not found");
-		}
-		if (assignee.scrum_role !== "developer") {
-			createApiError(
-				"INVALID_ASSIGNEE",
-				"Only users with Developer role can be assigned to blockers"
-			);
-		}
-	}
+// 	// Validate assignee is a developer if provided
+// 	if (data.assignee_id) {
+// 		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
+// 		if (!assignee) {
+// 			createApiError("INVALID_INPUT", "Assignee not found");
+// 		}
+// 		if (assignee.scrum_role !== "developer") {
+// 			createApiError(
+// 				"INVALID_ASSIGNEE",
+// 				"Only users with Developer role can be assigned to blockers"
+// 			);
+// 		}
+// 	}
 
-	// Create new blocker
-	const newBlocker = {
-		id: `blocker-${Date.now()}`,
-		description: data.description,
-		status: "open" as const,
-		created_by: {
-			id: currentUser.id,
-			name: currentUser.name,
-			avatar_url: currentUser.avatar_url,
-		},
-		assignee: data.assignee_id
-			? {
-					id: data.assignee_id,
-					name: mockUsers.find((u) => u.id === data.assignee_id)!.name,
-					avatar_url: mockUsers.find((u) => u.id === data.assignee_id)!.avatar_url,
-				}
-			: null,
-		ticket: {
-			id: data.ticket_id || "0",
-			title: "Mock Ticket Title", // In real implementation, apiF from tasks/tickets
-		},
-		created_at: new Date().toISOString(),
-		resolved_at: null,
-	};
+// 	// Create new blocker
+// 	const newBlocker = {
+// 		id: `blocker-${Date.now()}`,
+// 		description: data.description,
+// 		status: "open" as const,
+// 		created_by: {
+// 			id: currentUser.id,
+// 			name: currentUser.name,
+// 			avatar_url: currentUser.avatar_url,
+// 		},
+// 		assignee: data.assignee_id
+// 			? {
+// 					id: data.assignee_id,
+// 					name: mockUsers.find((u) => u.id === data.assignee_id)!.name,
+// 					avatar_url: mockUsers.find((u) => u.id === data.assignee_id)!.avatar_url,
+// 				}
+// 			: null,
+// 		ticket: {
+// 			id: data.ticket_id || "0",
+// 			title: "Mock Ticket Title", // In real implementation, apiF from tasks/tickets
+// 		},
+// 		created_at: new Date().toISOString(),
+// 		resolved_at: null,
+// 	};
 
-	// Add to mock database
-	mockBlockers.push(newBlocker);
-	const parentTicket = mockTicketStore.find((t) => t.id === data.ticket_id);
-	if (parentTicket) {
-		parentTicket.blockers.push({
-			id: newBlocker.id,
-			description: newBlocker.description,
-			status: newBlocker.status,
-			created_by: newBlocker.created_by,
-		});
-	}
+// 	// Add to mock database
+// 	mockBlockers.push(newBlocker);
+// 	const parentTicket = mockTicketStore.find((t) => t.id === data.ticket_id);
+// 	if (parentTicket) {
+// 		parentTicket.blockers.push({
+// 			id: newBlocker.id,
+// 			description: newBlocker.description,
+// 			status: newBlocker.status,
+// 			created_by: newBlocker.created_by,
+// 		});
+// 	}
 
-	// Return minimal response (contract 7.1)
-	return {
-		id: newBlocker.id,
-		description: newBlocker.description,
-		status: newBlocker.status,
-		created_by: currentUser.id,
-		assignee_id: data.assignee_id,
-		ticket_id: data.ticket_id,
-		created_at: newBlocker.created_at,
-		resolved_at: null,
-	};
-}
+// 	// Return minimal response (contract 7.1)
+// 	return {
+// 		id: newBlocker.id,
+// 		description: newBlocker.description,
+// 		status: newBlocker.status,
+// 		created_by: currentUser.id,
+// 		assignee_id: data.assignee_id,
+// 		ticket_id: data.ticket_id,
+// 		created_at: newBlocker.created_at,
+// 		resolved_at: null,
+// 	};
+// }
 
-// List Blockers
-export async function listBlockers(
-	org_id: string,
-	status?: "open" | "resolved"
-): Promise<BlockerListItem[]> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
+// // List Blockers
+// export async function listBlockers(
+// 	org_id: string,
+// 	status?: "open" | "resolved"
+// ): Promise<BlockerListItem[]> {
+// 	await delay(300);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Validate user belongs to organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Validate user belongs to organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	// Filter blockers by organization (all blockers for this org)
-	let blockers = mockBlockers;
+// 	// Filter blockers by organization (all blockers for this org)
+// 	let blockers = mockBlockers;
 
-	// Apply status filter if provided
-	if (status) {
-		blockers = blockers.filter((b) => b.status === status);
-	}
+// 	// Apply status filter if provided
+// 	if (status) {
+// 		blockers = blockers.filter((b) => b.status === status);
+// 	}
 
-	// Transform to BlockerListItem format (string ids to numbers)
-	return blockers.map((b) => ({
-		id: b.id,
-		description: b.description,
-		status: b.status,
-		created_by: {
-			id: b.created_by.id,
-			name: b.created_by.name,
-			avatar_url: b.created_by.avatar_url,
-		},
-		assignee: b.assignee
-			? {
-					id: b.assignee.id,
-					name: b.assignee.name,
-				}
-			: null,
-		ticket: {
-			id: b.ticket.id,
-			title: b.ticket.title,
-		},
-		created_at: b.created_at,
-		resolved_at: b.resolved_at,
-	}));
-}
+// 	// Transform to BlockerListItem format (string ids to numbers)
+// 	return blockers.map((b) => ({
+// 		id: b.id,
+// 		description: b.description,
+// 		status: b.status,
+// 		created_by: {
+// 			id: b.created_by.id,
+// 			name: b.created_by.name,
+// 			avatar_url: b.created_by.avatar_url,
+// 		},
+// 		assignee: b.assignee
+// 			? {
+// 					id: b.assignee.id,
+// 					name: b.assignee.name,
+// 				}
+// 			: null,
+// 		ticket: {
+// 			id: b.ticket.id,
+// 			title: b.ticket.title,
+// 		},
+// 		created_at: b.created_at,
+// 		resolved_at: b.resolved_at,
+// 	}));
+// }
 
-// Update Blocker
-export async function updateBlocker(
-	blocker_id: string,
-	data: UpdateBlockerRequest
-): Promise<UpdateBlockerResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Update Blocker
+// export async function updateBlocker(
+// 	blocker_id: string,
+// 	data: UpdateBlockerRequest
+// ): Promise<UpdateBlockerResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Find blocker
-	const blocker = mockBlockers.find((b) => b.id === blocker_id);
-	if (!blocker) {
-		createApiError("NOT_FOUND", "Blocker not found");
-	}
+// 	// Find blocker
+// 	const blocker = mockBlockers.find((b) => b.id === blocker_id);
+// 	if (!blocker) {
+// 		createApiError("NOT_FOUND", "Blocker not found");
+// 	}
 
-	// Check permissions
-	const isOwner = blocker.created_by.id === currentUser.id;
-	const isAssignee = blocker.assignee?.id === currentUser.id;
-	const isScrumMaster = currentUser.scrum_role === "scrum_master";
-	const isProductOwner = currentUser.scrum_role === "product_owner";
+// 	// Check permissions
+// 	const isOwner = blocker.created_by.id === currentUser.id;
+// 	const isAssignee = blocker.assignee?.id === currentUser.id;
+// 	const isScrumMaster = currentUser.scrum_role === "scrum_master";
+// 	const isProductOwner = currentUser.scrum_role === "product_owner";
 
-	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
+// 	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
 
-	// Validate assignee if provided
-	if (data.assignee_id !== undefined && data.assignee_id !== null) {
-		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
-		if (!assignee) {
-			createApiError("INVALID_INPUT", "Assignee not found");
-		}
-		if (assignee.scrum_role !== "developer") {
-			createApiError(
-				"INVALID_ASSIGNEE",
-				"Only users with Developer role can be assigned to blockers"
-			);
-		}
-	}
+// 	// Validate assignee if provided
+// 	if (data.assignee_id !== undefined && data.assignee_id !== null) {
+// 		const assignee = mockUsers.find((u) => u.id === data.assignee_id);
+// 		if (!assignee) {
+// 			createApiError("INVALID_INPUT", "Assignee not found");
+// 		}
+// 		if (assignee.scrum_role !== "developer") {
+// 			createApiError(
+// 				"INVALID_ASSIGNEE",
+// 				"Only users with Developer role can be assigned to blockers"
+// 			);
+// 		}
+// 	}
 
-	// Update blocker fields
-	if (data.description !== undefined) {
-		if (!data.description.trim()) {
-			createApiError("INVALID_INPUT", "Description cannot be empty");
-		}
-		blocker.description = data.description;
-	}
+// 	// Update blocker fields
+// 	if (data.description !== undefined) {
+// 		if (!data.description.trim()) {
+// 			createApiError("INVALID_INPUT", "Description cannot be empty");
+// 		}
+// 		blocker.description = data.description;
+// 	}
 
-	if (data.ticket_id !== undefined) {
-		blocker.ticket.id = data.ticket_id || "0";
-	}
+// 	if (data.ticket_id !== undefined) {
+// 		blocker.ticket.id = data.ticket_id || "0";
+// 	}
 
-	if (data.assignee_id !== undefined) {
-		if (data.assignee_id === null) {
-			blocker.assignee = null;
-		} else {
-			const assignee = mockUsers.find((u) => u.id === data.assignee_id)!;
-			blocker.assignee = {
-				id: assignee.id,
-				name: assignee.name,
-				avatar_url: assignee.avatar_url,
-			};
-		}
-	}
+// 	if (data.assignee_id !== undefined) {
+// 		if (data.assignee_id === null) {
+// 			blocker.assignee = null;
+// 		} else {
+// 			const assignee = mockUsers.find((u) => u.id === data.assignee_id)!;
+// 			blocker.assignee = {
+// 				id: assignee.id,
+// 				name: assignee.name,
+// 				avatar_url: assignee.avatar_url,
+// 			};
+// 		}
+// 	}
 
-	// Return minimal response (contract 7.3)
-	return {
-		id: blocker.id,
-		description: blocker.description,
-		status: blocker.status,
-		created_by: blocker.created_by.id,
-		assignee_id: blocker.assignee?.id || null,
-		ticket_id: blocker.ticket.id,
-		created_at: blocker.created_at,
-		resolved_at: blocker.resolved_at,
-	};
-}
+// 	// Return minimal response (contract 7.3)
+// 	return {
+// 		id: blocker.id,
+// 		description: blocker.description,
+// 		status: blocker.status,
+// 		created_by: blocker.created_by.id,
+// 		assignee_id: blocker.assignee?.id || null,
+// 		ticket_id: blocker.ticket.id,
+// 		created_at: blocker.created_at,
+// 		resolved_at: blocker.resolved_at,
+// 	};
+// }
 
-// Resolve Blocker
-export async function resolveBlocker(blocker_id: string): Promise<void> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Resolve Blocker
+// export async function resolveBlocker(blocker_id: string): Promise<void> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Find blocker
-	const blocker = mockBlockers.find((b) => b.id === blocker_id);
-	if (!blocker) {
-		createApiError("NOT_FOUND", "Blocker not found");
-	}
+// 	// Find blocker
+// 	const blocker = mockBlockers.find((b) => b.id === blocker_id);
+// 	if (!blocker) {
+// 		createApiError("NOT_FOUND", "Blocker not found");
+// 	}
 
-	// Check if already resolved
-	if (blocker.status === "resolved") {
-		createApiError("BLOCKER_ALREADY_RESOLVED", "Blocker already resolved");
-	}
+// 	// Check if already resolved
+// 	if (blocker.status === "resolved") {
+// 		createApiError("BLOCKER_ALREADY_RESOLVED", "Blocker already resolved");
+// 	}
 
-	// Check permissions
-	const isOwner = blocker.created_by.id === currentUser.id;
-	const isAssignee = blocker.assignee?.id === currentUser.id;
-	const isScrumMaster = currentUser.scrum_role === "scrum_master";
-	const isProductOwner = currentUser.scrum_role === "product_owner";
+// 	// Check permissions
+// 	const isOwner = blocker.created_by.id === currentUser.id;
+// 	const isAssignee = blocker.assignee?.id === currentUser.id;
+// 	const isScrumMaster = currentUser.scrum_role === "scrum_master";
+// 	const isProductOwner = currentUser.scrum_role === "product_owner";
 
-	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
+// 	if (!isOwner && !isAssignee && !isScrumMaster && !isProductOwner) {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
 
-	// Resolve blocker
-	blocker.status = "resolved";
-	blocker.resolved_at = new Date().toISOString();
+// 	// Resolve blocker
+// 	blocker.status = "resolved";
+// 	blocker.resolved_at = new Date().toISOString();
 
-	// Return 204 No Content (void)
-}
+// 	// Return 204 No Content (void)
+// }
 
 // =============================================================
 // MOCK TICKETS
 // =============================================================
 
-const mockTicketStore: TicketResponse[] = [
-	{
-		id: "t1",
-		title: "Fix login bug on mobile",
-		description: "Users on iOS cannot log in after the last update.",
-		status: "todo",
-		priority: "high",
-		created_by: { id: "1", name: "Miguel Andrade", avatar_url: null },
-		assignee_id: "3",
-		organization_id: "2",
-		created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-		updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-		tasks: [
-			{ id: "task1", title: "Reproduce the bug on iOS 17", status: "in_progress" },
-		],
-		blockers: [],
-	},
-	{
-		id: "t2",
-		title: "Implement dark mode",
-		description: "Add dark mode support across all pages.",
-		status: "in_progress",
-		priority: "medium",
-		created_by: { id: "2", name: "Pedro Perez", avatar_url: null },
-		assignee_id: "3",
-		organization_id: "2",
-		created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-		updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-		tasks: [
-			{ id: "task2", title: "Design dark mode color tokens", status: "in_progress" },
-			{ id: "task3", title: "Implement dark mode in Tailwind config", status: "completed" },
-		],
-		blockers: [],
-	},
-	{
-		id: "t3",
-		title: "Write onboarding docs",
-		description: null,
-		status: "completed",
-		priority: "low",
-		created_by: { id: "1", name: "Miguel Andrade", avatar_url: null },
-		assignee_id: null,
-		organization_id: "2",
-		created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-		updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-		tasks: [],
-		blockers: [],
-	},
-];
+// const mockTicketStore: TicketResponse[] = [
+// 	{
+// 		id: "t1",
+// 		title: "Fix login bug on mobile",
+// 		description: "Users on iOS cannot log in after the last update.",
+// 		status: "todo",
+// 		priority: "high",
+// 		created_by: { id: "1", name: "Miguel Andrade", avatar_url: null },
+// 		assignee_id: "3",
+// 		organization_id: "2",
+// 		created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+// 		updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+// 		tasks: [
+// 			{ id: "task1", title: "Reproduce the bug on iOS 17", status: "in_progress" },
+// 		],
+// 		blockers: [],
+// 	},
+// 	{
+// 		id: "t2",
+// 		title: "Implement dark mode",
+// 		description: "Add dark mode support across all pages.",
+// 		status: "in_progress",
+// 		priority: "medium",
+// 		created_by: { id: "2", name: "Pedro Perez", avatar_url: null },
+// 		assignee_id: "3",
+// 		organization_id: "2",
+// 		created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+// 		updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+// 		tasks: [
+// 			{ id: "task2", title: "Design dark mode color tokens", status: "in_progress" },
+// 			{ id: "task3", title: "Implement dark mode in Tailwind config", status: "completed" },
+// 		],
+// 		blockers: [],
+// 	},
+// 	{
+// 		id: "t3",
+// 		title: "Write onboarding docs",
+// 		description: null,
+// 		status: "completed",
+// 		priority: "low",
+// 		created_by: { id: "1", name: "Miguel Andrade", avatar_url: null },
+// 		assignee_id: null,
+// 		organization_id: "2",
+// 		created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+// 		updated_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+// 		tasks: [],
+// 		blockers: [],
+// 	},
+// ];
 
-export async function createTicket(
-	org_id: string,
-	data: CreateTicketRequest
-): Promise<TicketResponse> {
-	await delay(300);
-	void org_id;
-	const currentUser = getCurrentUserRecord();
-	const ticket: TicketResponse = {
-		id: `t${Date.now()}`,
-		title: data.title,
-		description: data.description,
-		status: "todo",
-		priority: data.priority,
-		created_by: { id: currentUser.id, name: currentUser.name, avatar_url: currentUser.avatar_url },
-		assignee_id: data.assignee_id,
-		organization_id: org_id,
-		created_at: new Date().toISOString(),
-		updated_at: new Date().toISOString(),
-		tasks: [],
-		blockers: [],
-	};
-	mockTicketStore.push(ticket);
-	return ticket;
-}
+// export async function createTicket(
+// 	org_id: string,
+// 	data: CreateTicketRequest
+// ): Promise<TicketResponse> {
+// 	await delay(300);
+// 	void org_id;
+// 	const currentUser = getCurrentUserRecord();
+// 	const ticket: TicketResponse = {
+// 		id: `t${Date.now()}`,
+// 		title: data.title,
+// 		description: data.description,
+// 		status: "todo",
+// 		priority: data.priority,
+// 		created_by: { id: currentUser.id, name: currentUser.name, avatar_url: currentUser.avatar_url },
+// 		assignee_id: data.assignee_id,
+// 		organization_id: org_id,
+// 		created_at: new Date().toISOString(),
+// 		updated_at: new Date().toISOString(),
+// 		tasks: [],
+// 		blockers: [],
+// 	};
+// 	mockTicketStore.push(ticket);
+// 	return ticket;
+// }
 
-export async function listTicketsBoard(
-	org_id: string,
-	status?: "todo" | "in_progress" | "completed",
-	priority?: "low" | "medium" | "high",
-): Promise<ListTicketsBoardResponse[]> {
-	await delay(300);
-	void org_id;
-	return mockTicketStore
-		.filter((t) => (!status || t.status === status) && (!priority || t.priority === priority))
-		.map((t) => {
-			const assigneeUser = mockUsers.find((u) => u.id === t.assignee_id) ?? null;
-			return {
-				id: t.id,
-				title: t.title,
-				status: t.status,
-				priority: t.priority,
-				assignee: assigneeUser
-					? { id: assigneeUser.id, name: assigneeUser.name, avatar_url: assigneeUser.avatar_url ?? "" }
-					: null,
-				created_at: t.created_at,
-				updated_at: t.updated_at,
-			};
-		});
-}
+// export async function listTicketsBoard(
+// 	org_id: string,
+// 	status?: "todo" | "in_progress" | "completed",
+// 	priority?: "low" | "medium" | "high",
+// ): Promise<ListTicketsBoardResponse[]> {
+// 	await delay(300);
+// 	void org_id;
+// 	return mockTicketStore
+// 		.filter((t) => (!status || t.status === status) && (!priority || t.priority === priority))
+// 		.map((t) => {
+// 			const assigneeUser = mockUsers.find((u) => u.id === t.assignee_id) ?? null;
+// 			return {
+// 				id: t.id,
+// 				title: t.title,
+// 				status: t.status,
+// 				priority: t.priority,
+// 				assignee: assigneeUser
+// 					? { id: assigneeUser.id, name: assigneeUser.name, avatar_url: assigneeUser.avatar_url ?? "" }
+// 					: null,
+// 				created_at: t.created_at,
+// 				updated_at: t.updated_at,
+// 			};
+// 		});
+// }
 
-export async function getTicketDetails(ticket_id: string): Promise<TicketResponse> {
-	await delay(200);
-	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
-	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
-	return ticket;
-}
+// export async function getTicketDetails(ticket_id: string): Promise<TicketResponse> {
+// 	await delay(200);
+// 	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
+// 	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
+// 	return ticket;
+// }
 
-export async function updateTicket(
-	ticket_id: string,
-	data: UpdateTicketRequest
-): Promise<TicketResponse> {
-	await delay(300);
-	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
-	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
-	if (data.title !== undefined) ticket.title = data.title;
-	if (data.description !== undefined) ticket.description = data.description;
-	if (data.priority !== undefined) ticket.priority = data.priority;
-	if (data.status !== undefined) ticket.status = data.status;
-	if (data.assignee_id !== undefined) ticket.assignee_id = data.assignee_id;
-	ticket.updated_at = new Date().toISOString();
-	return { ...ticket };
-}
+// export async function updateTicket(
+// 	ticket_id: string,
+// 	data: UpdateTicketRequest
+// ): Promise<TicketResponse> {
+// 	await delay(300);
+// 	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
+// 	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
+// 	if (data.title !== undefined) ticket.title = data.title;
+// 	if (data.description !== undefined) ticket.description = data.description;
+// 	if (data.priority !== undefined) ticket.priority = data.priority;
+// 	if (data.status !== undefined) ticket.status = data.status;
+// 	if (data.assignee_id !== undefined) ticket.assignee_id = data.assignee_id;
+// 	ticket.updated_at = new Date().toISOString();
+// 	return { ...ticket };
+// }
 
-export async function moveTicket(
-	ticket_id: string,
-	data: MoveTicketRequest
-): Promise<MoveTicketResponse> {
-	await delay(200);
-	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
-	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
-	ticket.status = data.status;
-	ticket.updated_at = new Date().toISOString();
-	return { id: ticket.id, status: ticket.status, updated_at: ticket.updated_at };
-}
+// export async function moveTicket(
+// 	ticket_id: string,
+// 	data: MoveTicketRequest
+// ): Promise<MoveTicketResponse> {
+// 	await delay(200);
+// 	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
+// 	if (!ticket) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
+// 	ticket.status = data.status;
+// 	ticket.updated_at = new Date().toISOString();
+// 	return { id: ticket.id, status: ticket.status, updated_at: ticket.updated_at };
+// }
 
-export async function deleteTicket(ticket_id: string): Promise<void> {
-	await delay(200);
-	const index = mockTicketStore.findIndex((t) => t.id === ticket_id);
-	if (index === -1) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
-	mockTicketStore.splice(index, 1);
-}
+// export async function deleteTicket(ticket_id: string): Promise<void> {
+// 	await delay(200);
+// 	const index = mockTicketStore.findIndex((t) => t.id === ticket_id);
+// 	if (index === -1) throw { error: { code: "NOT_FOUND", message: "Ticket not found" } };
+// 	mockTicketStore.splice(index, 1);
+// }
 
-// =============================================================
-// MOCK TASKS
-// =============================================================
+// // =============================================================
+// // MOCK TASKS
+// // =============================================================
 
-const mockTaskStore: TaskResponse[] = [
-	{
-		id: "task1",
-		title: "Reproduce the bug on iOS 17",
-		description: "Test on simulator and real device.",
-		status: "in_progress",
-		created_by: "1",
-		assignee_id: "3",
-		ticket_id: "t1",
-	},
-	{
-		id: "task2",
-		title: "Design dark mode color tokens",
-		description: null,
-		status: "in_progress",
-		created_by: "2",
-		assignee_id: "3",
-		ticket_id: "t2",
-	},
-	{
-		id: "task3",
-		title: "Implement dark mode in Tailwind config",
-		description: "Use the `dark:` variant.",
-		status: "completed",
-		created_by: "2",
-		assignee_id: "3",
-		ticket_id: "t2",
-	},
-];
+// const mockTaskStore: TaskResponse[] = [
+// 	{
+// 		id: "task1",
+// 		title: "Reproduce the bug on iOS 17",
+// 		description: "Test on simulator and real device.",
+// 		status: "in_progress",
+// 		created_by: "1",
+// 		assignee_id: "3",
+// 		ticket_id: "t1",
+// 	},
+// 	{
+// 		id: "task2",
+// 		title: "Design dark mode color tokens",
+// 		description: null,
+// 		status: "in_progress",
+// 		created_by: "2",
+// 		assignee_id: "3",
+// 		ticket_id: "t2",
+// 	},
+// 	{
+// 		id: "task3",
+// 		title: "Implement dark mode in Tailwind config",
+// 		description: "Use the `dark:` variant.",
+// 		status: "completed",
+// 		created_by: "2",
+// 		assignee_id: "3",
+// 		ticket_id: "t2",
+// 	},
+// ];
 
-export async function createTask(
-	ticket_id: string,
-	data: CreateTaskRequest
-): Promise<TaskResponse> {
-	await delay(300);
-	const task: TaskResponse = {
-		id: `task${Date.now()}`,
-		title: data.title,
-		description: data.description,
-		status: "in_progress",
-		created_by: "1",
-		assignee_id: data.assignee_id,
-		ticket_id,
-	};
-	mockTaskStore.push(task);
-	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
-	if (ticket) {
-		ticket.tasks.push({ id: task.id, title: task.title, status: task.status });
-	}
-	return task;
-}
+// export async function createTask(
+// 	ticket_id: string,
+// 	data: CreateTaskRequest
+// ): Promise<TaskResponse> {
+// 	await delay(300);
+// 	const task: TaskResponse = {
+// 		id: `task${Date.now()}`,
+// 		title: data.title,
+// 		description: data.description,
+// 		status: "in_progress",
+// 		created_by: "1",
+// 		assignee_id: data.assignee_id,
+// 		ticket_id,
+// 	};
+// 	mockTaskStore.push(task);
+// 	const ticket = mockTicketStore.find((t) => t.id === ticket_id);
+// 	if (ticket) {
+// 		ticket.tasks.push({ id: task.id, title: task.title, status: task.status });
+// 	}
+// 	return task;
+// }
 
-export async function listTasks(
-	ticket_id: string,
-	status?: "in_progress" | "completed",
-): Promise<ListTaskResponse[]> {
-	await delay(200);
-	return mockTaskStore
-		.filter((t) => t.ticket_id === ticket_id && (!status || t.status === status))
-		.map((t) => ({ id: t.id, title: t.title, status: t.status }));
-}
+// export async function listTasks(
+// 	ticket_id: string,
+// 	status?: "in_progress" | "completed",
+// ): Promise<ListTaskResponse[]> {
+// 	await delay(200);
+// 	return mockTaskStore
+// 		.filter((t) => t.ticket_id === ticket_id && (!status || t.status === status))
+// 		.map((t) => ({ id: t.id, title: t.title, status: t.status }));
+// }
 
-export async function getTaskDetails(task_id: string): Promise<TaskResponse> {
-	await delay(200);
-	const task = mockTaskStore.find((t) => t.id === task_id);
-	if (!task) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
-	return task;
-}
+// export async function getTaskDetails(task_id: string): Promise<TaskResponse> {
+// 	await delay(200);
+// 	const task = mockTaskStore.find((t) => t.id === task_id);
+// 	if (!task) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
+// 	return task;
+// }
 
-export async function updateTask(
-	task_id: string,
-	data: UpdateTaskRequest
-): Promise<TaskResponse> {
-	await delay(300);
-	const task = mockTaskStore.find((t) => t.id === task_id);
-	if (!task) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
-	if (data.title !== undefined) task.title = data.title;
-	if (data.description !== undefined) task.description = data.description;
-	if (data.status !== undefined) task.status = data.status;
-	if (data.assignee_id !== undefined) task.assignee_id = data.assignee_id;
-	// Sync status back to the ticket's tasks summary
-	if (data.status !== undefined) {
-		const ticket = mockTicketStore.find((t) => t.id === task.ticket_id);
-		if (ticket) {
-			const summary = ticket.tasks.find((ts) => ts.id === task_id);
-			if (summary) summary.status = data.status;
-		}
-	}
-	return { ...task };
-}
+// export async function updateTask(
+// 	task_id: string,
+// 	data: UpdateTaskRequest
+// ): Promise<TaskResponse> {
+// 	await delay(300);
+// 	const task = mockTaskStore.find((t) => t.id === task_id);
+// 	if (!task) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
+// 	if (data.title !== undefined) task.title = data.title;
+// 	if (data.description !== undefined) task.description = data.description;
+// 	if (data.status !== undefined) task.status = data.status;
+// 	if (data.assignee_id !== undefined) task.assignee_id = data.assignee_id;
+// 	// Sync status back to the ticket's tasks summary
+// 	if (data.status !== undefined) {
+// 		const ticket = mockTicketStore.find((t) => t.id === task.ticket_id);
+// 		if (ticket) {
+// 			const summary = ticket.tasks.find((ts) => ts.id === task_id);
+// 			if (summary) summary.status = data.status;
+// 		}
+// 	}
+// 	return { ...task };
+// }
 
-export async function deleteTask(task_id: string): Promise<void> {
-	await delay(200);
-	const index = mockTaskStore.findIndex((t) => t.id === task_id);
-	if (index === -1) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
-	mockTaskStore.splice(index, 1);
-}
+// export async function deleteTask(task_id: string): Promise<void> {
+// 	await delay(200);
+// 	const index = mockTaskStore.findIndex((t) => t.id === task_id);
+// 	if (index === -1) throw { error: { code: "NOT_FOUND", message: "Task not found" } };
+// 	mockTaskStore.splice(index, 1);
+// }
 
 // =============================================================
 // MOCK DASHBOARD
@@ -2204,7 +2204,7 @@ export async function joinOrganization(data:
 	return response.json();
 }
 
-/*
+
 // 4.1 CREATE TICKETS
 export async function createTicket(
 	org_id: string,
@@ -2462,7 +2462,7 @@ export async function deleteTask(
 		throw errorData;
 	}
 }
-*/
+
 
 // 6.1 CREATE STANDUP
 export async function createStandup(
@@ -2552,7 +2552,6 @@ export async function deleteStandup(
 	}
 }
 
-/*
 // 7.1 CREATE BLOCKER
 export async function createBlocker(
 	org_id: string,
@@ -2645,7 +2644,7 @@ export async function resolveBlocker(
 		throw errorData;
 	}
 }
-*/
+
 
 // 8.1 GET LEGAL DOCUMENT
 export async function getLegalDocument(

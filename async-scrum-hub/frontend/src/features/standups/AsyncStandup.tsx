@@ -202,7 +202,7 @@ export function AsyncStandup() {
 	};
 
 	useOrgWebSocket(orgId, (msg) => {
-		const reFetchEvents = ["standup.created", "standup.updated"];
+		const reFetchEvents = ["standup.created", "standup.updated", "standup.deleted"];
 		if (reFetchEvents.includes(msg.event)) {
 			fetchStandups();
 		}
@@ -318,7 +318,7 @@ export function AsyncStandup() {
 									</div>
 
 									{/* Yesterday Section */}
-									{s.yesterday && (
+									{s.yesterday && s.standup_date === today && (
 										<div className="pb-4">
 											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
 												Yesterday

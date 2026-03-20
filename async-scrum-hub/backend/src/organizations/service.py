@@ -21,6 +21,7 @@ from sqlalchemy import update as sa_update
 
 from src.config.email import send_invite_email
 from src.database.models import Organization, User
+from src.database.models.blocker import Blocker
 from src.database.models.enums import OrgRole, ScrumRole
 from src.organizations.schemas import available_SR
 
@@ -220,6 +221,12 @@ def remove_member(
 	user.organization_id = None
 	user.org_role = None
 	user.scrum_role = None
+
+	db.query(Blocker).filter(
+		Blocker.organization_id == org_id,
+		Blocker.assignee_id == user_id,
+	).update({"assignee_id": None})
+
 	db.commit()
 
 
