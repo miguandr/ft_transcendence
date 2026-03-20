@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCurrentUser } from "../services/api";
 import { AuthContext } from "../routes/useAuth"
-import type { User } from "../services/api";
+import type { User } from "../types/api.types";
 import type { ReactNode } from "react";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			setIsLoading(false);
 		}
 	}, []);
-	
+
 	const logout = () => {
 		localStorage.removeItem("token");
 		setUser(null);
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		void refreshUser();
-	}, []);
+	}, [refreshUser]);
 
 	return (
 		<AuthContext.Provider value={{ user, isLoading, refreshUser, logout }}>

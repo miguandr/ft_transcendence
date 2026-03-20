@@ -1,6 +1,6 @@
 import { AuthProvider } from "./routes/AuthProvider";
 import { RequireAuth } from "./routes/RequireAuth";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Sidebar } from "./components/layout/SideBar/Sidebar";
 import { TopBar } from "./components/layout/TopBar/TopBar";
 import { WelcomeAnimation } from "./features/auth/WelcomeAnimation";
@@ -15,35 +15,8 @@ import { AsyncStandup } from "./features/standups/AsyncStandup";
 import { Blockers } from "./features/blockers/Blockers";
 import { Analytics } from "./features/analytics/Analytics";
 import { Info } from "./features/info/Info";
-//import { Navigate } from "react-router-dom";
 
-function AppLayout() {
-	const location = useLocation();
-	const preAuthPaths = ["/", "/welcome", "/login", "/signup", "/team-setup"];
-	const isPreAuth = preAuthPaths.includes(location.pathname);
-
-	// User is on auth pages (not logged in)
-	if (isPreAuth) {
-		return (
-			<Routes>
-				<Route path="/" element={<WelcomeAnimation />} />
-				<Route path="/welcome" element={<Welcome />} />
-				<Route path="/login" element={<Login />} />
-				<Route path="/signup" element={<SignUp />} />
-				<Route path="/team-setup" element={<TeamSetup />} />
-				<Route
-					path="/team-setup"
-					element={
-						<RequireAuth>
-							<TeamSetup />
-						</RequireAuth>
-					}
-				/>
-			</Routes>
-		);
-	}
-
-	// User is logged in - show dashboard with sidebar/topbar
+function AuthenticatedLayout() {
 	return (
 		<RequireAuth>
 			<div className="flex h-screen bg-gray-50">
@@ -63,6 +36,26 @@ function AppLayout() {
 				</div>
 			</div>
 		</RequireAuth>
+	);
+}
+
+function AppLayout() {
+	return (
+		<Routes>
+			<Route path="/" element={<WelcomeAnimation />} />
+			<Route path="/welcome" element={<Welcome />} />
+			<Route path="/login" element={<Login />} />
+			<Route path="/signup" element={<SignUp />} />
+			<Route
+				path="/team-setup"
+				element={
+					<RequireAuth>
+						<TeamSetup />
+					</RequireAuth>
+				}
+			/>
+			<Route path="/*" element={<AuthenticatedLayout />} />
+		</Routes>
 	);
 }
 

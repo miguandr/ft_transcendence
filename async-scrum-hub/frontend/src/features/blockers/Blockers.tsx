@@ -228,7 +228,7 @@ export function Blockers() {
 		setSelectedBlocker(blocker);
 		setBlockerForm({
 			description: blocker.description,
-			ticket_id: blocker.ticket.id.toString(),
+			ticket_id: blocker.ticket?.id?.toString() ?? "",
 			assignee_id: blocker.assignee?.id || "",
 		});
 		setIsEditBlockerOpen(true);
@@ -344,7 +344,7 @@ export function Blockers() {
 														<span className="text-gray-500">
 															Ticket:{" "}
 															<span className="text-gray-700">
-																{blocker.ticket.title}
+																{blocker.ticket?.title ?? "Deleted ticket"}
 															</span>
 														</span>
 														{blocker.assignee && ( // check if object "assignee" exists. Optional chaining also ok "blocker.assignee?.id"
@@ -447,7 +447,7 @@ export function Blockers() {
 													<span>
 														Ticket:{" "}
 														<span className="text-gray-600">
-															{blocker.ticket.title}
+															{blocker.ticket?.title ?? "Deleted ticket"}
 														</span>
 													</span>
 													{blocker.assignee && (

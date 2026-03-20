@@ -42,10 +42,12 @@ def create_standup(db: Session, org_id: uuid.UUID, user: User, today: str) -> St
 	).first()
 	yesterday_content = previous.today if previous else None
 
-	# Auto-populate blocker_ids from open blockers in the org
+	# Auto-populate blocker_ids from open blockers created by or assigned to the user
+	from sqlalchemy import or_
 	open_blockers = db.query(Blocker).filter(
 		Blocker.organization_id == org_id,
 		Blocker.status == BlockerStatus.OPEN,
+		or_(Blocker.created_by == user.id, Blocker.assignee_id == user.id),
 	).all()
 	blocker_ids = [b.id for b in open_blockers]
 

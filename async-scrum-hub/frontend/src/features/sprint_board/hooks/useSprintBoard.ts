@@ -40,6 +40,7 @@ export function useSprintBoard() {
 	const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 	const [isCreateBlockerOpen, setIsCreateBlockerOpen] = useState(false);
 	const [isEditTicketOpen, setIsEditTicketOpen] = useState(false);
+	const [draggedTicketHasActiveItems, setDraggedTicketHasActiveItems] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState<{
 		type: "ticket" | "task";
 		id: string;
@@ -105,7 +106,11 @@ export function useSprintBoard() {
 		authUser?.scrum_role === "product_owner" ||
 		authUser?.scrum_role === "scrum_master" ||
 		task.assignee_id === authUser?.id;
-	const developerMembers = teamMembers.filter((m) => m.scrum_role === "developer");
+	const developerMembers = teamMembers.filter((m) =>
+		m.scrum_role === "developer" &&
+		m.id !== authUser?.id
+	);
+
 
 	const fetchTicketBoard = useCallback(async () => {
 		if (!orgId) return;
@@ -440,13 +445,28 @@ export function useSprintBoard() {
 		}
 	};
 
-	const handleTicketDrag = (ticket: ListTicketsBoard) => {
+	const handleTicketDrag = async (ticket: ListTicketsBoard) => {
 		if (!isLeadRole) return;
 		setDraggedTicket(ticket);
+
+		try {
+			const detail = await getTicketDetails(ticket.id);
+			const hasActive =
+				detail.tasks.some((t) => t.status === "in_progress") ||
+				detail.blockers.some((b) => b.status === "open");
+			setDraggedTicketHasActiveItems(hasActive);
+		} catch {
+			setDraggedTicketHasActiveItems(false);
+		}
 	};
 
 	const handleTicketDrop = async (newStatus: TicketStatus) => {
 		if (!draggedTicket || !isLeadRole) return;
+		if (newStatus === "completed" && draggedTicketHasActiveItems) {
+			setErrors({ ticketDrop: "This ticket still has active items" });
+			setDraggedTicket(null);
+			return;
+		}
 
 		try {
 			await moveTicket(
