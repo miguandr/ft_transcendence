@@ -61,6 +61,7 @@ export function Info() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ fetchMember: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ fetchMember: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -69,7 +70,7 @@ export function Info() {
 				setErrors({ fetchMember: "Something went wrong" });
 			}
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchMembers();
@@ -94,6 +95,7 @@ export function Info() {
 				const apiError = error as APIError;
 				if (apiError.error?.code === "UNAUTHORIZED") {
 					setErrors({ removeMember: "Authentication required" });
+					refreshUser();
 				} else if (apiError.error?.code === "FORBIDDEN") {
 					setErrors({ removeMember: "You do not have permission to perform this action" });
 				} else if (apiError.error?.code === "NOT_FOUND") {

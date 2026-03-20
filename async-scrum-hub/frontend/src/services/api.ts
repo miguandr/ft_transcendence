@@ -1,5 +1,5 @@
 // Mock API - simulates backend
-// Later, replace with real fetch calls to http://localhost:8000/api/v1
+// Later, replace with real apiF calls to http://localhost:8000/api/v1
 import type{
 	User,
 	OrganizationMember,
@@ -1087,211 +1087,211 @@ export async function inviteMember(
 // }
 
 
-// Create Standup
-export async function createStandup(
-	org_id: string,
-	data: CreateStandupRequest
-) : Promise<CreateStandupResponse> {
-	await delay(500);
-	const currentUser = getCurrentUserRecord();
+// // Create Standup
+// export async function createStandup(
+// 	org_id: string,
+// 	data: CreateStandupRequest
+// ) : Promise<CreateStandupResponse> {
+// 	await delay(500);
+// 	const currentUser = getCurrentUserRecord();
 
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	if (!data.today.trim()) {
-		createApiError("INVALID_INPUT", "Entry is required");
-	}
+// 	if (!data.today.trim()) {
+// 		createApiError("INVALID_INPUT", "Entry is required");
+// 	}
 
-	// ---DATE SETUP---
-	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
-	const now = new Date();
-	const today = now.toISOString().split('T')[0];
+// 	// ---DATE SETUP---
+// 	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+// 	const now = new Date();
+// 	const today = now.toISOString().split('T')[0];
 
-	//Calculate yesterday
-	const yesterdayDate = new Date();
-	yesterdayDate.setDate(now.getDate() - 1);
-	const yesterday = yesterdayDate.toISOString().split('T')[0];
+// 	//Calculate yesterday
+// 	const yesterdayDate = new Date();
+// 	yesterdayDate.setDate(now.getDate() - 1);
+// 	const yesterday = yesterdayDate.toISOString().split('T')[0];
 
-	// Check if this user already has a standup starting with that date string
-	const alreadySubmitted = mockStandups.some(s =>
-		s.created_by.id ===currentUser.id &&
-		s.created_at.startsWith(today)
-	);
-	if (alreadySubmitted) {
-		createApiError("STANDUP_ALREADY_EXISTS", "You have already created a standup for today");
-	}
+// 	// Check if this user already has a standup starting with that date string
+// 	const alreadySubmitted = mockStandups.some(s =>
+// 		s.created_by.id ===currentUser.id &&
+// 		s.created_at.startsWith(today)
+// 	);
+// 	if (alreadySubmitted) {
+// 		createApiError("STANDUP_ALREADY_EXISTS", "You have already created a standup for today");
+// 	}
 
-	// ---FILTERED BLOCKERS---
-	// Get active blockers
-	const openBlockerIds = mockBlockers
-	.filter(blockers => {
-		const isOpen = blockers.status === "open";
-		const creator = mockUsers.find(u => u.id === blockers.created_by.id);
-		return isOpen && creator?.organization_id == org_id;
-	})
-	.map(blocker => blocker.id);
+// 	// ---FILTERED BLOCKERS---
+// 	// Get active blockers
+// 	const openBlockerIds = mockBlockers
+// 	.filter(blockers => {
+// 		const isOpen = blockers.status === "open";
+// 		const creator = mockUsers.find(u => u.id === blockers.created_by.id);
+// 		return isOpen && creator?.organization_id == org_id;
+// 	})
+// 	.map(blocker => blocker.id);
 
-	// Get the standup created on the prebious calender date
-	const YesterdayStandup = mockStandups.find(s =>
-		s.created_by.id == currentUser.id &&
-		s.created_at.startsWith(yesterday)
-	);
+// 	// Get the standup created on the prebious calender date
+// 	const YesterdayStandup = mockStandups.find(s =>
+// 		s.created_by.id == currentUser.id &&
+// 		s.created_at.startsWith(yesterday)
+// 	);
 
-	// Create new standup
-	const newStandup = {
-		id: `standup-${Date.now()}`,
-		created_at: now.toISOString(),
-		today: data.today,
-		yesterday: YesterdayStandup?.today || null,
-		blocker_ids: openBlockerIds,
-		created_by: {
-			id: currentUser.id,
-			name: currentUser.name,
-			avatar_url: currentUser.avatar_url,
-		}
-	};
+// 	// Create new standup
+// 	const newStandup = {
+// 		id: `standup-${Date.now()}`,
+// 		created_at: now.toISOString(),
+// 		today: data.today,
+// 		yesterday: YesterdayStandup?.today || null,
+// 		blocker_ids: openBlockerIds,
+// 		created_by: {
+// 			id: currentUser.id,
+// 			name: currentUser.name,
+// 			avatar_url: currentUser.avatar_url,
+// 		}
+// 	};
 
-	mockStandups.push(newStandup);
-	return (newStandup);
-}
+// 	mockStandups.push(newStandup);
+// 	return (newStandup);
+// }
 
-//List Standups
-export async function listStandups(
-	org_id: string,
-): Promise<StandupListItem[]> {
-	await delay(300);
-	const currentUser = getCurrentUserRecord();
+// //List Standups
+// export async function listStandups(
+// 	org_id: string,
+// ): Promise<StandupListItem[]> {
+// 	await delay(300);
+// 	const currentUser = getCurrentUserRecord();
 
-	// Validate user belongs to organization
-	if (currentUser.organization_id !== org_id) {
-		createApiError("FORBIDDEN", "You are not a member of this organization");
-	}
+// 	// Validate user belongs to organization
+// 	if (currentUser.organization_id !== org_id) {
+// 		createApiError("FORBIDDEN", "You are not a member of this organization");
+// 	}
 
-	const filteredStandups = mockStandups.filter((standups) => {
-		const creator = mockUsers.find((u) => u.id === standups.created_by.id);
+// 	const filteredStandups = mockStandups.filter((standups) => {
+// 		const creator = mockUsers.find((u) => u.id === standups.created_by.id);
 
-		return creator?.organization_id === org_id;
-	});
+// 		return creator?.organization_id === org_id;
+// 	});
 
-	return filteredStandups.map((s) => ({
-		id: s.id,
-		created_at: s.created_at,
-		today: s.today,
-		yesterday: s.yesterday,
-		blockers: s.blocker_ids
-		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
-		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
-		.map((b) => ({ // map the data how we need it
-			id: b.id,
-			title: b.description,
-			ticket: {
-				id: b.ticket.id,
-				title: b.ticket.title,
-			},
-		})),
-		created_by: s.created_by,
-	}));
-}
+// 	return filteredStandups.map((s) => ({
+// 		id: s.id,
+// 		created_at: s.created_at,
+// 		today: s.today,
+// 		yesterday: s.yesterday,
+// 		blockers: s.blocker_ids
+// 		.map((ids) => mockBlockers.find((b) => b.id === ids)) // get from blockers the info from the blocker_ids in this standup
+// 		.filter((b): b is NonNullable<typeof b> => Boolean(b)) // filter undefined and toss them to avoid crash
+// 		.map((b) => ({ // map the data how we need it
+// 			id: b.id,
+// 			title: b.description,
+// 			ticket: {
+// 				id: b.ticket.id,
+// 				title: b.ticket.title,
+// 			},
+// 		})),
+// 		created_by: s.created_by,
+// 	}));
+// }
 
-// Edit Standup
-export async function editStandup(
-	standup_id: string,
-	data: EditStandupRequest
-): Promise<EditStandupResponse> {
-	await delay(500);
+// // Edit Standup
+// export async function editStandup(
+// 	standup_id: string,
+// 	data: EditStandupRequest
+// ): Promise<EditStandupResponse> {
+// 	await delay(500);
 
-	const currentUser = getCurrentUserRecord();
-	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+// 	const currentUser = getCurrentUserRecord();
+// 	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
 
-	// Find standup
-	const standup = mockStandups.find((b) => b.id === standup_id);
-	if (!standup) {
-		createApiError("NOT_FOUND", "Standup not found");
-	}
+// 	// Find standup
+// 	const standup = mockStandups.find((b) => b.id === standup_id);
+// 	if (!standup) {
+// 		createApiError("NOT_FOUND", "Standup not found");
+// 	}
 
-	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
-	const todayDate = new Date().toISOString().split('T')[0];
-	const createDate = standup.created_at.split('T')[0];
+// 	// Get today's date in YYYY-MM-DD format (e.g., "2024-02-15")
+// 	const todayDate = new Date().toISOString().split('T')[0];
+// 	const createDate = standup.created_at.split('T')[0];
 
-	// Check if this user already has a standup starting with that date string
-	if (todayDate !== createDate) {
-		createApiError("EDIT_WINDOW_EXPIRED", "Standups can only be edited on the day they are created");
-	}
+// 	// Check if this user already has a standup starting with that date string
+// 	if (todayDate !== createDate) {
+// 		createApiError("EDIT_WINDOW_EXPIRED", "Standups can only be edited on the day they are created");
+// 	}
 
-	// Check permissions
-	const isOwner = standup.created_by.id === currentUser.id;
-	const admin = (await orgMembers).find((u) => u.org_role === "admin");
-	const isAdmin = admin?.id === currentUser.id;
+// 	// Check permissions
+// 	const isOwner = standup.created_by.id === currentUser.id;
+// 	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+// 	const isAdmin = admin?.id === currentUser.id;
 
-	if (!isOwner && !isAdmin) {
-		createApiError("FORBIDDEN", "You do not have permission to perform this action");
-	}
+// 	if (!isOwner && !isAdmin) {
+// 		createApiError("FORBIDDEN", "You do not have permission to perform this action");
+// 	}
 
-	// Edit Standup field
-	if (data.today !== undefined) {
-		if (!data.today.trim()) {
-			createApiError("INVALID_INPUT", "Entry cannot be empty");
-		}
-		standup.today = data.today;
-	}
+// 	// Edit Standup field
+// 	if (data.today !== undefined) {
+// 		if (!data.today.trim()) {
+// 			createApiError("INVALID_INPUT", "Entry cannot be empty");
+// 		}
+// 		standup.today = data.today;
+// 	}
 
-	return {
-		id: standup.id,
-		today: standup.today,
-	};
-}
+// 	return {
+// 		id: standup.id,
+// 		today: standup.today,
+// 	};
+// }
 
-// Delete Standup
-export async function deleteStandup(
-	standup_id: string
-): Promise<void> {
-	await delay(500);
+// // Delete Standup
+// export async function deleteStandup(
+// 	standup_id: string
+// ): Promise<void> {
+// 	await delay(500);
 
-	const currentUser = getCurrentUserRecord();
-	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
+// 	const currentUser = getCurrentUserRecord();
+// 	const orgMembers = getOrganizationMembers(currentUser.organization_id!);
 
-	// Find index of the standup in mock array
-	const standupIndex = mockStandups.findIndex((u) => u.id === standup_id);
-	if (standupIndex === -1) {
-		createApiError("NOT_FOUND", "Standup not found");
-	}
+// 	// Find index of the standup in mock array
+// 	const standupIndex = mockStandups.findIndex((u) => u.id === standup_id);
+// 	if (standupIndex === -1) {
+// 		createApiError("NOT_FOUND", "Standup not found");
+// 	}
 
-	// Find standup to delete
-	const standupToDelete = mockStandups[standupIndex];
+// 	// Find standup to delete
+// 	const standupToDelete = mockStandups[standupIndex];
 
-	// Check permissions
-	const isOwner = standupToDelete.created_by.id === currentUser.id;
-	const admin = (await orgMembers).find((u) => u.org_role === "admin");
-	const isAdmin = admin?.id === currentUser.id;
+// 	// Check permissions
+// 	const isOwner = standupToDelete.created_by.id === currentUser.id;
+// 	const admin = (await orgMembers).find((u) => u.org_role === "admin");
+// 	const isAdmin = admin?.id === currentUser.id;
 
-	if (!isOwner && !isAdmin) {
-		createApiError("FORBIDDEN", "You dont own permission to delete this standup");
-	}
+// 	if (!isOwner && !isAdmin) {
+// 		createApiError("FORBIDDEN", "You dont own permission to delete this standup");
+// 	}
 
-	// Remove Standup from the array
-	mockStandups.splice(standupIndex, 1);
-}
+// 	// Remove Standup from the array
+// 	mockStandups.splice(standupIndex, 1);
+// }
 
 
 // =============================================================
 // TICKETS
 // =============================================================
 
-// Interfaces
-export interface TicketListItem {
-	id: string;
-	title: string;
-	status: "todo" | "in_progress" | "completed";
-	priority: "low" | "medium" | "high";
-	assignee: {
-		id: string;
-		name: string;
-		avatar_url: string | null;
-	} | null;
-	created_at: string;
-	updated_at: string;
-}
+// // Interfaces
+// export interface TicketListItem {
+// 	id: string;
+// 	title: string;
+// 	status: "todo" | "in_progress" | "completed";
+// 	priority: "low" | "medium" | "high";
+// 	assignee: {
+// 		id: string;
+// 		name: string;
+// 		avatar_url: string | null;
+// 	} | null;
+// 	created_at: string;
+// 	updated_at: string;
+// }
 
 export async function listTickets(org_id: string): Promise<TicketListItem[]> {
 	await delay(500);
@@ -1455,7 +1455,7 @@ export async function createBlocker(
 			: null,
 		ticket: {
 			id: data.ticket_id || "0",
-			title: "Mock Ticket Title", // In real implementation, fetch from tasks/tickets
+			title: "Mock Ticket Title", // In real implementation, apiF from tasks/tickets
 		},
 		created_at: new Date().toISOString(),
 		resolved_at: null,
@@ -1933,17 +1933,31 @@ export async function getDashboardData(org_id: string): Promise<DashboardData> {
 	};
 }
 */
+///////////////////////////////////////////////////////////////
 // =============================================================
-// REAL FETCH VERSIONS - Replace mock functions with these
+// REAL apiF VERSIONS - Replace mock functions with these
 // =============================================================
+////////////////////////////////////////////////////////////////
 
+async function apiFetch(
+	url: string,
+	options?: RequestInit
+) : Promise<Response> {
+	const response = await fetch(url, options);
+	if (response.status === 401) {
+		localStorage.removeItem("token");
+		window.location.href = "/login";
+	}
+
+	return response;
+}
 
 // 1.1 REGISTER NEW USER
 export async function signup(data:
 	SignUpRequest
 ): Promise<SignUpResponse> {
 
-	const response = await fetch(`${API_URL}/auth/register`, {
+	const response = await apiFetch(`${API_URL}/auth/register`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data)
@@ -1962,7 +1976,7 @@ export async function login(credentials:
 	LoginRequest
 ): Promise<LoginResponse> {
 
-	const response = await fetch(`${API_URL}/auth/login`, {
+	const response = await apiFetch(`${API_URL}/auth/login`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(credentials)
@@ -1987,7 +2001,7 @@ export async function getCurrentUser(): Promise<User>
 {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/users/me`, {
+	const response = await apiFetch(`${API_URL}/users/me`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2009,7 +2023,7 @@ export async function updateUser(
 ) : Promise<User> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/users/me`, {
+	const response = await apiFetch(`${API_URL}/users/me`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2035,7 +2049,7 @@ export async function uploadAvatar(
 	const formData = new FormData();
 	formData.append("file", data.file);
 
-	const response = await fetch(`${API_URL}/users/me/avatar`, {
+	const response = await apiFetch(`${API_URL}/users/me/avatar`, {
 		method: 'POST',
 		headers: {
 			'Authorization': `Bearer ${token}`
@@ -2058,7 +2072,7 @@ export async function createOrganization(data:
 ): Promise<CreateOrgResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations`, {
+	const response = await apiFetch(`${API_URL}/organizations`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2082,7 +2096,7 @@ export async function setUserRole(data: {
 }): Promise<SelectRoleResponse>{
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${data.org_id}`, {
+	const response = await apiFetch(`${API_URL}/organizations/${data.org_id}`, {
 		method: 'PATCH',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2105,7 +2119,7 @@ export async function getOrganizationMembers(
 ): Promise<OrganizationMember[]> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/members`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2128,7 +2142,7 @@ export async function inviteMember(
 ) : Promise<InviteMemberResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/members`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/members`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2152,7 +2166,7 @@ export async function removeMember(
 ): Promise<{ success: boolean}> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/members/${user_id}`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/members/${user_id}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2173,7 +2187,7 @@ export async function joinOrganization(data:
 ): Promise<JoinOrgResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/join`, {
+	const response = await apiFetch(`${API_URL}/organizations/join`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2198,7 +2212,7 @@ export async function createTicket(
 ) : Promise<TicketResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/tickets`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/tickets`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2228,7 +2242,7 @@ export async function listTicketsBoard(
 	const query = params.size > 0 ? `?${params.toString()}` : "";
 	const url = `${API_URL}/organizations/${org_id}/tickets${query}`;
 
-	const response = await fetch(url, {
+	const response = await apiFetch(url, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2250,7 +2264,7 @@ export async function getTicketDetails(
 ) : Promise<TicketResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tickets/${ticket_id}`, {
+	const response = await apiFetch(`${API_URL}/tickets/${ticket_id}`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2273,7 +2287,7 @@ export async function updateTicket(
 ) : Promise<TicketResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tickets/${ticket_id}`, {
+	const response = await apiFetch(`${API_URL}/tickets/${ticket_id}`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2297,7 +2311,7 @@ export async function moveTicket(
 ) : Promise<MoveTicketResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tickets/${ticket_id}/move`, {
+	const response = await apiFetch(`${API_URL}/tickets/${ticket_id}/move`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2320,7 +2334,7 @@ export async function deleteTicket(
 ) : Promise <void> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tickets/${ticket_id}`, {
+	const response = await apiFetch(`${API_URL}/tickets/${ticket_id}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2341,7 +2355,7 @@ export async function createTask(
 ) : Promise<CreateTaskResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tickets/${ticket_id}/tasks`, {
+	const response = await apiFetch(`${API_URL}/tickets/${ticket_id}/tasks`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2368,7 +2382,7 @@ export async function listTasks(
 		?  `${API_URL}/tickets/${ticket_id}/tasks?status=${status}`
 		: `${API_URL}/tickets/${ticket_id}/tasks`;
 
-	const response = await fetch(url, {
+	const response = await apiFetch(url, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2390,7 +2404,7 @@ export async function getTaskDetails(
 ) : Promise<TaskResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tasks/${task_id}`, {
+	const response = await apiFetch(`${API_URL}/tasks/${task_id}`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2413,7 +2427,7 @@ export async function updateTask(
 ) : Promise<TaskResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tasks/${task_id}`, {
+	const response = await apiFetch(`${API_URL}/tasks/${task_id}`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2436,7 +2450,7 @@ export async function deleteTask(
 ) : Promise <void> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/tasks/${task_id}`, {
+	const response = await apiFetch(`${API_URL}/tasks/${task_id}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2448,7 +2462,7 @@ export async function deleteTask(
 		throw errorData;
 	}
 }
-
+*/
 
 // 6.1 CREATE STANDUP
 export async function createStandup(
@@ -2457,7 +2471,7 @@ export async function createStandup(
 ) : Promise<CreateStandupResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/standups`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/standups`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2479,7 +2493,7 @@ export async function listStandups(
 ): Promise<StandupListItem[]> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/standups`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/standups`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2502,7 +2516,7 @@ export async function editStandup(
 ): Promise<EditStandupResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/standups/${standup_id}`, {
+	const response = await apiFetch(`${API_URL}/standups/${standup_id}`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2525,7 +2539,7 @@ export async function deleteStandup(
 ): Promise<void> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/standups/${standup_id}`, {
+	const response = await apiFetch(`${API_URL}/standups/${standup_id}`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2538,7 +2552,7 @@ export async function deleteStandup(
 	}
 }
 
-
+/*
 // 7.1 CREATE BLOCKER
 export async function createBlocker(
 	org_id: string,
@@ -2546,7 +2560,7 @@ export async function createBlocker(
 ): Promise<CreateBlockerResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/blockers`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/blockers`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2572,7 +2586,7 @@ export async function listBlockers(
 		? `${API_URL}/organizations/${org_id}/blockers?status=${status}`
 		: `${API_URL}/organizations/${org_id}/blockers`;
 
-	const response = await fetch(url, {
+	const response = await apiFetch(url, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2595,7 +2609,7 @@ export async function updateBlocker(
 ): Promise<UpdateBlockerResponse> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/blockers/${blocker_id}`, {
+	const response = await apiFetch(`${API_URL}/blockers/${blocker_id}`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2618,7 +2632,7 @@ export async function resolveBlocker(
 ): Promise<void> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/blockers/${blocker_id}/resolve`, {
+	const response = await apiFetch(`${API_URL}/blockers/${blocker_id}/resolve`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -2639,7 +2653,7 @@ export async function getLegalDocument(
 ) : Promise<LegalDocuments> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/legal/documents/${key}`, {
+	const response = await apiFetch(`${API_URL}/legal/documents/${key}`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2662,7 +2676,7 @@ export async function getAnalitycsData(
 ) : Promise<AnalitycsData> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/analytics`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/analytics`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',
@@ -2685,7 +2699,7 @@ export async function getDashboardData(
 ) : Promise<DashboardData> {
 	const token = localStorage.getItem("token");
 
-	const response = await fetch(`${API_URL}/organizations/${org_id}/dashboard`, {
+	const response = await apiFetch(`${API_URL}/organizations/${org_id}/dashboard`, {
 		method: 'GET',
 		headers: {
 		'Content-Type': 'application/json',

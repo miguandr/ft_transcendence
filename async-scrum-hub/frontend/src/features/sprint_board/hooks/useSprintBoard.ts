@@ -45,7 +45,7 @@ export function useSprintBoard() {
 		id: string;
 	} | null>(null);
 	// Data states
-	const { user: authUser } = useAuth();
+	const { user: authUser, refreshUser } = useAuth();
 	const [teamMembers, setTeamMembers] = useState<OrgMember[]>([]);
 	const [ticketsBoard, setTicketsBoard] = useState<ListTicketsBoard[]>([]);
 	// Auth states
@@ -125,6 +125,7 @@ export function useSprintBoard() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketBoard: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketBoard: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -135,7 +136,7 @@ export function useSprintBoard() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [orgId]);
+	}, [orgId, refreshUser]);
 
 	useEffect(() => {
 		fetchTicketBoard();
@@ -156,6 +157,7 @@ export function useSprintBoard() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketDetail: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketDetail: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -194,6 +196,7 @@ export function useSprintBoard() {
 				setErrors({ ticketCreate: "Only users with Developer role can be assigned to tickets" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketCreate: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketCreate: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -244,6 +247,7 @@ export function useSprintBoard() {
 				setErrors({ ticketEdit: "Only users with Developer role can be assigned to tickets" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketEdit: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketEdit: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -275,6 +279,7 @@ export function useSprintBoard() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketDelete: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketDelete: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -318,6 +323,7 @@ export function useSprintBoard() {
 				setErrors({ taskCreate: "Only users with Developer role can be assigned to tasks" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskCreate: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ taskCreate: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -343,6 +349,7 @@ export function useSprintBoard() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskDetail: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ taskDetail: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -376,6 +383,7 @@ export function useSprintBoard() {
 			const apiError = error as APIError;
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskDelete: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ taskDelete: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -419,6 +427,7 @@ export function useSprintBoard() {
 				setErrors({ blockerCreate: "Only users with Developer role can be assigned to blockers" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ blockerCreate: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ blockerCreate: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -456,6 +465,7 @@ export function useSprintBoard() {
 				setErrors({ ticketDrop: apiError.detail[0]?.msg ?? "Validation error" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ ticketDrop: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ ticketDrop: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
@@ -500,6 +510,7 @@ export function useSprintBoard() {
 				setErrors({ taskDrop: "Only users with Developer role can be assigned to tasks" });
 			} else if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ taskDrop: "Authentication required" });
+				refreshUser();
 			} else if (apiError.error?.code === "FORBIDDEN") {
 				setErrors({ taskDrop: "You do not have permission to perform this action" });
 			} else if (apiError.error?.code === "NOT_FOUND") {
