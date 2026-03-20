@@ -52,14 +52,10 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 ```bash
 # 1. Clone the repository
 git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4-b02b1c4c8715-7248977-dtorrett
+
+# 2. Start the full stack
 cd async-scrum-hub
-
-# 2. Configure environment variables
-cp .env.example .env
-# Edit .env with your values
-
-# 3. Start the full stack
-docker compose up --build
+make up
 ```
 
 The application will be available at:
@@ -91,7 +87,7 @@ The application will be available at:
 ### Responsibilities
 
 **Daniela — Tech Lead & Backend Architecture**
-Defined and maintained the overall backend architecture. Responsible for the FastAPI entrypoint, database foundation, API infrastructure (authorization system, dependency injection, permission model), auth and users domains, and all architecture documentation.
+Defined and maintained the overall backend architecture. Responsible for the FastAPI entrypoint, database foundation, API infrastructure (authorization system, dependency injection, permission model, configuration), auth, users, dashboard and analytics backend domains and all architecture documentation.
 
 **Miguel — Product Owner & Frontend**
 Defined product vision and feature priorities. Organized team meetings. Owns the frontend application: all page features, component design system, API client integration, and UI/UX implementation.
@@ -100,7 +96,7 @@ Defined product vision and feature priorities. Organized team meetings. Owns the
 Implemented the organizations, task and tickets backend domains.
 
 **Maria Luiza — Scrum Master & DevOps**
-Facilitated team coordination and tracked progress. Implemented the standups and blockers backend domains, the analytics module, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
+Facilitated team coordination and tracked progress. Implemented the standups and blockers backend domains, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
 
 ---
 
@@ -158,7 +154,7 @@ Facilitated team coordination and tracked progress. Implemented the standups and
 
 ### Key Technical Decisions
 
-**Domain-driven backend structure:** Each feature domain (auth, users, tickets, tasks, standups, blockers, analytics) is fully self-contained with its own `routes.py`, `schemas.py`, and `service.py`. This reduces coupling and makes ownership explicit.
+**Domain-driven backend structure:** Each feature domain (auth, users, tickets, tasks, standups, blockers, analytics, dashboard) is fully self-contained with its own `routes.py`, `schemas.py`, and `service.py`. This reduces coupling and makes ownership explicit.
 
 **JWT Bearer tokens for auth:** Stateless authentication that scales horizontally without session storage. Token contains user ID in the `sub` claim and is validated on every request.
 
@@ -213,7 +209,7 @@ standups
 blockers
   id (UUID PK) | description (text)
   status (open | resolved)
-  ticket_id (FK → tickets, SET NULL, nullable)
+  ticket_id (FK → tickets, CASCADE, nullable)
   organization_id (FK → organizations, CASCADE)
   created_by (FK → users, CASCADE)
   assignee_id (FK → users, SET NULL, nullable)
@@ -225,7 +221,7 @@ blockers
 - Tickets belong to an organization and contain tasks
 - Blockers optionally link to a ticket
 - Standups are unique per user per day per organization
-- Deleting a ticket cascades to its tasks
+- Deleting a ticket cascades to its tasks and blockers
 
 ---
 
@@ -291,6 +287,12 @@ blockers
 | Update blocker  | Edit description, assignee, linked ticket   | Maria Luiza   |
 | Resolve blocker | Irreversible; records resolved_at timestamp | Maria Luiza   |
 
+### Dashboard
+| Feature        | Description                                                               | Backend Owner |
+|----------------|---------------------------------------------------------------------------|---------------|
+| Summary cards  | Current user's tasks in progress, completed tickets, and active blockers  | Daniela       |
+| Activity feed  | Up to 6 most recent task/ticket created or completed events in the org    | Daniela       |
+
 ### Analytics
 | Feature                | Description                                  | Backend Owner |
 |------------------------|----------------------------------------------|---------------|
@@ -298,6 +300,13 @@ blockers
 | Ticket chart           | Weekly completed tickets (bar chart)         | Daniela       |
 | Standup stats          | Participation rate (posted / total possible) | Daniela       |
 | Blocker avg cycle time | Average days from open to resolved           | Daniela       |
+
+### Team Workload Info *(Custom Minor — Module 10, frontend only)*
+| Feature                  | Description                                                                          | Owner         |
+|--------------------------|--------------------------------------------------------------------------------------|---------------|
+| Per-member workload view | Expandable list of each member's assigned tickets, active tasks, and open blockers   | Miguel (FE)   |
+| Team-wide stat cards     | Totals across tickets, tasks, and blockers for the entire org                        | Miguel (FE)   |
+| Live updates             | Workload counts update in real time via WebSocket without page refresh               | Miguel (FE)   |
 
 ### Legal
 | Feature          | Description                              | Backend Owner |
@@ -329,7 +338,7 @@ blockers
 ### Module Details
 
 **Module 1 — Use a frontend framework (React + TypeScript)**
-The frontend is built with React 18 and TypeScript, using Vite as the build tool. The application is a fully client-side SPA with client-side routing via React Router, typed API calls, and component-level state management with React hooks.
+The frontend is built with React 19 and TypeScript, using Vite as the build tool. The application is a fully client-side SPA with client-side routing via React Router, typed API calls, and component-level state management with React hooks.
 
 **Module 2 — Use a backend framework (FastAPI)**
 The backend is built with FastAPI, a modern Python web framework that provides automatic OpenAPI documentation, async support, dependency injection, and Pydantic-based request/response validation. FastAPI is the backend counterpart to the frontend React framework claimed in Module 1.
@@ -373,13 +382,14 @@ Users can create an organization — which makes them admin — or join an exist
 - Implemented `config/settings.py`, `config/security.py`.
 - Built database foundation: `session.py`, `base.py`, all core models (`user.py`, `organization.py`).
 - Implemented full API infrastructure: `deps.py`, `permissions.py`, `authorize.py`, `routes.py`.
-- Implemented `auth/` domain (register, login, JWT) and `users/` domain (profile, avatar).
+- Implemented `dashboard/` domain.
+- Implemented `analytics/` domain.
+- Implemented `auth/` domain (register, login, JWT) 
+- Implemented `users/` domain (profile, avatar).
+- Built database models: `user.py`, `organization.py`.
+- Wrote backend tests for dashboard, analytics, auth and users domains
 - Wrote and maintained all architecture documentation (`ARCHITECTURE.md`, `API_CONTRACTS.md`, `AUTHORIZATION_MODEL.md`, `PERMISSIONS_MATRIX.md`, `DEVELOPMENT_STANDARDS.md`).
-- Implemented `auth/` domain.
-- Implemented `user/` domain.
-- Built database models: `auth.py`, `user.py`.
-- Implemented `analytics/`, `legal/` and `dashboard/` domain with the corresponded tests
-- Set up Alembic migrations and backend testing scaffolding.
+- Set up Alembic migrations.
 
 ### Miguel — Product Owner & Frontend
 - Defined product vision, feature priorities, and acceptance criteria.
@@ -392,8 +402,9 @@ Users can create an organization — which makes them admin — or join an exist
 - Defined the entire type system (`types/api.types.ts`).
 - Maintained frontend tooling (Vite, TypeScript config, ESLint).
 - Built drag & drop, ticket, task and blocker CRUD, real-time sync interface on the sprint board.
+- Built the Team Workload Info page: per-member expandable view aggregating tickets, tasks, and blockers with live WebSocket updates.
 
-### Freddy — Developer & Backend Feature Domains
+### Freddy — Developer
 - Implemented `organizations/` domain (create, join, member management).
 - Implemented `tickets/` domain (CRUD, status transitions, priority).
 - Implemented `tasks/` domain.

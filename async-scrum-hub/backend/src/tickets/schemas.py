@@ -20,9 +20,12 @@ class TicketBriefList(TicketBriefOrg):
 	created_at: datetime
 	updated_at: datetime
 
+TITLE_MAX_LENGTH = 255
+DESCRIPTION_MAX_LENGTH = 2000
+
 class CreateTicketRequest(BaseModel):
-	title: str = Field(..., min_length=1)
-	description: Optional[str] = None
+	title: str = Field(..., min_length=1, max_length=TITLE_MAX_LENGTH)
+	description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
 	priority: Priority
 	assignee_id: Optional[UUID] = None
 
@@ -53,8 +56,8 @@ class TicketDetailResponse(CreateTicketResponse):
 	blockers: list[BlockerBriefTicket] = []
 
 class UpdateTicketRequest(BaseModel):
-	title: Optional[str] = Field(None, min_length=1)
-	description: Optional[str] = None
+	title: Optional[str] = Field(None, min_length=1, max_length=TITLE_MAX_LENGTH)
+	description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
 	priority: Optional[Priority] = None
 	status: Optional[TicketStatus] = None
 	assignee_id: Optional[UUID] = None

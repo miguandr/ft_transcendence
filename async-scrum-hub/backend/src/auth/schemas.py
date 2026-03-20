@@ -15,7 +15,7 @@ class RegisterResponse(BaseModel):
 	
 class LoginRequest(BaseModel):
 	email: EmailStr
-	password: str
+	password: str = Field(..., min_length=8)
 
 class LoginResponse(BaseModel):
 	access_token: str

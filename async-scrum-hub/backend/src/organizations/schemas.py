@@ -1,14 +1,14 @@
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from src.database.models.enums import OrgRole, ScrumRole
 from src.tickets.schemas import TicketBriefOrg
 from src.tasks.schemas import TaskBriefOrg
 from src.blockers.schemas import BlockerBriefOrg
 
 class OrgCreateRequest(BaseModel):
-	name: str = Field(..., min_length=1)
+	name: str = Field(..., min_length=1, max_length=50)
 
 class OrgCreateResponse(BaseModel):
 	id: UUID
@@ -41,7 +41,7 @@ class OrgGetMemberResponse(BaseModel):
 
 class OrgInviteMemberRequest(BaseModel):
 	name: str = Field(..., min_length=1)
-	email: str = Field(..., min_length=1)
+	email: EmailStr
 
 class OrgInviteMemberResponse(BaseModel):
 	email: str

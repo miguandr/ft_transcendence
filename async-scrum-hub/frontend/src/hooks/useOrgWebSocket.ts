@@ -22,6 +22,8 @@ export function useOrgWebSocket(
 		const token = localStorage.getItem("token");
 		if (!token) return;
 
+		let cancelled = false;
+
 		const wsBase = (import.meta.env.VITE_API_URL as string)
 			.replace(/^https/, "wss")
 			.replace(/^http/, "ws")
@@ -37,7 +39,12 @@ export function useOrgWebSocket(
 			}
 		};
 
+		ws.onerror = () => {
+			if (!cancelled) console.error("WS: connection error");
+		};
+
 		ws.onclose = (event) => {
+			if (cancelled) return;
 			if (event.code === 4001) console.error("WS: invalid token");
 			if (event.code === 4003) {
 				console.error("WS: not an org member");
@@ -45,6 +52,9 @@ export function useOrgWebSocket(
 			}
 		};
 
-		return () => ws.close();
+		return () => {
+			cancelled = true;
+			ws.close();
+		};
 	}, [orgId]); // only reconnect if orgId changes
 }
