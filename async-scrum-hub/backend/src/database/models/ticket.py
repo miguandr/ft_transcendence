@@ -28,7 +28,7 @@ class Ticket(Base):
 	- Status values: todo, in_progress, completed
 	- Priority values: low, medium, high
 	- Deleting a ticket cascades to all its tasks and blockers
-	- assignee_id is set to NULL if the assigned user is deleted
+	- created_by and assignee_id are set to NULL if the user is deleted
 	"""
 
 	__tablename__ = "tickets"
@@ -73,10 +73,10 @@ class Ticket(Base):
 		default=Priority.MEDIUM,
 	)
 
-	created_by: Mapped[uuid.UUID] = mapped_column(
+	created_by: Mapped[uuid.UUID | None] = mapped_column(
 		UUID(as_uuid=True),
-		ForeignKey("users.id", ondelete="CASCADE"),
-		nullable=False
+		ForeignKey("users.id", ondelete="SET NULL"),
+		nullable=True
 	)
 
 	organization_id: Mapped[uuid.UUID] = mapped_column(
@@ -112,7 +112,7 @@ class Ticket(Base):
 	)
 
 	#Relationships
-	creator: Mapped["User"] = relationship(
+	creator: Mapped["User | None"] = relationship(
 		"User",
 		foreign_keys=[created_by],
 		back_populates="tickets_created",

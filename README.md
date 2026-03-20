@@ -184,7 +184,7 @@ tickets
   status (todo | in_progress | completed)
   priority (low | medium | high)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   assignee_id (FK → users, SET NULL, nullable)
   created_at | updated_at
 
@@ -193,7 +193,7 @@ tasks
   status (in_progress | completed)
   ticket_id (FK → tickets, CASCADE)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   assignee_id (FK → users, SET NULL, nullable)
   created_at | updated_at
 
@@ -202,16 +202,16 @@ standups
   blocker_ids (UUID[], nullable)
   standup_date (date)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   created_at | updated_at
   UNIQUE (organization_id, created_by, standup_date)
 
 blockers
   id (UUID PK) | description (text)
   status (open | resolved)
-  ticket_id (FK → tickets, CASCADE, nullable)
+  ticket_id (FK → tickets, CASCADE)
   organization_id (FK → organizations, CASCADE)
-  created_by (FK → users, CASCADE)
+  created_by (FK → users, SET NULL, nullable)
   assignee_id (FK → users, SET NULL, nullable)
   resolved_at (nullable) | created_at | updated_at
 ```
@@ -219,7 +219,7 @@ blockers
 **Key relationships:**
 - A user belongs to one organization (nullable until they join or create one)
 - Tickets belong to an organization and contain tasks
-- Blockers optionally link to a ticket
+- Blockers must be linked to a ticket
 - Standups are unique per user per day per organization
 - Deleting a ticket cascades to its tasks and blockers
 

@@ -24,7 +24,7 @@ DESCRIPTION_MAX_LENGTH = 2000
 
 class BlockerCreateRequest(BaseModel):
 	description: str = Field(..., min_length=1, max_length=DESCRIPTION_MAX_LENGTH)
-	ticket_id: Optional[UUID] = None
+	ticket_id: UUID
 	assignee_id: Optional[UUID] = None
 
 
@@ -38,9 +38,9 @@ class BlockerResponse(BaseModel):
 	id: UUID
 	description: str
 	status: str
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 	assignee: Optional[UserBrief] = None
-	ticket: Optional[TicketBrief] = None
+	ticket: TicketBrief
 	created_at: datetime
 	resolved_at: Optional[datetime] = None
 

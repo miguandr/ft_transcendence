@@ -10,14 +10,14 @@ DESCRIPTION_MAX_LENGTH = 2000
 class CreateTaskRequest(BaseModel):
 	title: str = Field(..., min_length=1, max_length=TITLE_MAX_LENGTH)
 	description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
-	assignee_id: Optional[UUID] = None
+	assignee_id: UUID
 
 class CreateTaskResponse(BaseModel):
 	id: UUID
 	title: str
 	description: Optional[str]
 	status: TaskStatus
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 	assignee_id: Optional[UUID]
 	ticket_id: UUID
 

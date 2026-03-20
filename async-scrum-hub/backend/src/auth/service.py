@@ -7,6 +7,7 @@ from src.auth.schemas import LoginResponse
 
 
 def register_user(db: Session, email: str, name: str, password: str) -> User:
+	email = email.lower()
 	existing = db.query(User).filter(User.email == email).first()
 	if existing:
 		raise HTTPException(
@@ -21,7 +22,7 @@ def register_user(db: Session, email: str, name: str, password: str) -> User:
 
 
 def login_user(db: Session, email: str, password: str) -> LoginResponse:
-
+	email = email.lower()
 	user = db.query(User).filter(User.email == email).first()
 	if not user or not verify_password(password, user.password_hash):
 		raise HTTPException(

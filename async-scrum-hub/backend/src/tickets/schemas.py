@@ -27,7 +27,7 @@ class CreateTicketRequest(BaseModel):
 	title: str = Field(..., min_length=1, max_length=TITLE_MAX_LENGTH)
 	description: Optional[str] = Field(None, max_length=DESCRIPTION_MAX_LENGTH)
 	priority: Priority
-	assignee_id: Optional[UUID] = None
+	assignee_id: UUID
 
 class CreateTicketResponse(BaseModel):
 	id: UUID
@@ -35,7 +35,7 @@ class CreateTicketResponse(BaseModel):
 	description: Optional[str]
 	status: TicketStatus
 	priority: Priority
-	created_by: UserBrief
+	created_by: Optional[UserBrief]
 	assignee_id: Optional[UUID]
 	organization_id: UUID
 	created_at: datetime
