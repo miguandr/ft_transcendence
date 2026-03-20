@@ -21,6 +21,7 @@ export interface Ticket {
 		id: string;
 		title: string;
 		status: TaskStatus;
+		assignee_id: string;
 	}>
 	blockers: Array<{
 		id: string;
@@ -56,7 +57,7 @@ export interface Task
 	ticket_id: string;
 }
 
-export type TaskSummary = Pick<Task, 'id' | 'title' | 'status'>;
+export type TaskSummary = Pick<Task, 'id' | 'title' | 'status' | 'assignee_id'>;
 
 export interface Blocker
 {

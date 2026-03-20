@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { formatScrumRole } from "../../utils/formatters";
-import { getOrganizationMembers, removeMember } from "../../services/api";
+import { getOrganizationMembers, removeMember,  } from "../../services/api";
 import type { OrganizationMember } from "../../types/api.types"
 import { useAuth, } from "../../routes/useAuth";
 import { useOrgWebSocket } from "../../hooks/useOrgWebSocket";
@@ -378,7 +378,7 @@ export function Info() {
 				<div className="mt-6 grid grid-cols-3 gap-4">
 					<StatCard
 						icon={<FileText className="w-5 h-5 text-cyan-600" />}
-						label="Active Tickets"
+						label="Assigned Tickets"
 						value={members.reduce((sum, m) => sum + m.tickets.length, 0)}
 						subtitle="Across team"
 						bgColor="bg-cyan-50"
@@ -386,7 +386,7 @@ export function Info() {
 
 					<StatCard
 						icon={<CheckSquare className="w-5 h-5 text-emerald-600" />}
-						label="Active Tasks"
+						label="Assigned Tasks"
 						value={members.reduce((sum, m) => sum + m.tasks.length, 0)}
 						subtitle="Across team"
 						bgColor="bg-emerald-50"

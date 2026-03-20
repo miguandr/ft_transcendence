@@ -69,11 +69,11 @@ The application will be available at:
 
 ### Environment Variables
 
-| Variable                      | Description                        
+| Variable                      | Description
 |-------------------------------|------------------------------------
-| `DATABASE_URL`                | PostgreSQL connection string 
-| `SECRET_KEY`                  | JWT signing secret key 
-| `ALLOWED_ORIGINS`             | CORS allowed origins (frontend URL) 
+| `DATABASE_URL`                | PostgreSQL connection string
+| `SECRET_KEY`                  | JWT signing secret key
+| `ALLOWED_ORIGINS`             | CORS allowed origins (frontend URL)
 
 ---
 
@@ -125,34 +125,34 @@ Implemented the standups and blockers backend domains, the analytics module, rea
 ## Technical Stack
 
 ### Frontend
-| Technology            | Purpose 
+| Technology            | Purpose
 |-----------------------|---------------------------
-| React 18 + TypeScript | UI framework 
-| Vite                  | Build tool and dev server 
-| Tailwind CSS          | Utility-first styling 
-| shadcn/ui             | Accessible UI primitives 
-| Recharts              | Analytics charts 
-| WebSocket API         | Real-time updates 
+| React 18 + TypeScript | UI framework
+| Vite                  | Build tool and dev server
+| Tailwind CSS          | Utility-first styling
+| shadcn/ui             | Accessible UI primitives
+| Recharts              | Analytics charts
+| WebSocket API         | Real-time updates
 
 ### Backend
-| Technology       | Purpose 
+| Technology       | Purpose
 |------------------|------------------------------------------
-| Python 3.12      | Runtime 
-| FastAPI          | Web framework (async, typed, auto-docs) 
-| SQLAlchemy       | ORM (database models and queries) 
-| Alembic          | Database migrations 
-| Pydantic         | Request/response validation and schemas 
-| python-jose      | JWT token creation and verification 
-| passlib + bcrypt | Password hashing 
+| Python 3.12      | Runtime
+| FastAPI          | Web framework (async, typed, auto-docs)
+| SQLAlchemy       | ORM (database models and queries)
+| Alembic          | Database migrations
+| Pydantic         | Request/response validation and schemas
+| python-jose      | JWT token creation and verification
+| passlib + bcrypt | Password hashing
 
 ### Database
 **PostgreSQL** — chosen for its strong relational model, UUID support, enum types, and ARRAY columns (used for `standup.blocker_ids`).
 
 ### Infrastructure
-| Technology              | Purpose 
+| Technology              | Purpose
 |-------------------------|------------------------------------------------
-| Docker + Docker Compose | Containerization and single-command deployment 
-| Nginx                   | Reverse proxy 
+| Docker + Docker Compose | Containerization and single-command deployment
+| Nginx                   | Reverse proxy
 
 ### Key Technical Decisions
 
@@ -321,7 +321,7 @@ blockers
 | 8  | Major          | Advanced permissions system (RBAC)                      | 2 | Daniela     |
 | 9  | Minor          | Real-time collaborative features                        | 1 | Maria Luiza |
 | 10 | Minor          | User activity analytics and insights dashboard          | 1 | Daniela     |
-| 11 | Minor (Custom) | Drag & Drop system                                      | 1 | Miguel      |
+| 11 | Minor (Custom) | Drag & Drop state management system                     | 1 | Miguel      |
 | 12 | Minor (Custom) | Organization system                                     | 1 | Freddy      |
 
 ### Module Details
@@ -383,12 +383,15 @@ Users create or join organizations using a unique join code. Admins manage membe
 ### Miguel — Scrum Master & Frontend
 - Facilitated team coordination, tracked progress, organized sprint planning.
 - Defined product vision, feature priorities, and acceptance criteria.
-- Built and maintained the entire frontend application.
-- Implemented all feature pages: auth flow, dashboard, sprint board, standups, blockers, analytics, info.
-- Designed and built the custom component design system (`components/custom/`).
-- Implemented API client (`services/api.ts`) with typed request functions.
+- Built and maintained the entire frontend platform.
+- Developed auth infrastructure with token management, protected routes and auto-logout.
+- Built all feature pages: auth flow, dashboard, sprint board, standups, blockers, analytics, info.
+- Implemented role-based permissions in UI.
+- Designed and built the custom component design system library (`components/custom/`).
+- Implemented full API client layer (`services/api.ts`) with typed request functions covering 7 domains.
+- Defined the entire type system (`types/api.types.ts`).
 - Maintained frontend tooling (Vite, TypeScript config, ESLint).
-- Implemented drag & drop interface on the sprint board.
+- Built drag & drop, ticket, task and blocker CRUD, real-time sync interface on the sprint board.
 
 ### Freddy — Developer & Backend Feature Domains
 - Implemented `organizations/` domain (create, join, member management).

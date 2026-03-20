@@ -27,6 +27,7 @@ class TaskBrief(BaseModel):
 	id: UUID
 	title: str
 	status: TaskStatus
+	assignee_id: Optional[UUID]
 
 	model_config = ConfigDict(from_attributes=True)
 
