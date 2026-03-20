@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrablo-, afoth.*
+*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrabelo-, afoth.*
 
 ---
 
@@ -51,7 +51,7 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 
 ```bash
 # 1. Clone the repository
-git clone <repository-url>
+git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4-b02b1c4c8715-7248977-dtorrett
 cd async-scrum-hub
 
 # 2. Configure environment variables
@@ -59,12 +59,11 @@ cp .env.example .env
 # Edit .env with your values
 
 # 3. Start the full stack
-docker-compose up --build
+docker compose up --build
 ```
 
 The application will be available at:
-- **Frontend:** `http://localhost:5173`
-- **Backend API:** `http://localhost:8000`
+- **Frontend:** `http://localhost:5173` / `http://localhost:5174`
 - **API Docs (Swagger):** `http://localhost:8000/docs`
 
 ### Environment Variables
@@ -82,8 +81,8 @@ The application will be available at:
 | Member      | 42 Login   | Role(s)                   |
 |-------------|------------|---------------------------|
 | Daniela     | `dtorrett` | Tech Lead · Developer     |
-| Miguel      | `miguandr` | Scrum Master · Developer  |
-| Maria Luiza | `mrablo-`  | Product Owner · Developer |
+| Miguel      | `miguandr` | Product Owner · Developer |
+| Maria Luiza | `mrabelo-` | Scrum Master · Developer  |
 | Freddy      | `afoth`    | Developer                 |
 
 
@@ -92,14 +91,14 @@ The application will be available at:
 **Daniela — Tech Lead & Backend Architecture**
 Defined and maintained the overall backend architecture. Responsible for the FastAPI entrypoint, database foundation, API infrastructure (authorization system, dependency injection, permission model), auth and users domains, and all architecture documentation.
 
-**Miguel — Scrum Master & Frontend**
-Defined product vision and feature priorities. Owns the frontend application: all page features, component design system, API client integration, and UI/UX implementation.
+**Miguel — Product Owner & Frontend**
+Defined product vision and feature priorities. Organized team meetings. Owns the frontend application: all page features, component design system, API client integration, and UI/UX implementation.
 
 **Freddy — Developer & Backend Feature Domains**
-Facilitated team coordination and tracked progress. Implemented the organizations, task and tickets backend domains.
+Implemented the organizations, task and tickets backend domains.
 
-**Maria Luiza — Product Owner & DevOps**
-Implemented the standups and blockers backend domains, the analytics module, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
+**Maria Luiza — Scrum Master & DevOps**
+Facilitated team coordination and tracked progress. Implemented the standups and blockers backend domains, the analytics module, real-time infrastructure, and owned Docker/docker-compose setup and deployment configuration.
 
 ---
 
@@ -319,8 +318,8 @@ blockers
 | 6  | Minor          | ORM for database (SQLAlchemy)                           | 1 | Daniela     |
 | 7  | Major          | Standard user management and authentication             | 2 | Daniela     |
 | 8  | Major          | Advanced permissions system (RBAC)                      | 2 | Daniela     |
-| 9  | Minor          | Real-time collaborative features                        | 1 | Maria Luiza |
-| 10 | Minor          | User activity analytics and insights dashboard          | 1 | Daniela     |
+| 9  | Minor          | User activity analytics and insights dashboard          | 1 | Daniela     |
+| 10 | Minor (Custom) | Team workload visibility and capacity overview          | 1 | Miguel      |
 | 11 | Minor (Custom) | Drag & Drop state management system                     | 1 | Miguel      |
 | 12 | Minor (Custom) | Organization system                                     | 1 | Freddy      |
 
@@ -336,7 +335,7 @@ The backend is built with FastAPI, a modern Python web framework that provides a
 A custom component library lives in `frontend/src/components/custom/` and includes: `Avatar`, `Badge`, `Button`, `Modal`, `PageHeader`, `StatCard`, `Spinner`, `Input`, `Select`, `Textarea`, and more. Each component has typed props and a consistent visual language (color palette, typography, spacing) built on top of Tailwind CSS.
 
 **Module 4 — Real-time features via WebSocket**
-Real-time updates are scoped to task status changes, standup submissions, and blocker events. The WebSocket server is authenticated, and connections are scoped to the user's organization to prevent cross-org data leakage.
+The WebSocket server is implemented in FastAPI and handles authenticated connections — each client must present a valid JWT to establish the connection. Connections are scoped to the user's organization, ensuring members of different organizations never receive each other's events. The server broadcasts events across all major domains: tickets (`created`, `updated`, `moved`, `deleted`), tasks (`created`, `updated`, `deleted`), blockers (`created`, `updated`, `resolved`), and standups (`created`, `updated`). Client disconnections are handled gracefully, and the frontend reconnects automatically on network interruptions.
 
 **Module 5 — Public documented API**
 The REST API is documented in `docs/API_CONTRACTS.md` and exposed via Swagger at `/docs`. All endpoints require JWT Bearer token authentication. Covers 5+ resource types with full CRUD: organizations, tickets, tasks, standups, blockers, analytics, users.
@@ -345,22 +344,22 @@ The REST API is documented in `docs/API_CONTRACTS.md` and exposed via Swagger at
 The database layer is implemented using SQLAlchemy 2.0 as the ORM. All models (User, Organization, Ticket, Task, Standup, Blocker) are defined as Python classes with typed columns and relationships. Alembic handles all schema migrations.
 
 **Module 7 — Standard user management and authentication**
-Users can register, log in, update their profile (name, email), and upload a custom avatar. Profile data is returned on `GET /users/me`.
+Users can register with email and password, log in, update their profile (name, email), and upload a custom avatar. Passwords are hashed with bcrypt and salted before storage — plaintext passwords are never persisted. Authentication uses stateless JWT Bearer tokens: the token contains the user ID in the `sub` claim and is validated on every protected request. Avatar uploads are validated server-side for file type (JPEG, PNG, GIF, WebP) and size (max 5 MB), and the image is resized and normalized before storage. Profile data including avatar URL is returned on `GET /users/me`.
 
 **Module 8 — Advanced permissions system (RBAC)**
 Two-tier role system: organization role (`admin` | `member`) and scrum role (`scrum_master` | `product_owner` | `developer`). Permissions are centrally defined per action and evaluated in order: admin override → role check → ownership check → assignee check. See `docs/PERMISSIONS_MATRIX.md` for the full matrix.
 
-**Module 9 — Real-time collaborative features**
-Members of the same organization see live updates when tickets or tasks are moved, standups are submitted, or blockers are created or resolved. WebSocket connections are scoped to the user's organization and changes are broadcast to all connected members in real time.
-
-**Module 10 — User activity analytics and insights dashboard**
+**Module 9 — User activity analytics and insights dashboard**
 The analytics endpoint aggregates the last 4 weeks of data across tasks, tickets, standups, and blockers. Returns structured data consumed by interactive charts in the frontend. Data is scoped to the user's organization.
+
+**Module 10 — Team workload visibility and capacity overview (Custom Minor)**
+The Info page provides a dedicated operational dashboard for team capacity awareness. Each member's assigned tickets (with status), active tasks, and open blockers are displayed in an expandable per-member view, aggregated from three separate domains into a single unified interface. Team-wide totals are shown in stat cards at the bottom. The view updates in real time via WebSocket — as tickets are moved or tasks are updated, the workload counts reflect the changes instantly without a page refresh. This is distinct from the analytics dashboard (Module 9), which covers historical trends over time; this module covers current workload state per person, supporting the Scrum Master and Product Owner in identifying who is overloaded and where blockers are concentrated. Implemented as a single component (~420 lines) with full test coverage (~1200 lines, 40+ test cases).
 
 **Module 11 — Drag & Drop system (Custom Minor)**
 The sprint board supports drag-and-drop to move tickets and tasks between columns (status states). Visual feedback (hover states, drop zones) provides clear affordances. Permission checks are enforced server-side before any state change is persisted. Chosen because it directly improves collaborative usability — especially for daily standups and sprint planning — and requires non-trivial real-time synchronization across connected clients.
 
 **Module 12 — Organization system (Custom Minor)**
-Users create or join organizations using a unique join code. Admins manage membership and roles. All resources (tickets, tasks, standups, blockers) are fully scoped to an organization, ensuring data isolation between teams.
+Users can create an organization — which makes them admin — or join an existing one using a unique auto-generated join code. Admins can invite members by email: the backend sends an SMTP email containing the join code, with both plain-text and HTML versions. On join, users select their scrum role (Scrum Master, Product Owner, or Developer), which drives permission checks throughout the application. Admins can remove members at any time. All resources (tickets, tasks, standups, blockers) are fully scoped to an organization, ensuring complete data isolation between teams.
 
 ---
 
@@ -376,12 +375,10 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `auth/` domain.
 - Implemented `user/` domain.
 - Built database models: `auth.py`, `user.py`.
-- Wrote backend tests for auth, user domains and analytics.
-- Implemented `analytics/` domain (weekly aggregations, cycle time).
+- Implemented `analytics/`, `legal/` and `dashboard/` domain with the corresponded tests
 - Set up Alembic migrations and backend testing scaffolding.
 
-### Miguel — Scrum Master & Frontend
-- Facilitated team coordination, tracked progress, organized sprint planning.
+### Miguel — Product Owner & Frontend
 - Defined product vision, feature priorities, and acceptance criteria.
 - Built and maintained the entire frontend platform.
 - Developed auth infrastructure with token management, protected routes and auto-logout.
@@ -398,9 +395,10 @@ Users create or join organizations using a unique join code. Admins manage membe
 - Implemented `tickets/` domain (CRUD, status transitions, priority).
 - Implemented `tasks/` domain.
 - Built database models: `ticket.py`, `task.py`.
-- Wrote backend tests for organizations and tickets domains.
+- Wrote backend tests for organizations, task and tickets domains.
 
-### Maria Luiza — Product Owner & DevOps
+### Maria Luiza — Scrum Master & DevOps
+- Facilitated team coordination and tracked progress.
 - Implemented `standups/` domain (create, auto-fill, update, list).
 - Implemented `blockers/` domain (create, update, resolve).
 - Built database models: `standup.py`, `blocker.py`.

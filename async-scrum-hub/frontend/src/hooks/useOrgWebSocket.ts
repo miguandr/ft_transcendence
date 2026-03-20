@@ -22,9 +22,11 @@ export function useOrgWebSocket(
 		const token = localStorage.getItem("token");
 		if (!token) return;
 
-		const ws = new WebSocket(
-			`ws://localhost:8000/ws/${orgId}?token=${token}`
-		);
+		const wsBase = (import.meta.env.VITE_API_URL as string)
+			.replace(/^https/, "wss")
+			.replace(/^http/, "ws")
+			.replace(/\/api\/v1$/, "");
+		const ws = new WebSocket(`${wsBase}/ws/${orgId}?token=${token}`);
 
 		ws.onmessage = (event) => {
 			try {
