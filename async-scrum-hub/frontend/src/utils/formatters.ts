@@ -1,3 +1,10 @@
+const BACKEND_URL = "http://localhost:8000";
+
+export function resolveAvatarUrl(url: string | null | undefined): string | null {
+	if (!url) return null;
+		return url.startsWith("http") ? url : `${BACKEND_URL}${url}`;
+}
+
 // Time formatters
 export function formatRelativeTime(utcString: string): string {
 	const diff = Date.now() - new Date(utcString).getTime();
@@ -69,3 +76,5 @@ export function assignColorById(userId: string): string {
 	const index = Math.abs(hash) % colorPalette.length;
 	return colorPalette[index];
 }
+
+

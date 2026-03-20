@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { getLegalDocument, type LegalDocuments } from "../../../services/api";
+import { getLegalDocument } from "../../../services/api";
+import type { LegalDocuments } from "../../../types/api.types"
 type APIError = {
 	error?: { code?: string; message?: string };
 	detail?: Array<{ msg: string }>;

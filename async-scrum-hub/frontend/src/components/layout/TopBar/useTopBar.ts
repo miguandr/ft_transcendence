@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUser, uploadAvatar, inviteMember } from "../../../services/api";
-import { formatScrumRole } from "../../../utils/formatters";
+import { formatScrumRole, resolveAvatarUrl } from "../../../utils/formatters";
 import { useAuth } from "../../../routes/useAuth";
 import type { APIError } from "../../../utils/shared.types";
 
@@ -32,7 +32,8 @@ export function useTopBar() {
 	//Derived states
 	const isAdmin = authUser?.org_role === "admin";
 	//Derived data
-	const showImageAvatar = previewAvatar || authUser?.avatar_url || "";
+	const showImageAvatar = previewAvatar || resolveAvatarUrl(authUser?.avatar_url) || "";
+
 	const formattedScrumRole = authUser?.scrum_role
 		? formatScrumRole(authUser.scrum_role)
 		: "";

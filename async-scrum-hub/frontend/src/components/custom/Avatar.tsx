@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { assignColorById, generateAvatarInitials } from "../../utils/formatters";
+import { assignColorById, generateAvatarInitials, resolveAvatarUrl } from "../../utils/formatters";
 
 interface AvatarProps {
 	avatarUrl?: string | null; // Optional: URL to user's uploaded image
@@ -35,7 +35,8 @@ export function Avatar({
 	};
 
 	// Show image if URL exists and hasn't errored
-	const showImage = avatarUrl && !imageError;
+	const resolvedUrl = resolveAvatarUrl(avatarUrl);
+	const showImage = resolvedUrl && !imageError;
 
 	return (
 		<div
@@ -43,7 +44,7 @@ export function Avatar({
 		>
 			{showImage ? (
 				<img
-					src={avatarUrl}
+					src={resolvedUrl}
 					alt={name || "User avatar"}
 					className="w-full h-full object-cover"
 					onError={() => setImageError(true)}
