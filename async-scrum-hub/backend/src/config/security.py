@@ -32,7 +32,8 @@ JWT_ALGORITHM = settings.jwt_algorithm
 #
 # If the token expires, the client must authenticate again to receive a new one.
 def create_access_token(subject: str|uuid.UUID) -> str:
-	expiration_time = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
+	now = datetime.now(timezone.utc)
+	expiration_time = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 	payload = {
 		"sub": str(subject),
 		"exp":  expiration_time
