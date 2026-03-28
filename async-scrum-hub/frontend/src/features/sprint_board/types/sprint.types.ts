@@ -21,7 +21,7 @@ export interface Ticket {
 		id: string;
 		title: string;
 		status: TaskStatus;
-		assignee_id: string | null;
+		assignee_id: string;
 	}>
 	blockers: Array<{
 		id: string;
