@@ -16,7 +16,7 @@ else
 endif
 endif
 
-APP_URL := https://localhost:8443
+APP_URL := http://localhost:8080
 
 .PHONY: up down restart logs build remove
 
@@ -26,7 +26,11 @@ up:
 	HOST_IP=$(HOST_IP) docker compose up -d
 	@echo "Waiting for app to be ready..."
 	@until docker compose logs frontend 2>&1 | grep -q "ready in"; do \
-		sleep 2; \
+		sleep 1; \
+	done
+	@echo "Waiting for nginx to be ready..."
+	@until curl -s http://$(HOST_IP):8080 > /dev/null 2>&1; do \
+		sleep 1; \
 	done
 	@echo "Opening browser at $(APP_URL)"
 	@$(OPEN_CMD) $(APP_URL) &
@@ -38,6 +42,14 @@ down:
 restart:
 	docker compose down
 	HOST_IP=$(HOST_IP) docker compose up -d
+	@echo "Waiting for app to be ready..."
+	@until docker compose logs frontend 2>&1 | grep -q "ready in"; do \
+		sleep 1; \
+	done
+	@echo "Waiting for nginx to be ready..."
+	@until curl -s http://localhost:8080 > /dev/null 2>&1; do \
+		sleep 1; \
+	done
 	@$(OPEN_CMD) $(APP_URL) &
 	@docker compose logs -f
 
@@ -50,7 +62,11 @@ build:
 	HOST_IP=$(HOST_IP) docker compose up --build -d
 	@echo "Waiting for app to be ready..."
 	@until docker compose logs frontend 2>&1 | grep -q "ready in"; do \
-		sleep 2; \
+		sleep 1; \
+	done
+	@echo "Waiting for nginx to be ready..."
+	@until curl -s http://$(HOST_IP):8080 > /dev/null 2>&1; do \
+		sleep 1; \
 	done
 	@echo "Opening browser at $(APP_URL)"
 	@$(OPEN_CMD) $(APP_URL) &

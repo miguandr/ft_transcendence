@@ -10,7 +10,8 @@ import {
 	PageHeader,
 	Avatar,
 	ModalConfirmation,
-	ErrorText
+	ErrorText,
+	Select,
 } from "../../components/custom/index";
 import {
 	createBlocker,
@@ -313,9 +314,9 @@ export function Blockers() {
 													<AlertCircle className="w-6 h-6 text-rose-600" />
 												</div>
 
-												<div className="flex-1">
+												<div className="flex-1 min-w-0">
 													<div className="flex items-start justify-between gap-4 mb-3">
-														<p className="text-sm text-gray-900">
+														<p className="text-sm text-gray-900 break-all">
 															{blocker.description}
 														</p>
 														<span className="text-xs px-2 py-1 rounded-lg bg-rose-100 text-rose-700">
@@ -342,20 +343,16 @@ export function Blockers() {
 														</div>
 													</div>
 
-													<div className="flex items-center gap-3 text-xs">
-														<span className="text-gray-500">
-															Ticket:{" "}
-															<span className="text-gray-700">
-																{blocker.ticket?.title ?? "Deleted ticket"}
-															</span>
-														</span>
-														{blocker.assignee && ( // check if object "assignee" exists. Optional chaining also ok "blocker.assignee?.id"
-															<span className="text-gray-500">
-																Related to:{" "}
-																<span className="text-gray-700">
-																	{blocker.assignee.name}
-																</span>
-															</span>
+													<div className="text-xs text-gray-500 space-y-1 min-w-0">
+														<div className="flex gap-1 min-w-0">
+															<span className="shrink-0">Ticket:</span>
+															<span className="text-gray-700 truncate">{blocker.ticket?.title ?? "Deleted ticket"}</span>
+														</div>
+														{blocker.assignee && (
+															<div className="flex gap-1 min-w-0">
+																<span className="shrink-0">Related to:</span>
+																<span className="text-gray-700 truncate">{blocker.assignee.name}</span>
+															</div>
 														)}
 													</div>
 												</div>
@@ -409,7 +406,7 @@ export function Blockers() {
 												<CheckCircle2 className="w-6 h-6 text-gray-500" />
 											</div>
 
-											<div className="flex-1">
+											<div className="flex-1 min-w-0">
 												<div className="flex items-start justify-between gap-4 mb-3">
 													<p className="text-sm text-gray-700 line-through">
 														{blocker.description}
@@ -445,20 +442,16 @@ export function Blockers() {
 													</div>
 												</div>
 
-												<div className="flex items-center gap-3 text-xs text-gray-500">
-													<span>
-														Ticket:{" "}
-														<span className="text-gray-600">
-															{blocker.ticket?.title ?? "Deleted ticket"}
-														</span>
-													</span>
+												<div className="text-xs text-gray-500 space-y-1 min-w-0">
+													<div className="flex gap-1 min-w-0">
+														<span className="shrink-0">Ticket:</span>
+														<span className="text-gray-600 truncate">{blocker.ticket?.title ?? "Deleted ticket"}</span>
+													</div>
 													{blocker.assignee && (
-														<span>
-															Related to:{" "}
-															<span className="text-gray-600">
-																{blocker.assignee.name}
-															</span>
-														</span>
+														<div className="flex gap-1 min-w-0">
+															<span className="shrink-0">Related to:</span>
+															<span className="text-gray-600 truncate">{blocker.assignee.name}</span>
+														</div>
 													)}
 												</div>
 											</div>
@@ -518,46 +511,34 @@ export function Blockers() {
 						<Label htmlFor="ticket">
 							Associated Ticket <span className="text-rose-500">*</span>
 						</Label>
-						<select
+						<Select
 							id="ticket"
 							value={blockerForm.ticket_id}
-							onChange={(e) =>
-								setBlockerForm({
-									...blockerForm, // we use spread to keep the information as the user fills in the form
-									ticket_id: e.target.value,
-								})
-							}
-							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-						>
-							<option value="">Select a ticket</option>
-							{ticketList.filter((t) => t.status !== "completed").map((ticket) => (
-								<option key={ticket.id} value={ticket.id}>
-									{ticket.title}
-								</option>
-							))}
-						</select>
+							onChange={(e) => setBlockerForm({ ...blockerForm, ticket_id: e.target.value })}
+							options={[
+								{ value: "", label: "Select a ticket" },
+								...ticketList.filter((t) => t.status !== "completed").map((ticket) => ({
+									value: ticket.id,
+									label: ticket.title,
+								})),
+							]}
+						/>
 					</div>
 
 					<div>
 						<Label htmlFor="assignee">Related to (optional)</Label>
-						<select
+						<Select
 							id="assignee"
 							value={blockerForm.assignee_id}
-							onChange={(e) =>
-								setBlockerForm({
-									...blockerForm,
-									assignee_id: e.target.value,
-								})
-							}
-							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-						>
-							<option value="">Select related team member</option>
-							{availableAssignees.map((member: OrganizationMember) => (
-								<option key={member.id} value={member.id}>
-									{member.name}
-								</option>
-							))}
-						</select>
+							onChange={(e) => setBlockerForm({ ...blockerForm, assignee_id: e.target.value })}
+							options={[
+								{ value: "", label: "Select related team member" },
+								...availableAssignees.map((member: OrganizationMember) => ({
+									value: member.id,
+									label: member.name,
+								})),
+							]}
+						/>
 					</div>
 				</div>
 				{errors.createBlocker && <ErrorText>{errors.createBlocker}</ErrorText>}
@@ -608,24 +589,18 @@ export function Blockers() {
 						<Label htmlFor="edit-ticket">
 							Associated Ticket <span className="text-rose-500">*</span>
 						</Label>
-						<select
+						<Select
 							id="edit-ticket"
 							value={blockerForm.ticket_id}
-							onChange={(e) =>
-								setBlockerForm({
-									...blockerForm,
-									ticket_id: e.target.value,
-								})
-							}
-							className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-						>
-							<option value="">Select a ticket</option>
-							{ticketList.filter((t) => t.status !== "completed").map((ticket) => (
-								<option key={ticket.id} value={ticket.id}>
-									{ticket.title}
-								</option>
-							))}
-						</select>
+							onChange={(e) => setBlockerForm({ ...blockerForm, ticket_id: e.target.value })}
+							options={[
+								{ value: "", label: "Select a ticket" },
+								...ticketList.filter((t) => t.status !== "completed").map((ticket) => ({
+									value: ticket.id,
+									label: ticket.title,
+								})),
+							]}
+						/>
 					</div>
 
 					{(authUser?.scrum_role === "scrum_master" ||
@@ -633,24 +608,18 @@ export function Blockers() {
 						selectedBlocker?.created_by.id === authUser?.id) && (
 						<div>
 							<Label htmlFor="edit-assignee">Assignee (optional)</Label>
-							<select
+							<Select
 								id="edit-assignee"
 								value={blockerForm.assignee_id}
-								onChange={(e) =>
-									setBlockerForm({
-										...blockerForm,
-										assignee_id: e.target.value,
-									})
-								}
-								className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-							>
-								<option value="">Assign to team member</option>
-								{availableAssignees.map((member) => (
-									<option key={member.id} value={member.id}>
-										{member.name}
-									</option>
-								))}
-							</select>
+								onChange={(e) => setBlockerForm({ ...blockerForm, assignee_id: e.target.value })}
+								options={[
+									{ value: "", label: "Assign to team member" },
+									...availableAssignees.map((member) => ({
+										value: member.id,
+										label: member.name,
+									})),
+								]}
+							/>
 						</div>
 					)}
 				</div>

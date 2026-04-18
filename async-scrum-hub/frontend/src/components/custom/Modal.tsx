@@ -40,9 +40,9 @@ export function Modal({
 					className={`bg-white rounded-2xl shadow-xl w-full max-h-screen flex flex-col pointer-events-auto ${sizeClasses[size]} ${className}`}
 				>
 					{/* Header */}
-					<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-						<div>
-							<h2 className="text-2xl text-gray-900">{title}</h2>
+					<div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 ">
+						<div className="min-w-0 flex-1 mr-4">
+							<h2 className="text-2xl text-gray-900 wrap-break-word">{title}</h2>
 							{subtitle && <div className="text-xs text-gray-500 mt-1.5">{subtitle}</div>}
 						</div>
 						<button

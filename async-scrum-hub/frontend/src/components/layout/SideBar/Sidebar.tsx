@@ -97,7 +97,7 @@ export function Sidebar() {
 					{isLoading && <p className="text-sm text-grey-500">Loading...</p>}
 					{errors.doc && <ErrorText>{errors.doc}</ErrorText>}
 					{document && (
-						<div className="overflow-y-auto max-h-[60vh] prose prose-sm prose-headings:text-base">
+						<div className="overflow-y-auto max-h-[60vh] prose prose-sm prose-headings:text-base mx-[28px]">
 							<ReactMarkdown>{document.content}</ReactMarkdown>
 						</div>
 					)}

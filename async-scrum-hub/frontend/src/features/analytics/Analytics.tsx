@@ -40,7 +40,7 @@ export function Analytics() {
 
 		} catch (error:unknown) {
 			const apiError = error as APIError;
-			
+
 			console.error("API call failed:", error);
 			if (apiError.error?.code === "UNAUTHORIZED") {
 				setErrors({ analytics: "Authentication required" });
@@ -111,7 +111,9 @@ export function Analytics() {
 							<ResponsiveContainer width="100%" height={250}>
 								<LineChart data={analytics?.tasks}>
 									<CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-									<Legend></Legend>
+									<Legend verticalAlign="top" align="center" iconSize={8} wrapperStyle={{ paddingBottom: "12px" }} />
+
+
 									<XAxis dataKey="week" tick={{ fill: "#9ca3af", fontSize: 12 }} />
 									<YAxis tick={{ fill: "#9ca3af", fontSize: 12 }} />
 									<Tooltip

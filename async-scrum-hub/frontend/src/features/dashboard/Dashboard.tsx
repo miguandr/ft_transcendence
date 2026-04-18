@@ -65,7 +65,7 @@ export function Dashboard() {
 					{data?.recent_updates.map((update, index) => (
 						<div
 							key={index}
-							className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
+							className="flex items-start gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0 wrap-break-word"
 						>
 							<Avatar
 								name={update.created_by.name}

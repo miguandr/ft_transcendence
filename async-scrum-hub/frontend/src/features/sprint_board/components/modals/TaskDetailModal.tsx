@@ -42,7 +42,7 @@ export function TaskDetailModal({
 
 			<div>
 				{/* <h4 className="text-sm text-gray-700 ">Description</h4> */}
-				<p className="text-sm py-2 mb-10 text-gray-600">
+				<p className="text-sm py-2 mb-10 text-gray-600 wrap-break-word">
 					{task.description || "No description provided"}
 				</p>
 			</div>

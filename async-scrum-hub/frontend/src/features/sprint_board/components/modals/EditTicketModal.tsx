@@ -135,7 +135,7 @@ export function EditTicketModal({
 				</div>
 			</div>
 			{error && <ErrorText>{error}</ErrorText>}
-			<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+			<div className="flex items-center justify-end gap-3 py-4 border-t border-gray-100">
 				<Button
 					variant="secondary"
 					size="md"

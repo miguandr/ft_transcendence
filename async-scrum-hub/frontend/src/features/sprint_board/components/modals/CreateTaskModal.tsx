@@ -92,12 +92,12 @@ export function CreateTaskModal({
 								label: member.name,
 							})),
 					]}
-					className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors mb-1.5"
+					className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
 				/>
 			</div>
 		</div>
 		{error && <ErrorText>{error}</ErrorText>}
-		<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+		<div className="flex items-center justify-end gap-3 py-4">
 			<Button
 				variant="secondary"
 				size="md"

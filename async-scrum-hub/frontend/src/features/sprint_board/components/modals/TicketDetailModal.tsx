@@ -97,15 +97,15 @@ export function TicketDetailModal({
 			{/* Description */}
 			<div className="pb-6">
 				<h4 className="text-sm font-medium text-gray-800 mb-1.5">Description</h4>
-				<p className="text-sm text-gray-600 leading-relaxed">
+				<p className="text-sm text-gray-600 leading-relaxed wrap-break-word">
 					{ticket.description || "No description provided"}
 				</p>
 			</div>
 			{/* <hr className="border-gray-100 my-3" /> */}
 
 			{/* Tasks */}
-			<div className="pb-6">
-				<div className="flex items-center justify-between mb-2">
+			<div className="pb-4">
+				<div className="flex items-center justify-between mb-4">
 					<h4 className="text-sm font-medium text-gray-800">Tasks</h4>
 					<Button
 						variant="ghost"
@@ -144,7 +144,7 @@ export function TicketDetailModal({
 											draggable={canDragTask(task)}
 											onDragStart={() => onTaskDragStart(task)}
 											onClick={() => onSelectTask(task.id)}
-											className={`bg-white p-3 rounded-lg border border-gray-200 text-sm hover:shadow-sm transition-shadow ${
+											className={`bg-white p-3 rounded-lg border border-gray-200 text-sm hover:shadow-sm transition-shadow wrap-break-word ${
 												canDragTask(task)
 													? "cursor-grab active:cursor-grabbing"
 													: "cursor-pointer"
@@ -173,14 +173,14 @@ export function TicketDetailModal({
 											draggable={canDragTask(task)}
 											onDragStart={() => onTaskDragStart(task)}
 											onClick={() => onSelectTask(task.id)}
-											className={`bg-white p-3 rounded-lg border border-emerald-200 text-sm hover:shadow-sm transition-shadow flex items-center gap-2 ${
+											className={`bg-white p-3 rounded-lg border border-emerald-200 text-sm hover:shadow-sm transition-shadow flex items-center gap-2 wrap-break-word ${
 												canDragTask(task)
 													? "cursor-grab active:cursor-grabbing"
 													: "cursor-pointer"
 											}`}
 										>
 											<CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-											<span className="flex-1">{task.title}</span>
+											<span className="flex-1 min-w-0 wrap-break-word">{task.title}</span>
 										</div>
 									))}
 								{errorTaskDrop && <ErrorText>{errorTaskDrop}</ErrorText>}

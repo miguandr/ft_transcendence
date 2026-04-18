@@ -75,7 +75,7 @@ export function CreateBlockerModal({
 			<div>
 				<Select
 					label="Related to (optional)"
-					className="mb-4.5 bg-gray-50 border text-gray-600"
+					className="bg-gray-50 border text-gray-600"
 					value={form.assignee}
 					onChange={(e) =>
 						setForm({
@@ -94,7 +94,7 @@ export function CreateBlockerModal({
 			</div>
 		</div>
 		{error && <ErrorText>{error}</ErrorText>}
-		<div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
+		<div className="flex items-center justify-end gap-3 py-4 ">
 			<Button
 				variant="secondary"
 				size="md"

@@ -69,7 +69,7 @@ export function KanbanColumn({
 								}`}
 							>
 								<div className="flex items-start justify-between gap-2 mb-3">
-									<span className="text-sm text-gray-900 flex-1">
+									<span className="text-sm text-gray-900 flex-1 min-w-0 wrap-break-word">
 										{ticket.title}
 									</span>
 									<span

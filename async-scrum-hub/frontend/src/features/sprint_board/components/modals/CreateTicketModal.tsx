@@ -43,80 +43,82 @@ export function CreateTicketModal({
 			size="md"
 			subtitle="New tickets will appear in To Do"
 		>
-			<div>
-				<Label>
-					Title <span className="text-rose-500">*</span>
-				</Label>
-				<Input
-					type="text"
-					value={form.title}
-					onChange={(e) => setForm({ ...form, title: e.target.value })}
-					placeholder="Enter ticket title"
-					className="px-3 py-2 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-				/>
-			</div>
-			<div>
-				<Label>
-					Description
-				</Label>
-				<textarea
-					value={form.description}
-					onChange={(e) => setForm({ ...form, description: e.target.value, })}
-					placeholder="Add details (optional)"
-					rows={4}
-					className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors resize-none"
-				/>
-			</div>
-			<div>
-				<Label>
-					Priority <span className="text-rose-500">*</span>
-				</Label>
-				<div className="grid grid-cols-3 gap-3">
-					{(["high", "medium", "low"] as Priority[]).map((p) => (
-						<button
-							key={p}
-							type="button"
-							onClick={() => setForm({ ...form, priority: p })}
-							className={`font-medium rounded-xl transition-all text-xs px-4 py-2 border-2 ${
-								form.priority === p
-									? p === "high"
-										? "border-rose-400 bg-rose-50 text-rose-700"
-										: p === "medium"
-											? "border-amber-400 bg-amber-50 text-amber-700"
-											: "border-gray-400 bg-gray-100 text-gray-700"
-									: "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-							}`}
-						>
-							{p.charAt(0).toUpperCase() + p.slice(1)}
-						</button>
-					))}
+			<div className="space-y-2">
+				<div>
+					<Label>
+						Title <span className="text-rose-500">*</span>
+					</Label>
+					<Input
+						type="text"
+						value={form.title}
+						onChange={(e) => setForm({ ...form, title: e.target.value })}
+						placeholder="Enter ticket title"
+						className="px-3 py-2 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
+					/>
+				</div>
+				<div>
+					<Label>
+						Description
+					</Label>
+					<textarea
+						value={form.description}
+						onChange={(e) => setForm({ ...form, description: e.target.value, })}
+						placeholder="Add details (optional)"
+						rows={4}
+						className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors resize-none"
+					/>
+				</div>
+				<div>
+					<Label>
+						Priority <span className="text-rose-500">*</span>
+					</Label>
+					<div className="grid grid-cols-3 gap-3">
+						{(["high", "medium", "low"] as Priority[]).map((p) => (
+							<button
+								key={p}
+								type="button"
+								onClick={() => setForm({ ...form, priority: p })}
+								className={`font-medium rounded-xl transition-all text-xs px-4 py-2 border-2 ${
+									form.priority === p
+										? p === "high"
+											? "border-rose-400 bg-rose-50 text-rose-700"
+											: p === "medium"
+												? "border-amber-400 bg-amber-50 text-amber-700"
+												: "border-gray-400 bg-gray-100 text-gray-700"
+										: "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+								}`}
+							>
+								{p.charAt(0).toUpperCase() + p.slice(1)}
+							</button>
+						))}
+					</div>
+				</div>
+				<div>
+					<Label>
+						Assignee <span className="text-rose-500">*</span>
+					</Label>
+					<Select
+						value={form.assignee}
+						onChange={(e) =>
+							setForm({
+								...form,
+								assignee: e.target.value,
+							})
+						}
+						options={[
+							{ value: "", label: "Select team member" },
+							...teamMembers
+								.filter((m) => m.scrum_role === "developer")
+								.map((member) => ({
+									value: member.id,
+									label: member.name,
+								})),
+						]}
+						className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
+					/>
+				{error && <ErrorText>{error}</ErrorText>}
 				</div>
 			</div>
-			<div>
-				<Label>
-					Assignee <span className="text-rose-500">*</span>
-				</Label>
-				<Select
-					value={form.assignee}
-					onChange={(e) =>
-						setForm({
-							...form,
-							assignee: e.target.value,
-						})
-					}
-					options={[
-						{ value: "", label: "Select team member" },
-						...teamMembers
-							.filter((m) => m.scrum_role === "developer")
-							.map((member) => ({
-								value: member.id,
-								label: member.name,
-							})),
-					]}
-					className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-cyan-300 transition-colors"
-				/>
-			</div>
-			{error && <ErrorText>{error}</ErrorText>}
 			<div className="flex items-center justify-end gap-3 py-4 border-t border-gray-100">
 				<Button
 					variant="secondary"
