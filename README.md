@@ -51,7 +51,7 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 
 ```bash
 # 1. Clone the repository
-git clone git@vogsphere.42berlin.de:vogsphere/intra-uuid-7c27db9d-0748-4b59-8df4-b02b1c4c8715-7248977-dtorrett
+git clone https://github.com/miguandr/ft_transcendence.git
 
 # 2. Start the full stack
 cd async-scrum-hub
@@ -384,7 +384,7 @@ Users can create an organization — which makes them admin — or join an exist
 - Implemented full API infrastructure: `deps.py`, `permissions.py`, `authorize.py`, `routes.py`.
 - Implemented `dashboard/` domain.
 - Implemented `analytics/` domain.
-- Implemented `auth/` domain (register, login, JWT) 
+- Implemented `auth/` domain (register, login, JWT)
 - Implemented `users/` domain (profile, avatar).
 - Built database models: `user.py`, `organization.py`.
 - Wrote backend tests for dashboard, analytics, auth and users domains
