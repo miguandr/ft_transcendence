@@ -1,4 +1,4 @@
-# Async Scrum Hub
+# Scrum Hub
 
 A web-based asynchronous Scrum collaboration platform designed to help small remote teams coordinate their work without relying on constant synchronous meetings. The platform provides structured tools for task management, daily standups, and blocker tracking — all in an asynchronous-first environment.
 
@@ -21,7 +21,7 @@ A web-based asynchronous Scrum collaboration platform designed to help small rem
 
 ## Description
 
-**Async Scrum Hub** is a project management tool built around Scrum methodology. Teams create an organization, define their roles (Scrum Master, Product Owner, Developer), and manage their work through tickets, tasks, daily standups, and blocker reports — all without needing to be online at the same time.
+**Scrum Hub** is a project management tool built around Scrum methodology. Teams create an organization, define their roles (Scrum Master, Product Owner, Developer), and manage their work through tickets, tasks, daily standups, and blocker reports — all without needing to be online at the same time.
 
 **Key features:**
 - Role-based organization management with invite codes
