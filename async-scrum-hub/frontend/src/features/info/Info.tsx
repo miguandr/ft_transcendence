@@ -142,7 +142,7 @@ export function Info() {
 			<div className="w-full">
 				{errors.fetchMember && <ErrorText>{errors.fetchMember}</ErrorText>}
 
-				<div className="bg-white rounded-2xl border border-gray-100">
+				<div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
 
 					{/* Table Header */}
 					<div className="grid grid-cols-12 gap-6 px-6 py-4 border-b border-gray-100 text-xs uppercase tracking-wide text-gray-500">
@@ -162,7 +162,7 @@ export function Info() {
 							};
 
 							return (
-								<div key={member.id}>
+								<div key={member.id} className="overflow-hidden">
 									<div className="grid grid-cols-12 gap-6 px-6 py-5 items-center">
 
 										{/* Member Info */}
@@ -285,7 +285,7 @@ export function Info() {
 
 									{/* Expanded Activity Details */}
 									{expandedActivity?.memberId === member.id && (
-										<div className="px-6 pb-5">
+										<div className="px-6 pb-5 min-w-0 overflow-hidden">
 											<div className="bg-gray-50 rounded-xl p-4">
 												<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-3">
 													{expandedActivity.type === "tickets"
@@ -303,8 +303,8 @@ export function Info() {
 																	key={ticket.id}
 																	className="bg-white rounded-lg p-3 border border-gray-200"
 																>
-																	<div className="flex items-center justify-between">
-																		<p className="text-sm text-gray-900">
+																	<div className="flex items-center justify-between gap-2">
+																		<p className="text-sm text-gray-900 min-w-0 break-all">
 																			{ticket.title}
 																		</p>
 																		<Badge
@@ -332,7 +332,7 @@ export function Info() {
 																	key={task.id}
 																	className="bg-white rounded-lg p-3 border border-gray-200"
 																>
-																	<p className="text-sm text-gray-900">
+																	<p className="text-sm text-gray-900 break-all">
 																		{task.title}
 																	</p>
 																</div>
@@ -353,7 +353,7 @@ export function Info() {
 																	key={blocker.id}
 																	className="bg-white rounded-lg p-3 border border-rose-200"
 																>
-																	<p className="text-sm text-gray-900">
+																	<p className="text-sm text-gray-900 break-all">
 																		{blocker.description}
 																	</p>
 																</div>

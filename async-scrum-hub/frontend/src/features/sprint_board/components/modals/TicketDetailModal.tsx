@@ -224,8 +224,8 @@ export function TicketDetailModal({
 								}`}
 							>
 								<div className="flex items-start justify-between gap-3">
-									<div className="flex-1">
-										<p className="text-sm text-gray-900 mb-1">
+									<div className="flex-1 min-w-0">
+										<p className="text-sm text-gray-900 mb-1 wrap-break-word">
 											{blocker.description}
 										</p>
 										<p className="text-xs text-gray-500">

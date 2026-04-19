@@ -408,10 +408,10 @@ export function Blockers() {
 
 											<div className="flex-1 min-w-0">
 												<div className="flex items-start justify-between gap-4 mb-3">
-													<p className="text-sm text-gray-700 line-through">
+													<p className="text-sm text-gray-700 line-through min-w-0 break-all">
 														{blocker.description}
 													</p>
-													<span className="text-xs px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">
+													<span className="text-xs px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
 														Resolved
 													</span>
 												</div>

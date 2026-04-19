@@ -293,13 +293,13 @@ export function AsyncStandup() {
 										onMouseLeave={() => setHoveredStandup(null)}
 									>
 										<div className="flex items-start justify-between gap-3">
-											<div className="flex-1">
+											<div className="flex-1 min-w-0">
 												<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
 													{s.standup_date === today
 														? "Today"
 														: "Yesterday"}
 												</h4>
-												<p className="text-sm text-gray-600">{s.today}</p>
+												<p className="text-sm text-gray-600 break-all">{s.today}</p>
 											</div>
 
 											{canEdit && hoveredStandup === s.id && (
