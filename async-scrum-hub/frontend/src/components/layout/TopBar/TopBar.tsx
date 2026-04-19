@@ -49,10 +49,8 @@ export function TopBar() {
 	} = useTopBar();
 
 	return (
-		<header className="h-16 border-b border-gray-100 bg-white grid grid-cols-3 items-center px-6">
-			<div />
-
-			<div className="flex flex-col items-center">
+		<header className="h-16 border-b border-gray-100 bg-white flex items-center px-6">
+			<div className="flex-1 flex flex-col items-center">
 				<h1 className="text-3xl tracking-tight text-gray-400">{authUser?.org_name}</h1>
 				{errors.user && <ErrorText>{errors.user}</ErrorText>}
 			</div>
