@@ -1,7 +1,3 @@
-*This project has been created as part of the 42 curriculum by miguandr, dtorrett, mrabelo-, afoth.*
-
----
-
 # Async Scrum Hub
 
 A web-based asynchronous Scrum collaboration platform designed to help small remote teams coordinate their work without relying on constant synchronous meetings. The platform provides structured tools for task management, daily standups, and blocker tracking — all in an asynchronous-first environment.
