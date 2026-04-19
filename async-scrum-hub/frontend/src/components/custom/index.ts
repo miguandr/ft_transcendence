@@ -8,6 +8,7 @@ export { HintText } from "./HintText";
 export { IconBox } from "./IconBox";
 export { Input } from "./Input";
 export { Label } from "./Label";
+export { LegalModal } from "./LegalModal";
 export { Modal } from "./Modal";
 export { ModalConfirmation } from "./ModalConfirmation";
 export { PageContainer } from "./PageContainer";

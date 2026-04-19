@@ -8,11 +8,10 @@ import {
 } from "lucide-react";
 import {
 	ErrorText,
-	Modal,
+	LegalModal,
 } from "../../custom"
 import { Link, useLocation } from "react-router-dom";
 import { useSideBar } from "./useSideBar";
-import ReactMarkdown from "react-markdown"
 
 const navItems = [
 	{ path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -87,22 +86,20 @@ export function Sidebar() {
 			</aside>
 
 			{/* Legal Documents Modal */}
-			{activeDocument && (
-				<Modal
+			{document && (
+				<LegalModal
 					isOpen={!!activeDocument}
 					onClose={closeDocument}
-					title={document?.title ?? ""}
-					size="lg"
-				>
-					{isLoading && <p className="text-sm text-grey-500">Loading...</p>}
-					{errors.doc && <ErrorText>{errors.doc}</ErrorText>}
-					{document && (
-						<div className="overflow-y-auto max-h-[60vh] prose prose-sm prose-headings:text-base mx-[28px]">
-							<ReactMarkdown>{document.content}</ReactMarkdown>
-						</div>
-					)}
-				</Modal>
+					title={document.title}
+					content={document.content}
+				/>
 			)}
+			{isLoading && activeDocument && (
+				<div className="fixed inset-0 flex items-center justify-center z-50">
+					<p className="text-sm text-gray-500">Loading...</p>
+				</div>
+			)}
+			{errors.doc && <ErrorText>{errors.doc}</ErrorText>}
 		</>
 	);
 }
