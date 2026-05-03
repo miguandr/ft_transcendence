@@ -318,7 +318,7 @@ export function AsyncStandup() {
 									</div>
 
 									{/* Yesterday Section */}
-									{s.yesterday && (
+									{s.yesterday && s.standup_date === today && (
 										<div className="pb-4">
 											<h4 className="text-xs uppercase tracking-wide text-gray-500 mb-2">
 												Yesterday
